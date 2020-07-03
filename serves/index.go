@@ -19,6 +19,7 @@ type IndexData struct {
 	Scheduled           []models.Incident
 	BaseInfo            config.BaseInfo
 	Timezone            string
+	Theme               config.Theme
 }
 
 type timeSlice []string
@@ -144,6 +145,7 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 		TimelineDates:       timelineDates,
 		Scheduled:           scheduled,
 		Timezone:            timezone,
+		Theme:               a.theme,
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -167,10 +169,12 @@ func (a Serve) ShowIncident(w http.ResponseWriter, req *http.Request) {
 		BaseInfo config.BaseInfo
 		Incident models.Incident
 		Timezone string
+		Theme    config.Theme
 	}{
 		BaseInfo: a.baseInfo,
 		Incident: incident,
 		Timezone: timezone,
+		Theme:    a.theme,
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -238,6 +242,7 @@ func (a Serve) History(w http.ResponseWriter, req *http.Request) {
 			Timeline:      timeline,
 			TimelineDates: timelineDates,
 			Timezone:      timezone,
+			Theme:         a.theme,
 		},
 		After:  after,
 		Before: before,

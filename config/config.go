@@ -92,6 +92,19 @@ type Notifier struct {
 	Params map[string]interface{} `yaml:"params"`
 }
 
+type Theme struct {
+	PreStatus  string `yaml:"pre_status"`
+	PostStatus string `yaml:"post_status"`
+
+	PreTimeline  string `yaml:"pre_timeline"`
+	PostTimeline string `yaml:"post_timeline"`
+
+	PreMaintenance  string `yaml:"pre_maintenance"`
+	PostMaintenance string `yaml:"post_maintenance"`
+
+	Footer string `yaml:"footer"`
+}
+
 type Config struct {
 	Targets    []target   `yaml:"targets"`
 	Listen     string     `yaml:"listen"`
@@ -103,6 +116,8 @@ type Config struct {
 
 	CookieKey string     `yaml:"cookie_key"`
 	Notifiers []Notifier `yaml:"notifiers"`
+
+	Theme Theme `yaml:"theme"`
 }
 
 type Component struct {

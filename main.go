@@ -55,7 +55,7 @@ func main() {
 	router.Use(serves.NewLocationHandler(c.CookieKey, loc).Handler)
 	err = serves.Register(store, router, *c.BaseInfo,
 		url.UserPassword(c.Username, c.Password), c.Components,
-		loc,
+		loc, c.Theme,
 	)
 	if err != nil {
 		log.Fatal(err.Error())

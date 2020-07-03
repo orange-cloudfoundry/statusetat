@@ -27,6 +27,7 @@ type Serve struct {
 	components config.Components
 	loc        *time.Location
 	funcs      template.FuncMap
+	theme      config.Theme
 }
 
 func Register(
@@ -36,6 +37,7 @@ func Register(
 	userInfo *url.Userinfo,
 	components config.Components,
 	loc *time.Location,
+	theme config.Theme,
 ) error {
 
 	api := &Serve{
@@ -43,6 +45,7 @@ func Register(
 		baseInfo:   baseInfo,
 		components: components,
 		loc:        loc,
+		theme:      theme,
 	}
 
 	funcs := template.FuncMap{

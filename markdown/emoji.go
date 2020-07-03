@@ -37,7 +37,7 @@ func NewEmoji(value []byte) *Emoji {
 	}
 }
 
-var emojiRegexp = regexp.MustCompile(`^:[^:]*:$`)
+var emojiRegexp = regexp.MustCompile(`^:[A-Za-z0-9_-]*:`)
 
 type emojiParser struct {
 }

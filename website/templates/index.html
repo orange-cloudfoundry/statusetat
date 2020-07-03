@@ -95,7 +95,11 @@
         </a>
       </div>
     </div>
-
+      {{ with .Theme.Footer }}
+        <div class="row">
+            {{ . | markdown }}
+        </div>
+      {{end}}
   </div>
 </footer>
 
