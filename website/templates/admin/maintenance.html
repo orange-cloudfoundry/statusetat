@@ -1,0 +1,94 @@
+{{ extends "admin/index.html" }}
+{{ define "title" }}{{.BaseInfo.Title}} - Admin maintenance{{ end }}
+{{ define "content" }}
+  <div class="row">
+    <div class="col s12">
+      <div class="head">
+        <a href="/admin/maintenance/add" class="right waves-effect waves-light btn green lighten-1 white-text">Add
+          maintenance<i class="material-icons">add</i></a>
+        <h4>Maintenance</h4>
+        <div class="divider"></div>
+      </div>
+        {{ if .Maintenance }}
+          <ul class="collection">
+              {{ range .Maintenance }}
+                  {{ $mainMsg := .MainMessage }}
+                  <li class="collection-item incident-item avatar">
+                    <form>
+                      <input type="hidden" name="guid" value="{{ .GUID }}">
+                      <a href="#!" class="secondary-content waves-effect waves-light btn red white-text tooltipped delete-incident" data-tooltip="Delete maintenance"><i class="material-icons">delete</i></a>
+                      <a href="/admin/maintenance/edit/{{ .GUID }}" class="secondary-content waves-effect waves-light btn grey lighten-4 grey-text tooltipped" data-tooltip="Edit maintenance"><i class="material-icons">edit</i></a>
+                        {{ if eq .State 0 }}
+                          <a href="#!" class="secondary-content waves-effect waves-light btn green lighten-1 white-text tooltipped mark-as-set-state" data-state="1" data-tooltip="Mark as finished">
+                            <i class="material-icons">done</i>
+                          </a>
+                        {{ else }}
+                          <a href="#!" class="secondary-content waves-effect waves-light btn blue-grey lighten-1 white-text tooltipped mark-as-set-state" data-state="0" data-tooltip="Marks as continued">
+                            <i class="material-icons">forward</i>
+                          </a>
+                        {{ end }}
+                    </form>
+                    <span class="title">
+                    {{$mainMsg.Title | title | markdownNoParaph }}
+                </span>
+                    <p>
+                        {{ range .Components }}
+                          <span class="badge grey lighten-4 grey-text">{{ . }}</span>
+                        {{ end }}
+                      <br/>
+                      <span class="details-date">
+                    Scheduled in:
+                  <time class="grey-text human tooltipped" datetime="{{ .CreatedAt | timeStdFormat }}" data-tooltip="{{ .CreatedAt | timeFormat }}">{{ .CreatedAt | humanTime }}</time>
+                        - Duration: <time class="grey-text human tooltipped" data-prefix="End at: " data-tooltip="{{ .ScheduledEnd | timeFormat }}" datetime="{{ .ScheduledEnd | timeStdFormat}}">{{ humanDuration .CreatedAt .ScheduledEnd }}</time>
+                  </span>
+                    </p>
+
+                  </li>
+              {{end}}
+          </ul>
+        {{ else }}
+          No scheduled maintenance.
+        {{ end }}
+    </div>
+  </div>
+{{end}}
+
+{{ define "pre_body_close" }}
+  <script type="text/javascript">
+      $(document).ready(function () {
+          $(".mark-as-set-state").click(function () {
+              let guid = $(this).closest('form').find('input[name="guid"]').val();
+              let btn = $(this);
+              let state = $(this).data("state");
+              let previousContent = $(this).html();
+              $(this).html($('.preloader-box').html())
+              $(this).addClass("disabled");
+              $('.alert-box .alert').hide();
+              $.ajax({
+                  url: '/v1/incidents/' + guid,
+                  type: 'PUT',
+                  async: false,
+                  cache: false,
+                  data: JSON.stringify({
+                      "guid": guid,
+                      "state": state
+                  }),
+                  contentType: 'application/json',
+                  dataType: "json",
+                  timeout: 30000,
+                  error: function (err) {
+                      btn.html(previousContent);
+                      btn.removeClass("disabled");
+                      $('.alert-box .content').html('Code ' + err.responseJSON.status + ' ' + err.responseJSON.description + ': ' + err.responseJSON.detail);
+                      $(window).scrollTop(0);
+                      $('.alert-box .alert').show();
+                  },
+                  success: function (msg) {
+                      document.location.reload(true);
+                  }
+              });
+          })
+      });
+  </script>
+  {{ template "admin/delete-incident.html" . }}
+{{end}}

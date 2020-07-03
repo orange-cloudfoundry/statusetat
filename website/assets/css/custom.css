@@ -1,0 +1,243 @@
+.collection a {
+    text-overflow: ellipsis;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: table;
+    width: 100%;
+}
+
+footer {
+    display: table-row;
+    height: 100px;
+}
+
+.global-status {
+    font-size: 1.5rem;
+    padding: 1rem .5rem;
+    line-height: 24px;
+}
+
+
+.components-status {
+    margin-top: 15px;
+    padding: 5px;
+}
+
+.material-icons, .icon-text {
+    display: inline-flex;
+    vertical-align: top;
+}
+
+.material-icons.tooltipped {
+    cursor: pointer;
+}
+
+.timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.timeline-incident {
+    list-style: none;
+    border-left: 2px solid #e1e4e8;
+    margin-left: .5rem;
+    position: relative;
+    padding-top: 0;
+    padding-bottom: 1.5rem;
+    padding-left: 1.5rem;
+}
+
+.timeline-incident:last-child {
+    border-color: transparent;
+}
+
+.timeline-incident:before {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid #6a737d;
+    position: absolute;
+    border-radius: 9999px;
+    z-index: 10;
+    background-color: #fff;
+    content: " ";
+    left: -12px;
+    top: 0;
+}
+
+.timeline-incident-green:before {
+    border-color: #6a737d;
+}
+
+.timeline-incident-purple:before {
+    border-color: #9c27b0;
+}
+
+.timeline-incident-deep-orange:before {
+    border-color: #ff5722;
+}
+
+.timeline-incident-grey:before {
+    border-color: #212121;
+}
+
+.timeline-incident-red:before {
+    border-color: #F44336;
+}
+
+.timeline-incident-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.timeline-incident-body {
+    padding-bottom: .5rem;
+}
+
+.timeline-incident-body .message {
+    color: #6a737d;
+}
+
+.incident {
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.badge {
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+}
+
+.incident .incident-title h5 {
+    line-height: 18px;
+}
+
+.incident .incident-state-details {
+    line-height: 15px;
+}
+
+.incident-state-details {
+    margin-top: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.incident-main-message {
+    margin-top: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.incident-updates {
+    margin-top: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.incident .incident-title .badge {
+    margin-right: 5px;
+}
+
+time.human {
+    text-decoration: underline dotted;
+    cursor: help;
+}
+
+.sidenav li > a {
+    color: white;
+}
+
+.admin-container {
+    padding-left: 185px;
+}
+
+.admin-container .collection .collection-item.avatar {
+    padding: 10px 20px;
+}
+
+.admin-container .collection .collection-item .badge {
+    float: none;
+    margin-left: 0;
+}
+
+.admin-container .collection .collection-item .secondary-content {
+    float: right;
+    position: initial;
+    margin-left: 5px;
+}
+
+.admin-container .head {
+    margin-bottom: 50px;
+}
+
+.admin-container .chips-components {
+    margin-top: 0;
+}
+
+.admin-container [type="radio"]:checked + span,
+.admin-container [type="radio"]:not(:checked) + span {
+    padding-left: 25px;
+    margin-right: 10px;
+}
+
+.mark-as-btn {
+    width: 115px;
+}
+
+.preloader-wrapper.preload-btn {
+    width: 14px;
+    height: 14px;
+}
+
+.markdown ul,
+.markdown ol,
+.markdown ul > li,
+.markdown ol > li {
+    list-style: initial;
+}
+
+.markdown [type="checkbox"]:not(:checked),
+.markdown [type="checkbox"]:checked {
+    position: initial;
+    top: initial;
+    opacity: initial;
+}
+
+.modal-with-tabs {
+    width: 75%;
+    height: 80%;
+}
+
+.modal-with-tabs .tabs-vertical .col-modal-tabs {
+    width: 25%;
+}
+
+.modal-with-tabs .tabs-vertical .col-modal-content {
+    width: 74%;
+}
+
+.modal-with-tabs a.tab-no-border {
+    border-right: none;
+}
+
+.incident-item.avatar {
+    position: initial !important;
+}
+
+.details-date {
+    font-size: .7rem;
+}
+
+.chips .input {
+    width: 170px !important;
+}

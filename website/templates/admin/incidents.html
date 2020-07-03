@@ -1,0 +1,239 @@
+{{ extends "admin/index.html" }}
+{{ define "title" }}{{.BaseInfo.Title}} - Admin incidents{{ end }}
+{{ define "before-content"}}
+    {{ range .Incidents }}
+        {{ $incidentGuid := .GUID }}
+        <div class="row">
+          <div id="modal-incident-{{ .GUID }}" class="modal modal-fixed-footer modal-with-tabs">
+            <div class="modal-content">
+              <div class="tabs-vertical">
+                <div class="col col-modal-tabs">
+                  <ul class="tab modal-tabs">
+                      {{ range .Messages }}
+                        <li class="tab with-time">
+                          <a class="waves-effect waves-cyan" href="#message-{{ .GUID }}">
+                              {{ .Title | title | markdownNoParaph }}
+                            <time class="grey-text human tooltipped" datetime="{{ .CreatedAt | timeStdFormat }}" data-tooltip="{{ .CreatedAt | timeFormat }}">{{ .CreatedAt | humanTime }}</time>
+                          </a>
+                        </li>
+                      {{ end }}
+                    <li class="tab">
+                      <a class="waves-effect waves-cyan green center-align white-text tab-no-border" href="#new-message-{{ .GUID }}">
+                        New Message
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <div class="col col-modal-content">
+                    {{ range .Messages }}
+                      <div id="message-{{ .GUID }}" class="tab-content">
+                        <div class="row">
+                          <div class="col s12 alert-box">
+                            <div class="alert alert-danger" style="display: none;"><b>Error
+                                !</b>
+                              <span class="content"></span>
+                              <button class="waves-effect btn-flat close"><i class="material-icons">close</i></button>
+                            </div>
+                          </div>
+                        </div>
+                        <form class="col s12">
+                          <input type="hidden" name="incident-guid" value="{{ $incidentGuid }}">
+                          <input type="hidden" name="message-guid" value="{{ .GUID }}">
+                          <div class="row">
+                            <div class="input-field col s12">
+                              <input id="title-{{ .GUID }}" name="title" value="{{ .Title }}" type="text" class="validate markdown">
+                              <label for="title-{{ .GUID }}">Title *</label>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="input-field col s12">
+                              <textarea id="message-{{ .GUID }}" name="content" class="materialize-textarea markdown validate" style="height: 200px;">{{ .Content }}</textarea>
+                              <label for="message-{{ .GUID }}">Message * (You can write in markdown)</label>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                    {{ end }}
+                  <div id="new-message-{{ .GUID }}" class="tab-content">
+                    <form class="col s12">
+                      <input type="hidden" name="incident-guid" value="{{ $incidentGuid }}">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          <input id="title-{{ $incidentGuid }}" name="title" type="text" class="validate markdown">
+                          <label for="title-{{ $incidentGuid }}">Title *</label>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="input-field col s12">
+                          <textarea id="message-{{ $incidentGuid }}" name="content" class="materialize-textarea markdown validate" style="height: 200px;"></textarea>
+                          <label for="message-{{ $incidentGuid }}">Message * (You can write in markdown)</label>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <a href="#!" class="btn waves-effect waves-cyan white green-text send-message">Send</a>
+              <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+            </div>
+          </div>
+        </div>
+    {{end}}
+{{end}}
+{{ define "content" }}
+  <div class="row">
+    <div class="col s12">
+      <!-- Modal Structure -->
+
+      <div class="head">
+        <a href="/admin/incident/add" class="right waves-effect waves-light btn green lighten-1 white-text">Report an
+          incident<i class="material-icons">add</i></a>
+        <h4>Incidents</h4>
+        <div class="divider"></div>
+      </div>
+        {{ if .Incidents }}
+          <ul class="collection">
+              {{ range .Incidents }}
+                  {{ $mainMsg := .MainMessage }}
+                  <li class="collection-item incident-item avatar">
+                    <form>
+                      <input type="hidden" name="guid" value="{{ .GUID }}">
+                      <a href="#!" class="secondary-content waves-effect waves-light btn red white-text tooltipped-btn delete-incident" data-tooltip="Delete incident"><i class="material-icons">delete</i></a>
+                      <a href="/admin/incident/edit/{{ .GUID }}" class="secondary-content waves-effect waves-light btn grey lighten-4 grey-text tooltipped-btn" data-tooltip="Edit incident"><i class="material-icons">edit</i></a>
+                      <a href="#modal-incident-{{ .GUID }}" class="secondary-content waves-effect waves-light btn blue white-text tooltipped-btn modal-trigger" data-tooltip="Manage messages"><i class="material-icons">message</i></a>
+                      <a class='dropdown-trigger secondary-content waves-effect waves-light btn grey lighten-4 grey-text mark-as-btn' href='#' data-target='dropdown-mark-{{.GUID}}'>Mark
+                        As</a>
+
+                      <ul id='dropdown-mark-{{.GUID}}' class='dropdown-content'>
+                          {{ range $.IncidentStates }}
+                            <li>
+                              <a href="#!" class="{{ . | colorIncidentState}}-text mark-as-set-state" data-state="{{ . }}">{{ . | textIncidentState | title }}</a>
+                            </li>
+                          {{ end }}
+                      </ul>
+                    </form>
+
+                    <span class="title">
+                  <span class="badge {{ .State | colorIncidentState }} white-text">{{ .State | textIncidentState | title }}</span>
+                    {{$mainMsg.Title | title | markdownNoParaph }}
+                </span>
+                    <p>
+                        {{ range .Components }}
+                          <span class="badge grey lighten-4 grey-text">{{ . }}</span>
+                        {{ end }}
+                      <br/>
+                      <span class="details-date">
+                  Created at:
+                  <time class="grey-text human tooltipped" datetime="{{ .CreatedAt | timeStdFormat }}" data-tooltip="{{ .CreatedAt | timeFormat }}">{{ .CreatedAt | humanTime }}</time>
+                      {{ if gt (len .Messages) 0}}
+                        - Last Message Update:
+                        <time class="grey-text human tooltipped" datetime="{{ .LastMessage.CreatedAt | timeStdFormat }}" data-tooltip="{{ .LastMessage.CreatedAt | timeFormat }}">{{ .LastMessage.CreatedAt | humanTime }}</time>
+                      {{ end }}
+                  </span>
+                    </p>
+
+                  </li>
+              {{end}}
+          </ul>
+
+        {{ else }}
+          No incidents at between these dates.
+        {{ end }}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col s12 center-align">
+      <ul class="pagination">
+        <li>
+          <a href="/admin/incident?from={{ .After | timeStdFormat }}"><i class="material-icons">chevron_left</i>
+            After</a></li>
+        <li>
+          <a href="/admin/incident?from={{ .Before | timeStdFormat }}">Before
+            <i class="material-icons">chevron_right</i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+{{end}}
+
+{{ define "pre_body_close" }}
+  <script type="text/javascript">
+      $(document).ready(function () {
+          $(".send-message").click(function () {
+              let btn = $(this);
+              let modal = btn.closest('.modal');
+              $('.alert-box .alert', modal).hide();
+              let tabContent = $(".tab-content.active", modal);
+              let method = "POST"
+              let incidentGuid = $('input[name="incident-guid"]', tabContent).val()
+              let path = "/v1/incidents/" + incidentGuid + "/messages"
+              let data = {
+                  "title": $('input[name="title"]', tabContent).val(),
+                  "content": $('textarea[name="content"]', tabContent).val(),
+                  "incident_guid": incidentGuid,
+              }
+              let messageGuid = $('input[name="message-guid"]', tabContent).val();
+              if (messageGuid) {
+                  method = "PUT"
+                  path = "/v1/incidents/" + incidentGuid + "/messages/" + messageGuid
+                  data.message_guid = messageGuid
+              }
+              btn.append($('.preloader-box').html());
+              btn.addClass("disabled");
+              $.ajax({
+                  url: path,
+                  type: method,
+                  async: false,
+                  cache: false,
+                  data: JSON.stringify(data),
+                  contentType: 'application/json',
+                  dataType: "json",
+                  timeout: 30000,
+                  error: function (err) {
+                      btn.removeClass("disabled");
+                      $('.preload-btn', btn).remove();
+                      $('.alert-box .content', modal).html('Code ' + err.responseJSON.status + ' ' + err.responseJSON.description + ': ' + err.responseJSON.detail);
+                      $('.alert-box .alert', modal).show();
+                  },
+                  success: function (msg) {
+                      document.location.reload(true);
+                  }
+              });
+          })
+
+          $(".mark-as-set-state").click(function () {
+
+              let guid = $(this).closest('form').find('input[name="guid"]').val();
+              let btn = $(this);
+              let state = $(this).data("state");
+              $('.alert-box .alert').hide();
+              $.ajax({
+                  url: '/v1/incidents/' + guid,
+                  type: 'PUT',
+                  async: false,
+                  cache: false,
+                  data: JSON.stringify({
+                      "guid": guid,
+                      "state": state
+                  }),
+                  contentType: 'application/json',
+                  dataType: "json",
+                  timeout: 30000,
+                  error: function (err) {
+                      btn.removeClass("disabled");
+                      $('.preload-btn', btn).remove();
+                      $('.alert-box .content').html('Code ' + err.responseJSON.status + ' ' + err.responseJSON.description + ': ' + err.responseJSON.detail);
+                      $(window).scrollTop(0);
+                      $('.alert-box .alert').show();
+                  },
+                  success: function (msg) {
+                      document.location.reload(true);
+                  }
+              });
+          })
+      });
+  </script>
+  {{ template "admin/delete-incident.html" . }}
+{{end}}

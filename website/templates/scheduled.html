@@ -1,0 +1,38 @@
+<div class="incident z-depth-1">
+    {{ $mainMsg := .MainMessage }}
+  <div class="incident-title">
+    <div class="components-badges right">
+        {{ range .Components }}
+          <span class="badge grey lighten-4 grey-text left">{{ . }}</span>
+        {{ end }}
+    </div>
+      {{if eq .State 1 }}
+        <h5 class="{{ .State | colorIncidentState }}-text">
+          <del>{{ $mainMsg.Title | title | markdownNoParaph }}</del>
+        </h5>
+      {{ else }}
+        <h5 class="black-text">{{ $mainMsg.Title | title | markdownNoParaph }}</h5>
+      {{ end }}
+
+  </div>
+  <div class="incident-state-details">
+      {{ if eq .State 1 }}
+        <span class="{{ .State | colorIncidentState }}-text">Finished scheduled maintenance.</span>
+      {{ else if isAfterNow .CreatedAt }}
+        Scheduled maintenance has
+        <time class="grey-text human tooltipped" data-tooltip="Start At: {{ .CreatedAt | timeFormat }}" datetime="{{ .CreatedAt | timeStdFormat}}">
+          started
+        </time> and it
+                remains
+        <time class="grey-text human tooltipped" data-tooltip="End at: {{ .ScheduledEnd | timeFormat }}" datetime="{{ .ScheduledEnd | timeStdFormat}}">{{ humanDuration timeNow .ScheduledEnd }}</time>.
+      {{ else }}
+        It will start in
+        <time class="grey-text human tooltipped" data-prefix="Start At: " data-tooltip="{{ .CreatedAt | timeFormat }}" datetime="{{ .CreatedAt | timeStdFormat}}">{{ .CreatedAt | humanTime }}</time>
+        and will take
+        <time class="grey-text human tooltipped" data-prefix="End at: " data-tooltip="{{ .ScheduledEnd | timeFormat }}" datetime="{{ .ScheduledEnd | timeStdFormat}}">{{ humanDuration .CreatedAt .ScheduledEnd }}</time>.
+      {{ end }}
+  </div>
+  <div class="incident-main-message">
+    <p class="markdown">{{ $mainMsg.Content | markdown }}</p>
+  </div>
+</div>

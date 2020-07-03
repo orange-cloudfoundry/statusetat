@@ -1,0 +1,45 @@
+{{ extends "index.html" }}
+{{ define "content" }}
+  <div class="row">
+    <div class="col s1"></div>
+    <div class="col s10">
+        {{ range .TimelineDates }}
+            {{ $incidents := index $.Timeline . }}
+            <div class="row">
+              <div class="col s12">
+                <h4>
+                  <time>{{ . }}</time>
+                </h4>
+                <div>
+                    {{ if $incidents }}
+                        {{ range $incidents }}
+                            {{ template "incident.html" . }}
+                        {{end}}
+                    {{ else }}
+                      <div class="message">
+                        No incidents reported.
+                      </div>
+                    {{ end }}
+                </div>
+              </div>
+            </div>
+        {{ end }}
+    </div>
+    <div class="col s1"></div>
+  </div>
+  <div class="row">
+    <div class="col s1"></div>
+    <div class="col s10 center-align">
+      <ul class="pagination">
+        <li>
+          <a href="/history?all_types=true&from={{ .After | timeStdFormat }}"><i class="material-icons">chevron_left</i>
+            After</a></li>
+        <li>
+          <a href="/history?all_types=true&from={{ .Before | timeStdFormat }}">Before
+            <i class="material-icons">chevron_right</i></a>
+        </li>
+      </ul>
+    </div>
+    <div class="col s1"></div>
+  </div>
+{{ end }}

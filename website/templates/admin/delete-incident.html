@@ -1,0 +1,29 @@
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(".delete-incident").click(function () {
+            let guid = $(this).closest('form').find('input[name="guid"]').val();
+            let previousContent = $(this).html();
+            let btn = $(this);
+            $('.alert-box .alert').hide();
+            $(this).html($('.preloader-box').html())
+            $(this).addClass("disabled");
+            $.ajax({
+                url: '/v1/incidents/' + guid,
+                type: 'DELETE',
+                async: false,
+                cache: false,
+                timeout: 30000,
+                error: function (err) {
+                    btn.html(previousContent);
+                    btn.removeClass("disabled");
+                    $('.alert-box .content').html('Code ' + err.responseJSON.status + ' ' + err.responseJSON.description + ': ' + err.responseJSON.detail);
+                    $(window).scrollTop(0);
+                    $('.alert-box .alert').show();
+                },
+                success: function (msg) {
+                    document.location.reload(true);
+                }
+            });
+        });
+    });
+</script>
