@@ -1,4 +1,4 @@
-package notifiers
+package slack
 
 import (
 	"bytes"
@@ -12,8 +12,13 @@ import (
 	"github.com/ArthurHlt/statusetat/common"
 	"github.com/ArthurHlt/statusetat/config"
 	"github.com/ArthurHlt/statusetat/models"
+	"github.com/ArthurHlt/statusetat/notifiers"
 	"github.com/mitchellh/mapstructure"
 )
+
+func init() {
+	notifiers.RegisterNotifier(&Slack{})
+}
 
 type SlackOpts struct {
 	Endpoint           string `mapstructure:"endpoint"`
@@ -80,7 +85,7 @@ type Slack struct {
 	loc        *time.Location
 }
 
-func (n Slack) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (Notifier, error) {
+func (n Slack) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
 	var opts SlackOpts
 	err := mapstructure.Decode(params, &opts)
 	if err != nil {

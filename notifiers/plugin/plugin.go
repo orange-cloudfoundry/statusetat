@@ -1,4 +1,4 @@
-package notifiers
+package plugin
 
 import (
 	"fmt"
@@ -6,8 +6,13 @@ import (
 
 	"github.com/ArthurHlt/statusetat/config"
 	"github.com/ArthurHlt/statusetat/models"
+	"github.com/ArthurHlt/statusetat/notifiers"
 	"github.com/mitchellh/mapstructure"
 )
+
+func init() {
+	notifiers.RegisterNotifier(&Plugin{})
+}
 
 const RegisterFuncName = "Register"
 
@@ -17,10 +22,10 @@ type optsPlugin struct {
 }
 
 type Plugin struct {
-	notifier Notifier
+	notifier notifiers.Notifier
 }
 
-func (n Plugin) loadPlugin(path string) (Notifier, error) {
+func (n Plugin) loadPlugin(path string) (notifiers.Notifier, error) {
 	p, err := plugin.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("Error on plugin %s: %s", path, err.Error())
@@ -29,7 +34,7 @@ func (n Plugin) loadPlugin(path string) (Notifier, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Error on plugin %s: %s", path, err.Error())
 	}
-	notifierPlugin := registerPlugin.(func() Notifier)()
+	notifierPlugin := registerPlugin.(func() notifiers.Notifier)()
 	name := notifierPlugin.Name()
 	if name == "" {
 		return nil, fmt.Errorf("Error on plugin %s: plugin must define its name.")
@@ -39,7 +44,7 @@ func (n Plugin) loadPlugin(path string) (Notifier, error) {
 
 }
 
-func (n Plugin) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (Notifier, error) {
+func (n Plugin) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
 	var opts optsPlugin
 	err := mapstructure.Decode(params, &opts)
 	if err != nil {

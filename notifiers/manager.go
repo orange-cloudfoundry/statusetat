@@ -15,10 +15,10 @@ type ToNotifie struct {
 
 var toNotifies = []ToNotifie{}
 
-var notifiers = []Notifier{
-	&Slack{},
-	&GrafanaAnnotation{},
-	&Plugin{},
+var notifiers = []Notifier{}
+
+func RegisterNotifier(notifier Notifier) {
+	notifiers = append(notifiers, notifier)
 }
 
 func AddNotifier(name string, params map[string]interface{}, forComp config.ForComponent, baseInfo config.BaseInfo) error {

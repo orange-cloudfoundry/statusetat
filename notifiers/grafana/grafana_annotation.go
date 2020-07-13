@@ -1,4 +1,4 @@
-package notifiers
+package grafana
 
 import (
 	"bytes"
@@ -12,8 +12,13 @@ import (
 	"github.com/ArthurHlt/statusetat/common"
 	"github.com/ArthurHlt/statusetat/config"
 	"github.com/ArthurHlt/statusetat/models"
+	"github.com/ArthurHlt/statusetat/notifiers"
 	"github.com/mitchellh/mapstructure"
 )
+
+func init(){
+	notifiers.RegisterNotifier(&GrafanaAnnotation{})
+}
 
 type ReqGrafanaAnnotation struct {
 	DashboardID int      `json:"dashboardId,omitempty"`
@@ -40,7 +45,7 @@ type GrafanaAnnotation struct {
 	loc        *time.Location
 }
 
-func (n GrafanaAnnotation) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (Notifier, error) {
+func (n GrafanaAnnotation) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
 	var opts OptsGrafanaAnnotation
 	err := mapstructure.Decode(params, &opts)
 	if err != nil {

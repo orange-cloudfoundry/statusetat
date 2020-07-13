@@ -8,7 +8,9 @@ import (
 
 	"github.com/ArthurHlt/statusetat/config"
 	"github.com/ArthurHlt/statusetat/notifiers"
-	_ "github.com/ArthurHlt/statusetat/notifiers"
+	_ "github.com/ArthurHlt/statusetat/notifiers/grafana"
+	_ "github.com/ArthurHlt/statusetat/notifiers/plugin"
+	_ "github.com/ArthurHlt/statusetat/notifiers/slack"
 	"github.com/ArthurHlt/statusetat/serves"
 	"github.com/ArthurHlt/statusetat/storages"
 	"github.com/gobuffalo/packr/v2"
