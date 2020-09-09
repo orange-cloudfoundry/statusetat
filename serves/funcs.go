@@ -51,6 +51,30 @@ func colorIncidentState(state models.IncidentState) string {
 	return "green"
 }
 
+func colorHexState(state models.ComponentState) string {
+	switch state {
+	case models.DegradedPerformance:
+		return "#9c27b0"
+	case models.PartialOutage:
+		return "#ff5722"
+	case models.UnderMaintenance:
+		return "#9e9e9e"
+	case models.MajorOutage:
+		return "#e51c23"
+	}
+	return "#4CAF50"
+}
+
+func colorHexIncidentState(state models.IncidentState) string {
+	switch state {
+	case models.Unresolved:
+		return "#ff5722"
+	case models.Monitoring:
+		return "#2196F3"
+	}
+	return "#4CAF50"
+}
+
 func timeFormat(t time.Time) string {
 
 	return t.Format("Jan 02, 15:04 MST")

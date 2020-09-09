@@ -14,6 +14,8 @@ const (
 	created recordAction = iota
 	updated
 	deleted
+	subscribe
+	unsubscribe
 )
 
 type recordAction int
@@ -21,7 +23,7 @@ type recordAction int
 type record struct {
 	storeUrl string
 	action   recordAction
-	guid     string
+	data     string
 	incident models.Incident
 	deleted  bool
 }
@@ -62,6 +64,53 @@ func (m Replicate) Creator() func(u *url.URL) (Store, error) {
 		}
 		return nil, fmt.Errorf("No valid store can be found")
 	}
+}
+
+func (m Replicate) Subscribe(email string) error {
+	var err error
+	allInError := true
+	for storeUrl, s := range m.stores {
+		err = s.Subscribe(email)
+		if err != nil {
+			m.addRecord(storeUrl, subscribe, email, models.Incident{})
+			continue
+		}
+		allInError = false
+	}
+	if allInError {
+		return err
+	}
+	return nil
+}
+
+func (m Replicate) Unsubscribe(email string) error {
+	var err error
+	allInError := true
+	for storeUrl, s := range m.stores {
+		err = s.Unsubscribe(email)
+		if err != nil {
+			m.addRecord(storeUrl, unsubscribe, email, models.Incident{})
+			continue
+		}
+		allInError = false
+	}
+	if allInError {
+		return err
+	}
+	return nil
+}
+
+func (m Replicate) Subscribers() ([]string, error) {
+	var subs []string
+	var err error
+	for _, s := range m.stores {
+		subs, err = s.Subscribers()
+		if err != nil {
+			continue
+		}
+		return subs, nil
+	}
+	return subs, err
 }
 
 func (m Replicate) Detect(u *url.URL) bool {
@@ -119,7 +168,7 @@ func (m Replicate) Delete(guid string) error {
 	return nil
 }
 
-func (m *Replicate) addRecord(storeUrl string, action recordAction, guid string, incident models.Incident) {
+func (m *Replicate) addRecord(storeUrl string, action recordAction, data string, incident models.Incident) {
 	log.
 		WithField("action", action).
 		WithField("url", storeUrl).
@@ -128,7 +177,7 @@ func (m *Replicate) addRecord(storeUrl string, action recordAction, guid string,
 	records = append(records, &record{
 		storeUrl: storeUrl,
 		action:   action,
-		guid:     guid,
+		data:     data,
 		incident: incident,
 		deleted:  false,
 	})
@@ -178,16 +227,27 @@ func (m Replicate) replay() {
 					continue
 				}
 			case updated:
-				_, err := store.Update(record.guid, record.incident)
+				_, err := store.Update(record.data, record.incident)
 				if err != nil {
 					continue
 				}
 			case deleted:
-				err := store.Delete(record.guid)
+				err := store.Delete(record.data)
+				if err != nil {
+					continue
+				}
+			case subscribe:
+				err := store.Subscribe(record.data)
+				if err != nil {
+					continue
+				}
+			case unsubscribe:
+				err := store.Unsubscribe(record.data)
 				if err != nil {
 					continue
 				}
 			}
+
 			record.deleted = true
 		}
 

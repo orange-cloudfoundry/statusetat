@@ -8,6 +8,7 @@ import (
 
 	"github.com/ArthurHlt/statusetat/config"
 	"github.com/ArthurHlt/statusetat/notifiers"
+	_ "github.com/ArthurHlt/statusetat/notifiers/email"
 	_ "github.com/ArthurHlt/statusetat/notifiers/grafana"
 	_ "github.com/ArthurHlt/statusetat/notifiers/plugin"
 	_ "github.com/ArthurHlt/statusetat/notifiers/slack"
@@ -74,7 +75,7 @@ func main() {
 		}
 	}
 
-	go notifiers.Notify()
+	go notifiers.Notify(store)
 
 	log.Infof("Listening on address %s ...", c.Listen)
 	err = http.ListenAndServe(c.Listen, router)

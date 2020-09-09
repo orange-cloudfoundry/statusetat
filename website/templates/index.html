@@ -25,6 +25,22 @@
   </div>
 </nav>
 
+<div class="preloader-box" style="display: none;">
+  <div class="preloader-wrapper preload-btn active">
+    <div class="spinner-layer spinner-blue-only">
+      <div class="circle-clipper left">
+        <div class="circle"></div>
+      </div>
+      <div class="gap-patch">
+        <div class="circle"></div>
+      </div>
+      <div class="circle-clipper right">
+        <div class="circle"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="subscribe" class="modal">
   <div class="modal-content">
     <div class="row">
@@ -33,9 +49,10 @@
 
         <p class="center-align">Choose from the options below to automatically receive status updates.</p>
         <ul class="tabs modal-tabs">
-          <li class="tab col s4"><a class="active" href="#support">Support</a></li>
-          <li class="tab col s4"><a class="active" href="#calendar">Calendar</a></li>
-          <li class="tab col s4"><a href="#feed">Feed</a></li>
+          <li class="tab col s3"><a class="active" href="#support">Support</a></li>
+          <li class="tab col s3"><a href="#calendar">Calendar</a></li>
+          <li class="tab col s3"><a href="#feed">Feed</a></li>
+          <li class="tab col s3"><a href="#email">Email</a></li>
         </ul>
       </div>
       <div id="support" class="col s12 center-align">
@@ -49,6 +66,27 @@
           Get <a href="/atom.xml" target="_blank" rel="noopener">the Atom Feed</a> or
           <a href="/rss.xml" target="_blank" rel="noopener">the RSS Feed</a>.
         </span>
+      </div>
+      <div id="email" class="col s12 center-align">
+        <form id="subscribe-email">
+          <div class="row">
+            <div class="col s2">&nbsp;</div>
+            <div class="input-field col s8">
+              <input id="email-input" name="email" type="text" placeholder="your address email" class="validate">
+              <label for="email-input">Subscribe *</label>
+            </div>
+            <div class="col s2">&nbsp;</div>
+          </div>
+          <div class="row">
+            <div class="col s2">&nbsp;</div>
+            <div class="col s8">
+              <button type="submit" class="waves-effect waves-light btn green lighten-1 white-text">
+                Register me
+              </button>
+            </div>
+            <div class="col s2">&nbsp;</div>
+          </div>
+        </form>
       </div>
     </div>
   </div>

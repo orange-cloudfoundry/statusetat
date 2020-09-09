@@ -90,4 +90,28 @@ $(document).ready(function () {
 
     });
 
+    $('#subscribe-email button[type="submit"]').click(function (e) {
+        e.preventDefault();
+        formData = new FormData(document.getElementById("subscribe-email"));
+        path = "/v1/subscribe?email=" + formData.get("email");
+        let btn = $(this);
+        btn.append($('.preloader-box').html());
+        btn.addClass("disabled");
+        $.ajax({
+            url: path,
+            type: "PUT",
+            cache: false,
+            timeout: 30000,
+            error: function (err) {
+                btn.removeClass("disabled");
+                $('.preload-btn', btn).remove();
+                $(btn).before('<span style="color: red;">Code ' + err.responseJSON.status + ' ' + err.responseJSON.description + ': ' + err.responseJSON.detail + '</span>     ');
+            },
+            success: function (msg) {
+                console.log("yes");
+                $('#subscribe-email').html("Successfully registered your email");
+            }
+        });
+    });
+
 });

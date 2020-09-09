@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/ArthurHlt/statusetat/common"
@@ -49,31 +50,35 @@ func Register(
 	}
 
 	funcs := template.FuncMap{
-		"iconState":          iconState,
-		"colorState":         colorState,
-		"colorIncidentState": colorIncidentState,
-		"textIncidentState":  models.TextIncidentState,
-		"textState":          models.TextState,
-		"timeFormat":         timeFormat,
-		"timeStdFormat":      timeStdFormat,
-		"title":              common.Title,
-		"markdown":           markdown.ConvertSafeTemplate,
-		"stateFromIncidents": stateFromIncidents,
-		"safeHTML":           safeHTML,
-		"humanTime":          humanTime,
-		"jsonify":            jsonify,
-		"listMap":            listMap,
-		"humanDuration":      common.HumanDuration,
-		"timeNow":            api.timeNow,
-		"isAfterNow":         isAfterNow,
-		"baseUrl":            api.baseUrl,
-		"markdownNoParaph":   markdownNoParaph,
-		"tagify":             tagify,
-		"ref":                ref,
-		"timeFmtCustom":      timeFmtCustom,
+		"iconState":             iconState,
+		"colorState":            colorState,
+		"colorIncidentState":    colorIncidentState,
+		"textIncidentState":     models.TextIncidentState,
+		"textState":             models.TextState,
+		"timeFormat":            timeFormat,
+		"timeStdFormat":         timeStdFormat,
+		"title":                 common.Title,
+		"markdown":              markdown.ConvertSafeTemplate,
+		"stateFromIncidents":    stateFromIncidents,
+		"safeHTML":              safeHTML,
+		"humanTime":             humanTime,
+		"jsonify":               jsonify,
+		"listMap":               listMap,
+		"humanDuration":         common.HumanDuration,
+		"timeNow":               api.timeNow,
+		"isAfterNow":            isAfterNow,
+		"baseUrl":               api.baseUrl,
+		"markdownNoParaph":      markdownNoParaph,
+		"tagify":                tagify,
+		"ref":                   ref,
+		"timeFmtCustom":         timeFmtCustom,
+		"colorHexState":         colorHexState,
+		"colorHexIncidentState": colorHexIncidentState,
+		"join":                  strings.Join,
 	}
+	extemplate.SetFuncs(funcs)
 
-	api.xt = extemplate.New().Funcs(funcs)
+	api.xt = extemplate.New()
 	box := packr.New("templates", "../website/templates")
 	err := api.xt.ParseDir(box, []string{".html"})
 	if err != nil {
@@ -88,6 +93,10 @@ func Register(
 	router.HandleFunc("/atom.xml", api.Atom)
 	router.HandleFunc("/cal.ics", api.Ical)
 	subRouter := router.PathPrefix("/v1").Subrouter()
+
+	subRouter.HandleFunc("/subscribe", api.SubscribeEmail).Methods(http.MethodGet, http.MethodPatch, http.MethodPost, http.MethodPut)
+	subRouter.HandleFunc("/unsubscribe", api.UnsubscribeEmail).Methods(http.MethodGet, http.MethodPatch, http.MethodPost, http.MethodPut)
+
 	subRouter.HandleFunc("/components", api.ShowComponents).Methods(http.MethodGet)
 	subRouter.HandleFunc("/flags/incident_states", api.ShowFlagIncidentStates).Methods(http.MethodGet)
 	subRouter.HandleFunc("/flags/component_states", api.ShowFlagComponentStates).Methods(http.MethodGet)

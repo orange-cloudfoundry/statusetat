@@ -51,6 +51,55 @@ func (m Retry) Create(incident models.Incident) (models.Incident, error) {
 	return incident, err
 }
 
+func (m Retry) Subscribe(email string) error {
+	var err error
+	for i := 0; i < m.nbRetry; i++ {
+		err = m.next.Subscribe(email)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return err
+			}
+			time.Sleep(500 * time.Millisecond)
+			continue
+		}
+		return err
+	}
+	return err
+}
+
+func (m Retry) Unsubscribe(email string) error {
+	var err error
+	for i := 0; i < m.nbRetry; i++ {
+		err = m.next.Unsubscribe(email)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return err
+			}
+			time.Sleep(500 * time.Millisecond)
+			continue
+		}
+		return err
+	}
+	return err
+}
+
+func (m Retry) Subscribers() ([]string, error) {
+	var err error
+	var ret []string
+	for i := 0; i < m.nbRetry; i++ {
+		ret, err = m.next.Subscribers()
+		if err != nil {
+			if os.IsNotExist(err) {
+				return ret, err
+			}
+			time.Sleep(500 * time.Millisecond)
+			continue
+		}
+		return ret, err
+	}
+	return []string{}, err
+}
+
 func (m Retry) Update(guid string, incident models.Incident) (models.Incident, error) {
 	var err error
 	var ret models.Incident

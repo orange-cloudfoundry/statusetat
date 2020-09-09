@@ -18,6 +18,10 @@ type Store interface {
 	Read(guid string) (models.Incident, error)
 	ByDate(from, to time.Time) ([]models.Incident, error)
 
+	Subscribe(email string) error
+	Unsubscribe(email string) error
+	Subscribers() ([]string, error)
+
 	Ping() error
 }
 

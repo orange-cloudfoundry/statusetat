@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ArthurHlt/statusetat/common"
 	"github.com/ArthurHlt/statusetat/models"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -39,6 +40,62 @@ func (s *S3) Create(incident models.Incident) (models.Incident, error) {
 	})
 
 	return incident, err
+}
+
+func (s S3) retrieveSubscribers() ([]string, error) {
+	obj, err := s.sess.svc.GetObject(&s3.GetObjectInput{
+		Bucket: &s.sess.bucket,
+		Key:    aws.String(subscriberFilename),
+	})
+	if err != nil {
+		if aerr, ok := err.(awserr.RequestFailure); ok && aerr.StatusCode() == 404 {
+			return []string{}, os.ErrNotExist
+		}
+		return []string{}, err
+	}
+	defer obj.Body.Close()
+	subs := make([]string, 0)
+	err = json.NewDecoder(obj.Body).Decode(&subs)
+	if err != nil {
+		return []string{}, err
+	}
+	return subs, err
+}
+
+func (s S3) storeSubscribers(subscribers []string) error {
+	b, _ := json.Marshal(subscribers)
+	uploader := s3manager.NewUploader(s.sess.awsSess)
+	_, err := uploader.Upload(&s3manager.UploadInput{
+		Bucket: &s.sess.bucket,
+		Key:    aws.String(subscriberFilename),
+		Body:   bytes.NewBuffer(b),
+	})
+	return err
+}
+
+func (s S3) Subscribe(email string) error {
+	subs, err := s.retrieveSubscribers()
+	if err != nil {
+		return err
+	}
+	if common.InStrSlice(email, subs) {
+		return nil
+	}
+	subs = append(subs, email)
+	return s.storeSubscribers(subs)
+}
+
+func (s S3) Unsubscribe(email string) error {
+	subs, err := s.retrieveSubscribers()
+	if err != nil {
+		return err
+	}
+	subs = common.FilterStrSlice(email, subs)
+	return s.storeSubscribers(subs)
+}
+
+func (s S3) Subscribers() ([]string, error) {
+	return s.retrieveSubscribers()
 }
 
 func (s *S3) Update(guid string, incident models.Incident) (models.Incident, error) {

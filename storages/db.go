@@ -16,6 +16,10 @@ type DB struct {
 	db *gorm.DB
 }
 
+type Subscriber struct {
+	Email string `gorm:"primary_key"`
+}
+
 func (s DB) Creator() func(u *url.URL) (Store, error) {
 	return func(u *url.URL) (Store, error) {
 		s := &DB{}
@@ -54,7 +58,7 @@ func (s DB) Creator() func(u *url.URL) (Store, error) {
 		default:
 			return nil, fmt.Errorf("sgbd not found")
 		}
-		s.db.AutoMigrate(&models.Message{}, &models.Incident{}, &models.Metadata{})
+		s.db.AutoMigrate(&models.Message{}, &models.Incident{}, &models.Metadata{}, &Subscriber{})
 		return s, nil
 	}
 }
@@ -73,6 +77,35 @@ func (s DB) Create(incident models.Incident) (models.Incident, error) {
 	}
 	err := s.db.Create(&incident).Error
 	return incident, err
+}
+
+func (s DB) Subscribe(email string) error {
+	err := s.db.Create(&Subscriber{Email: email}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s DB) Unsubscribe(email string) error {
+	err := s.db.Where("email = ?", email).Delete(Subscriber{}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s DB) Subscribers() ([]string, error) {
+	subs := make([]Subscriber, 0)
+	err := s.db.Find(&subs).Error
+	if err != nil {
+		return []string{}, err
+	}
+	finalSubs := make([]string, len(subs))
+	for i, s := range subs {
+		finalSubs[i] = s.Email
+	}
+	return finalSubs, nil
 }
 
 func (s DB) Update(guid string, incident models.Incident) (models.Incident, error) {

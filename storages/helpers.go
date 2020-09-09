@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const subscriberFilename = "subscribers.json"
+
 func makeHttpClient(u *url.URL) *http.Client {
 	var transport http.RoundTripper
 	transport = makeHttpTransport(u)

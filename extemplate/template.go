@@ -18,6 +18,16 @@ import (
 
 var extendsRegex *regexp.Regexp
 
+var registeredFuncs = template.FuncMap{}
+
+func SetFuncs(funcs template.FuncMap) {
+	registeredFuncs = funcs
+}
+
+func Funcs() template.FuncMap {
+	return registeredFuncs
+}
+
 // Extemplate holds a reference to all templates
 // and shared configuration like Delims or FuncMap
 type Extemplate struct {
@@ -40,7 +50,7 @@ func init() {
 
 // New allocates a new, empty, template map
 func New() *Extemplate {
-	shared := template.New("")
+	shared := template.New("").Funcs(registeredFuncs)
 	return &Extemplate{
 		shared:    shared,
 		templates: make(map[string]*template.Template),

@@ -11,3 +11,7 @@ type Notifier interface {
 	Id() string
 	Notify(incident models.Incident) error
 }
+
+type NotifierSubscriber interface {
+	NotifySubscriber(incident models.Incident, subscribers []string) error
+}
