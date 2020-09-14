@@ -59,7 +59,7 @@
         <span>Visit our <a href="{{ .BaseInfo.Support }}" target="_blank" rel="noopener">Support Site</a>.</span>
       </div>
       <div id="calendar" class="col s12 center-align">
-        <span>Receive <strong>Scheduled Maintenances</strong> via <a href="webcal://{{ baseUrl.Host }}/cal.ics" target="_blank" rel="noopener">iCalendar</a>.</span>
+        <span>Receive <strong>Scheduled Maintenances</strong> via <a href="webcal://{{ (netUrl .BaseInfo.BaseURL).Host }}/cal.ics" target="_blank" rel="noopener">iCalendar</a>.</span>
       </div>
       <div id="feed" class="col s12 center-align">
         <span>

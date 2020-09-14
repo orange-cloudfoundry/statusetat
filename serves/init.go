@@ -6,14 +6,9 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
-	"strings"
-	"time"
 
-	"github.com/ArthurHlt/statusetat/common"
 	"github.com/ArthurHlt/statusetat/config"
 	"github.com/ArthurHlt/statusetat/extemplate"
-	"github.com/ArthurHlt/statusetat/markdown"
-	"github.com/ArthurHlt/statusetat/models"
 	"github.com/ArthurHlt/statusetat/storages"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/goji/httpauth"
@@ -26,7 +21,6 @@ type Serve struct {
 	xt         *extemplate.Extemplate
 	baseInfo   config.BaseInfo
 	components config.Components
-	loc        *time.Location
 	funcs      template.FuncMap
 	theme      config.Theme
 }
@@ -37,7 +31,6 @@ func Register(
 	baseInfo config.BaseInfo,
 	userInfo *url.Userinfo,
 	components config.Components,
-	loc *time.Location,
 	theme config.Theme,
 ) error {
 
@@ -45,38 +38,8 @@ func Register(
 		store:      store,
 		baseInfo:   baseInfo,
 		components: components,
-		loc:        loc,
 		theme:      theme,
 	}
-
-	funcs := template.FuncMap{
-		"iconState":             iconState,
-		"colorState":            colorState,
-		"colorIncidentState":    colorIncidentState,
-		"textIncidentState":     models.TextIncidentState,
-		"textState":             models.TextState,
-		"timeFormat":            timeFormat,
-		"timeStdFormat":         timeStdFormat,
-		"title":                 common.Title,
-		"markdown":              markdown.ConvertSafeTemplate,
-		"stateFromIncidents":    stateFromIncidents,
-		"safeHTML":              safeHTML,
-		"humanTime":             humanTime,
-		"jsonify":               jsonify,
-		"listMap":               listMap,
-		"humanDuration":         common.HumanDuration,
-		"timeNow":               api.timeNow,
-		"isAfterNow":            isAfterNow,
-		"baseUrl":               api.baseUrl,
-		"markdownNoParaph":      markdownNoParaph,
-		"tagify":                tagify,
-		"ref":                   ref,
-		"timeFmtCustom":         timeFmtCustom,
-		"colorHexState":         colorHexState,
-		"colorHexIncidentState": colorHexIncidentState,
-		"join":                  strings.Join,
-	}
-	extemplate.SetFuncs(funcs)
 
 	api.xt = extemplate.New()
 	box := packr.New("templates", "../website/templates")

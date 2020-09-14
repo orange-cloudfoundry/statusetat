@@ -12,16 +12,48 @@ import (
 	"io"
 	"path/filepath"
 	"regexp"
+	"strings"
 
+	"github.com/ArthurHlt/statusetat/common"
+	"github.com/ArthurHlt/statusetat/markdown"
+	"github.com/ArthurHlt/statusetat/models"
 	"github.com/gobuffalo/packr/v2"
 )
 
 var extendsRegex *regexp.Regexp
 
-var registeredFuncs = template.FuncMap{}
+var registeredFuncs = template.FuncMap{
+	"iconState":             iconState,
+	"colorState":            colorState,
+	"colorIncidentState":    colorIncidentState,
+	"textIncidentState":     models.TextIncidentState,
+	"textState":             models.TextState,
+	"timeFormat":            timeFormat,
+	"timeStdFormat":         timeStdFormat,
+	"title":                 common.Title,
+	"markdown":              markdown.ConvertSafeTemplate,
+	"stateFromIncidents":    stateFromIncidents,
+	"safeHTML":              safeHTML,
+	"humanTime":             humanTime,
+	"jsonify":               jsonify,
+	"listMap":               listMap,
+	"humanDuration":         common.HumanDuration,
+	"isAfterNow":            isAfterNow,
+	"markdownNoParaph":      markdownNoParaph,
+	"tagify":                tagify,
+	"ref":                   ref,
+	"timeFmtCustom":         timeFmtCustom,
+	"colorHexState":         colorHexState,
+	"colorHexIncidentState": colorHexIncidentState,
+	"join":                  strings.Join,
+	"netUrl":                netUrl,
+	"timeNow":               timeNow,
+}
 
-func SetFuncs(funcs template.FuncMap) {
-	registeredFuncs = funcs
+func AddFuncs(funcs template.FuncMap) {
+	for k, v := range funcs {
+		registeredFuncs[k] = v
+	}
 }
 
 func Funcs() template.FuncMap {

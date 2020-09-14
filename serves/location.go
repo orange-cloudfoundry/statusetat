@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ArthurHlt/statusetat/locations"
 	"github.com/gorilla/sessions"
 )
 
@@ -28,7 +29,7 @@ func SetLocationContext(req *http.Request, location *time.Location) {
 func (a Serve) Location(req *http.Request) *time.Location {
 	val := req.Context().Value(LocationContextKey)
 	if val == nil {
-		return a.loc
+		return locations.DefaultLocation()
 	}
 	return val.(*time.Location)
 }
@@ -41,10 +42,10 @@ func (a Serve) IsDefaultLocation(req *http.Request) bool {
 	return false
 }
 
-func NewLocationHandler(sessKey string, defaultLoc *time.Location) *LocationHandler {
+func NewLocationHandler(sessKey string) *LocationHandler {
 	return &LocationHandler{
 		store:      sessions.NewCookieStore([]byte(sessKey)),
-		defaultLoc: defaultLoc,
+		defaultLoc: locations.DefaultLocation(),
 	}
 }
 

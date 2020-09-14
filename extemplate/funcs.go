@@ -1,4 +1,4 @@
-package serves
+package extemplate
 
 import (
 	"encoding/json"
@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ArthurHlt/statusetat/locations"
 	"github.com/ArthurHlt/statusetat/markdown"
 	"github.com/ArthurHlt/statusetat/models"
 	"github.com/dustin/go-humanize"
@@ -141,16 +142,16 @@ func humanTime(t time.Time) string {
 	return humanize.Time(t)
 }
 
-func (a Serve) timeNow() time.Time {
-	return time.Now().In(a.loc)
+func timeNow() time.Time {
+	return time.Now().In(locations.DefaultLocation())
 }
 
 func isAfterNow(t time.Time) bool {
 	return time.Now().After(t)
 }
 
-func (a Serve) baseUrl() *url.URL {
-	u, _ := url.Parse(a.baseInfo.BaseURL)
+func netUrl(baseUrl string) *url.URL {
+	u, _ := url.Parse(baseUrl)
 	return u
 }
 

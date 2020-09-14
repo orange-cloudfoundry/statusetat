@@ -111,7 +111,6 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 		}
 
 	}
-
 	from, err := a.parseDate(req, "from", time.Now().In(a.Location(req)))
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)

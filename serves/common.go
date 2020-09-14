@@ -11,12 +11,12 @@ import (
 func (a Serve) scheduled(req *http.Request) ([]models.Incident, error) {
 	scheduled := make([]models.Incident, 0)
 
-	from, err := a.parseDate(req, "from", time.Now().In(a.Location(req)).Add(26*7*24*time.Hour))
+	from, err := a.parseDate(req, "from", time.Now().In(a.Location(req)).Add(26*24*time.Hour))
 	if err != nil {
 		return []models.Incident{}, err
 	}
 	y, m, d := from.Date()
-	to, err := a.parseDate(req, "to", time.Date(y, m, d, 0, 0, 0, 0, a.Location(req)).AddDate(0, 0, -26*7))
+	to, err := a.parseDate(req, "to", time.Date(y, m, d, 0, 0, 0, 0, a.Location(req)).AddDate(0, 0, -26))
 	if err != nil {
 		return []models.Incident{}, err
 	}
@@ -37,7 +37,8 @@ func (a Serve) scheduled(req *http.Request) ([]models.Incident, error) {
 
 func (a Serve) incidentsByParamsDate(req *http.Request) ([]models.Incident, error) {
 	var err error
-	from, err := a.parseDate(req, "from", time.Now().In(a.Location(req)))
+	y, m, d := time.Now().Date()
+	from, err := a.parseDate(req, "from", time.Date(y, m, d, 23, 59, 59, 0, a.Location(req)))
 	if err != nil {
 		return []models.Incident{}, err
 	}
@@ -46,7 +47,7 @@ func (a Serve) incidentsByParamsDate(req *http.Request) ([]models.Incident, erro
 	if err != nil {
 		return []models.Incident{}, err
 	}
-	y, m, d := to.Date()
+	y, m, d = to.Date()
 	to = time.Date(y, m, d, 23, 59, 59, 0, a.Location(req))
 
 	allType := false

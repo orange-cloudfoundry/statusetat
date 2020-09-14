@@ -4,9 +4,9 @@ import (
 	"flag"
 	"net/http"
 	"net/url"
-	"time"
 
 	"github.com/ArthurHlt/statusetat/config"
+	"github.com/ArthurHlt/statusetat/locations"
 	"github.com/ArthurHlt/statusetat/notifiers"
 	_ "github.com/ArthurHlt/statusetat/notifiers/email"
 	_ "github.com/ArthurHlt/statusetat/notifiers/grafana"
@@ -36,9 +36,8 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	box := packr.New("assets", "./website/assets")
-	loc := time.Local
 	if c.BaseInfo.TimeZone != "" {
-		loc, err = time.LoadLocation(c.BaseInfo.TimeZone)
+		err = locations.LoadByTimezone(c.BaseInfo.TimeZone)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -55,10 +54,9 @@ func main() {
 		OptionsPassthrough: true,
 		Debug:              true,
 	}).Handler)
-	router.Use(serves.NewLocationHandler(c.CookieKey, loc).Handler)
+	router.Use(serves.NewLocationHandler(c.CookieKey).Handler)
 	err = serves.Register(store, router, *c.BaseInfo,
-		url.UserPassword(c.Username, c.Password), c.Components,
-		loc, c.Theme,
+		url.UserPassword(c.Username, c.Password), c.Components, c.Theme,
 	)
 	if err != nil {
 		log.Fatal(err.Error())
