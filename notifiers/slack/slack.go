@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ArthurHlt/statusetat/common"
-	"github.com/ArthurHlt/statusetat/config"
-	"github.com/ArthurHlt/statusetat/models"
-	"github.com/ArthurHlt/statusetat/notifiers"
+	"github.com/orange-cloudfoundry/statusetat/common"
+	"github.com/orange-cloudfoundry/statusetat/config"
+	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/notifiers"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -29,38 +29,38 @@ type SlackOpts struct {
 	InsecureSkipVerify bool   `mapstructure:"insecure_skip_verify"`
 }
 
-type slackRequest struct {
+type SlackRequest struct {
 	Channel     string            `json:"channel,omitempty"`
 	Username    string            `json:"username,omitempty"`
 	IconEmoji   string            `json:"icon_emoji,omitempty"`
 	IconURL     string            `json:"icon_url,omitempty"`
 	LinkNames   bool              `json:"link_names,omitempty"`
-	Attachments []slackAttachment `json:"attachments"`
+	Attachments []SlackAttachment `json:"attachments"`
 }
 
-// slackAttachment is used to display a richly-formatted message block.
-type slackAttachment struct {
+// SlackAttachment is used to display a richly-formatted message block.
+type SlackAttachment struct {
 	Title      string        `json:"title,omitempty"`
 	TitleLink  string        `json:"title_link,omitempty"`
 	Pretext    string        `json:"pretext,omitempty"`
 	Text       string        `json:"text"`
 	Fallback   string        `json:"fallback"`
 	CallbackID string        `json:"callback_id"`
-	Fields     []slackField  `json:"fields,omitempty"`
-	Actions    []slackAction `json:"actions,omitempty"`
+	Fields     []SlackField  `json:"fields,omitempty"`
+	Actions    []SlackAction `json:"actions,omitempty"`
 	ImageURL   string        `json:"image_url,omitempty"`
 	ThumbURL   string        `json:"thumb_url,omitempty"`
 	Footer     string        `json:"footer"`
 	Color      string        `json:"color,omitempty"`
 }
 
-type slackField struct {
+type SlackField struct {
 	Title string `yaml:"title,omitempty" json:"title,omitempty"`
 	Value string `yaml:"value,omitempty" json:"value,omitempty"`
 	Short *bool  `yaml:"short,omitempty" json:"short,omitempty"`
 }
 
-type slackAction struct {
+type SlackAction struct {
 	Type         string                  `yaml:"type,omitempty"  json:"type,omitempty"`
 	Text         string                  `yaml:"text,omitempty"  json:"text,omitempty"`
 	URL          string                  `yaml:"url,omitempty"   json:"url,omitempty"`
@@ -168,18 +168,18 @@ func (n Slack) notifyScheduled(incident models.Incident) error {
 		icon = "clock1"
 	}
 	short := true
-	b, _ := json.Marshal(slackRequest{
+	b, _ := json.Marshal(SlackRequest{
 		Channel:   n.opts.Channel,
 		Username:  fmt.Sprintf("%s - Scheduled maintenance", n.opts.Username),
 		IconEmoji: icon,
 		IconURL:   "",
 		LinkNames: false,
-		Attachments: []slackAttachment{
+		Attachments: []SlackAttachment{
 			{
 				Title:   common.Title(msg.Title),
 				Pretext: pretext,
 				Text:    msg.Content,
-				Fields: []slackField{
+				Fields: []SlackField{
 					{
 						Title: "Components placed in maintenance",
 						Value: "`" + strings.Join(incident.Components.Inline(), "`, `") + "`",
@@ -240,7 +240,7 @@ func (n Slack) notifyIncident(incident models.Incident) error {
 	}
 	title := common.Title(msg.Title) + " - " + common.Title(models.TextIncidentState(incident.State))
 
-	fields := []slackField{
+	fields := []SlackField{
 		{
 			Title: "Impacted components",
 			Value: "`" + strings.Join(incident.Components.Inline(), "` `") + "`",
@@ -259,20 +259,20 @@ func (n Slack) notifyIncident(incident models.Incident) error {
 	}
 
 	if incident.State == models.Resolved {
-		fields = append(fields, slackField{
+		fields = append(fields, SlackField{
 			Title: "End at",
 			Value: incident.UpdatedAt.In(n.loc).String(),
 			Short: &short,
 		})
 	}
 
-	b, _ := json.Marshal(slackRequest{
+	b, _ := json.Marshal(SlackRequest{
 		Channel:   n.opts.Channel,
 		Username:  fmt.Sprintf("%s - Incident", n.opts.Username),
 		IconEmoji: icon,
 		IconURL:   "",
 		LinkNames: false,
-		Attachments: []slackAttachment{
+		Attachments: []SlackAttachment{
 			{
 				Title:     title,
 				TitleLink: fmt.Sprintf("%s/incidents/%s", n.baseUrl, incident.GUID),

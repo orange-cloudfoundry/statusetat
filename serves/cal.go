@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/models"
 	ics "github.com/arran4/golang-ical"
 )
 

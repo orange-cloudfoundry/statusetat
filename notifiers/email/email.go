@@ -1,15 +1,17 @@
 package email
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . EmailDialer
+
 import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
 	"html/template"
 
-	"github.com/ArthurHlt/statusetat/config"
-	"github.com/ArthurHlt/statusetat/extemplate"
-	"github.com/ArthurHlt/statusetat/models"
-	"github.com/ArthurHlt/statusetat/notifiers"
+	"github.com/orange-cloudfoundry/statusetat/config"
+	"github.com/orange-cloudfoundry/statusetat/extemplate"
+	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/notifiers"
 	"github.com/hashicorp/go-multierror"
 	"github.com/mitchellh/mapstructure"
 	"gopkg.in/gomail.v2"
@@ -51,13 +53,8 @@ const (
 	DefaultFrom             = "no-reply@local"
 )
 
-type ReqGrafanaAnnotation struct {
-	DashboardID int      `json:"dashboardId,omitempty"`
-	PanelID     int      `json:"panelId,omitempty"`
-	Time        int64    `json:"time"`
-	TimeEnd     int64    `json:"timeEnd,omitempty"`
-	Tags        []string `json:"tags,omitempty"`
-	Text        string   `json:"text"`
+type EmailDialer interface {
+	DialAndSend(m ...*gomail.Message) error
 }
 
 type OptsEmail struct {
@@ -76,7 +73,7 @@ type OptsEmail struct {
 }
 
 type Email struct {
-	dialer              *gomail.Dialer
+	dialer              EmailDialer
 	id                  string
 	opts                OptsEmail
 	titleSite           string
@@ -85,6 +82,10 @@ type Email struct {
 	tplSubjectScheduled *template.Template
 	tplTxtScheduled     *template.Template
 	baseUrl             string
+}
+
+func (n *Email) SetDialer(dialer EmailDialer) {
+	n.dialer = dialer
 }
 
 type SmtpInfo struct {

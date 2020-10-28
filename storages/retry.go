@@ -5,16 +5,21 @@ import (
 	"os"
 	"time"
 
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
 type Retry struct {
-	next    Store
-	nbRetry int
+	next      Store
+	nbRetry   int
+	sleepTime time.Duration
 }
 
 func NewRetry(next Store, nbRetry int) *Retry {
-	return &Retry{next: next, nbRetry: nbRetry}
+	return NewRetryWithSleepTime(next, nbRetry, 500*time.Millisecond)
+}
+
+func NewRetryWithSleepTime(next Store, nbRetry int, sleepTime time.Duration) *Retry {
+	return &Retry{next: next, nbRetry: nbRetry, sleepTime: sleepTime}
 }
 
 func (m Retry) Creator() func(u *url.URL) (Store, error) {
@@ -43,7 +48,7 @@ func (m Retry) Create(incident models.Incident) (models.Incident, error) {
 			if os.IsNotExist(err) {
 				return incident, err
 			}
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(m.sleepTime)
 			continue
 		}
 		return ret, err
@@ -59,7 +64,7 @@ func (m Retry) Subscribe(email string) error {
 			if os.IsNotExist(err) {
 				return err
 			}
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(m.sleepTime)
 			continue
 		}
 		return err
@@ -75,7 +80,7 @@ func (m Retry) Unsubscribe(email string) error {
 			if os.IsNotExist(err) {
 				return err
 			}
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(m.sleepTime)
 			continue
 		}
 		return err
@@ -92,7 +97,7 @@ func (m Retry) Subscribers() ([]string, error) {
 			if os.IsNotExist(err) {
 				return ret, err
 			}
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(m.sleepTime)
 			continue
 		}
 		return ret, err
@@ -109,7 +114,7 @@ func (m Retry) Update(guid string, incident models.Incident) (models.Incident, e
 			if os.IsNotExist(err) {
 				return incident, err
 			}
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(m.sleepTime)
 			continue
 		}
 		return ret, err
@@ -125,7 +130,7 @@ func (m Retry) Delete(guid string) error {
 			if os.IsNotExist(err) {
 				return err
 			}
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(m.sleepTime)
 			continue
 		}
 		return err
@@ -142,7 +147,7 @@ func (m Retry) Read(guid string) (models.Incident, error) {
 			if os.IsNotExist(err) {
 				return models.Incident{}, err
 			}
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(m.sleepTime)
 			continue
 		}
 		return ret, err
@@ -159,7 +164,7 @@ func (m Retry) ByDate(from, to time.Time) ([]models.Incident, error) {
 			if os.IsNotExist(err) {
 				return []models.Incident{}, err
 			}
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(m.sleepTime)
 			continue
 		}
 		return ret, err
@@ -172,7 +177,7 @@ func (m Retry) Ping() error {
 	for i := 0; i < m.nbRetry; i++ {
 		err = m.next.Ping()
 		if err != nil {
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(m.sleepTime)
 			continue
 		}
 		return err

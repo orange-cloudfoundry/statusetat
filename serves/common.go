@@ -5,7 +5,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
 func (a Serve) scheduled(req *http.Request) ([]models.Incident, error) {

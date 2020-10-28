@@ -14,9 +14,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ArthurHlt/statusetat/common"
-	"github.com/ArthurHlt/statusetat/markdown"
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/common"
+	"github.com/orange-cloudfoundry/statusetat/markdown"
+	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/gobuffalo/packr/v2"
 )
 

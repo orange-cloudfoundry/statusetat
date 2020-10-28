@@ -6,8 +6,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ArthurHlt/statusetat/config"
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/config"
+	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/gorilla/mux"
 )
 

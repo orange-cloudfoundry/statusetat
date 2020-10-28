@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ArthurHlt/statusetat/common"
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/common"
+	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"

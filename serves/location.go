@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ArthurHlt/statusetat/locations"
+	"github.com/orange-cloudfoundry/statusetat/locations"
 	"github.com/gorilla/sessions"
 )
 

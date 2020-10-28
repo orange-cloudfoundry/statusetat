@@ -1,11 +1,13 @@
 package storages
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Store
+
 import (
 	"fmt"
 	"net/url"
 	"time"
 
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
 type Store interface {

@@ -3,9 +3,9 @@ package notifiers
 import (
 	"fmt"
 
-	"github.com/ArthurHlt/statusetat/config"
-	"github.com/ArthurHlt/statusetat/emitter"
-	"github.com/ArthurHlt/statusetat/storages"
+	"github.com/orange-cloudfoundry/statusetat/config"
+	"github.com/orange-cloudfoundry/statusetat/emitter"
+	"github.com/orange-cloudfoundry/statusetat/storages"
 	log "github.com/sirupsen/logrus"
 )
 

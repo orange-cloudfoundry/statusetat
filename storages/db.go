@@ -3,14 +3,21 @@ package storages
 import (
 	"fmt"
 	"net/url"
+	"strings"
 	"time"
 
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	gorm.DefaultCallback.Update().Remove("gorm:update_time_stamp")
+	gorm.DefaultCallback.Create().Remove("gorm:update_time_stamp")
+}
 
 type DB struct {
 	db *gorm.DB
@@ -18,6 +25,10 @@ type DB struct {
 
 type Subscriber struct {
 	Email string `gorm:"primary_key"`
+}
+
+func (s DB) GetDb() *gorm.DB {
+	return s.db
 }
 
 func (s DB) Creator() func(u *url.URL) (Store, error) {
@@ -45,11 +56,11 @@ func (s DB) Creator() func(u *url.URL) (Store, error) {
 				return nil, err
 			}
 		case "sqlite":
-			s.db, err = gorm.Open("sqlite3", u.Path)
+			s.db, err = gorm.Open("sqlite3", strings.TrimPrefix(u.String(), "sqlite://"))
 			if err != nil {
 				return nil, err
 			}
-			s.db = s.db.Debug()
+
 		case "postgres":
 			s.db, err = gorm.Open("postgres", u.String())
 			if err != nil {
@@ -57,6 +68,9 @@ func (s DB) Creator() func(u *url.URL) (Store, error) {
 			}
 		default:
 			return nil, fmt.Errorf("sgbd not found")
+		}
+		if log.IsLevelEnabled(log.DebugLevel) {
+			s.db = s.db.Debug()
 		}
 		s.db.AutoMigrate(&models.Message{}, &models.Incident{}, &models.Metadata{}, &Subscriber{})
 		return s, nil

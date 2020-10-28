@@ -5,4 +5,4 @@
 // and any other packr generated files.
 package serves
 
-import _ "github.com/ArthurHlt/statusetat/packrd"
+import _ "github.com/orange-cloudfoundry/statusetat/packrd"

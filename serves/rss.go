@@ -60,6 +60,14 @@ func (a Serve) feed(req *http.Request) (*feeds.Feed, error) {
 	for i, incident := range incidents {
 		mainMsg := incident.MainMessage()
 		content := ""
+
+		if incident.Components != nil {
+			content += "<b>Impacted components</b>:<br/><ul>"
+			for _, comp := range *incident.Components {
+				content += "<li>" + comp.String() + "</li>"
+			}
+			content += "</ul>"
+		}
 		for _, msg := range incident.UpdateMessages() {
 			content += "<p>" + msg.Content + "</p>"
 		}

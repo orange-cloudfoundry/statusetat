@@ -1,24 +1,31 @@
 package serves
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . HtmlTemplater
+
 import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 	"net/url"
 
-	"github.com/ArthurHlt/statusetat/config"
-	"github.com/ArthurHlt/statusetat/extemplate"
-	"github.com/ArthurHlt/statusetat/storages"
+	"github.com/orange-cloudfoundry/statusetat/config"
+	"github.com/orange-cloudfoundry/statusetat/extemplate"
+	"github.com/orange-cloudfoundry/statusetat/storages"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/goji/httpauth"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
 
+type HtmlTemplater interface {
+	ExecuteTemplate(wr io.Writer, name string, data interface{}) error
+}
+
 type Serve struct {
 	store      storages.Store
-	xt         *extemplate.Extemplate
+	xt         HtmlTemplater
 	baseInfo   config.BaseInfo
 	components config.Components
 	funcs      template.FuncMap
@@ -33,6 +40,24 @@ func Register(
 	components config.Components,
 	theme config.Theme,
 ) error {
+	xt := extemplate.New()
+	box := packr.New("templates", "../website/templates")
+	err := xt.ParseDir(box, []string{".html"})
+	if err != nil {
+		return err
+	}
+	return RegisterWithHtmlTemplater(store, router, baseInfo, userInfo, components, theme, xt)
+}
+
+func RegisterWithHtmlTemplater(
+	store storages.Store,
+	router *mux.Router,
+	baseInfo config.BaseInfo,
+	userInfo *url.Userinfo,
+	components config.Components,
+	theme config.Theme,
+	htmlTemplater HtmlTemplater,
+) error {
 
 	api := &Serve{
 		store:      store,
@@ -40,13 +65,7 @@ func Register(
 		components: components,
 		theme:      theme,
 	}
-
-	api.xt = extemplate.New()
-	box := packr.New("templates", "../website/templates")
-	err := api.xt.ParseDir(box, []string{".html"})
-	if err != nil {
-		return err
-	}
+	api.xt = htmlTemplater
 
 	router.HandleFunc("/", api.Index)
 	router.HandleFunc("/index", api.Index)
@@ -95,6 +114,10 @@ type HttpError struct {
 	Description string `json:"description"`
 	Detail      string `json:"detail"`
 	Status      int    `json:"status"`
+}
+
+func (he HttpError) Error() string {
+	return fmt.Sprintf("Http error (code: %d), %s: %s", he.Status, he.Detail, he.Description)
 }
 
 func JSONError(w http.ResponseWriter, err error, code int) {

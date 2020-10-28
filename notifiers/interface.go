@@ -1,8 +1,11 @@
 package notifiers
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Notifier
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . NotifierSubscriber
+
 import (
-	"github.com/ArthurHlt/statusetat/config"
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/config"
+	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
 type Notifier interface {

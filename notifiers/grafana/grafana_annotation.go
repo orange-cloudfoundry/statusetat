@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ArthurHlt/statusetat/common"
-	"github.com/ArthurHlt/statusetat/config"
-	"github.com/ArthurHlt/statusetat/models"
-	"github.com/ArthurHlt/statusetat/notifiers"
+	"github.com/orange-cloudfoundry/statusetat/common"
+	"github.com/orange-cloudfoundry/statusetat/config"
+	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/notifiers"
 	"github.com/mitchellh/mapstructure"
 )
 

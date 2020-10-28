@@ -1,11 +1,20 @@
 package emitter
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . emitterInterface
+
 import (
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/olebedev/emitter"
 )
 
-var e *emitter.Emitter = emitter.New(uint(100))
+type emitterInterface interface {
+	Emit(topic string, args ...interface{}) chan struct{}
+	On(topic string, middlewares ...func(*emitter.Event)) <-chan emitter.Event
+	Off(topic string, channels ...<-chan emitter.Event)
+	Listeners(topic string) []<-chan emitter.Event
+}
+
+var e emitterInterface = emitter.New(uint(100))
 
 func Emit(incident models.Incident) {
 	e.Emit("incident", incident)
@@ -25,4 +34,9 @@ func Listeners() []<-chan emitter.Event {
 
 func ToIncident(evt emitter.Event) models.Incident {
 	return evt.Args[0].(models.Incident)
+}
+
+// this is only made for testing purpose
+func SetEmitter(emit emitterInterface) {
+	e = emit
 }

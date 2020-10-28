@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
 type ForComponent struct {

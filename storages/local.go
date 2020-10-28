@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ArthurHlt/statusetat/common"
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/common"
+	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
 type Local struct {
@@ -21,9 +21,10 @@ type Local struct {
 
 func (l Local) Creator() func(u *url.URL) (Store, error) {
 	return func(u *url.URL) (Store, error) {
-		os.MkdirAll(u.Path, 0775)
+		path := strings.TrimPrefix(u.String(), "file://")
+		os.MkdirAll(path, 0775)
 		return &Local{
-			dir:   filepath.FromSlash(strings.TrimSuffix(u.Path, "/")),
+			dir:   filepath.FromSlash(strings.TrimSuffix(path, "/")),
 			mutex: &sync.Mutex{},
 		}, nil
 	}

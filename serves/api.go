@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/ArthurHlt/statusetat/emitter"
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/emitter"
+	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/gorilla/mux"
 	"github.com/nicklaw5/go-respond"
 	"github.com/satori/go.uuid"
@@ -45,7 +45,7 @@ func (a Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if len(incident.Messages) < 0 {
+	if len(incident.Messages) <= 0 {
 		JSONError(w, fmt.Errorf("At least one message must be set"), http.StatusPreconditionFailed)
 		return
 	}
@@ -164,6 +164,10 @@ func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
 
 	incident, err := a.store.Read(guid)
 	if err != nil {
+		if os.IsNotExist(err) {
+			JSONError(w, err, http.StatusNotFound)
+			return
+		}
 		JSONError(w, err, http.StatusPreconditionRequired)
 		return
 	}

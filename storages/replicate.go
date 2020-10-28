@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ArthurHlt/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/models"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -33,15 +33,23 @@ type Replicate struct {
 	stores     map[string]Store
 	records    *[]*record
 	mu         sync.Mutex
+	waitReplay time.Duration
+	waitClean  time.Duration
 }
 
 func NewReplicate(storesInit []Store) *Replicate {
+	return NewReplicateWithWaits(storesInit, 90*time.Second, 1*time.Hour)
+}
+
+func NewReplicateWithWaits(storesInit []Store, waitReplay, waitClean time.Duration) *Replicate {
 	records := make([]*record, 0)
 	repl := &Replicate{
 		storesInit: storesInit,
 		stores:     make(map[string]Store),
 		records:    &records,
 		mu:         sync.Mutex{},
+		waitReplay: waitReplay,
+		waitClean:  waitClean,
 	}
 
 	go repl.clean()
@@ -140,7 +148,7 @@ func (m Replicate) Update(guid string, incident models.Incident) (models.Inciden
 	for storeUrl, s := range m.stores {
 		incident, err = s.Update(guid, incident)
 		if err != nil {
-			m.addRecord(storeUrl, created, guid, incident)
+			m.addRecord(storeUrl, updated, guid, incident)
 			continue
 		}
 		allInError = false
@@ -198,7 +206,7 @@ func (m Replicate) clean() {
 		}
 		*m.records = finalRecord
 		m.mu.Unlock()
-		time.Sleep(1 * time.Hour)
+		time.Sleep(m.waitClean)
 	}
 }
 
@@ -251,7 +259,7 @@ func (m Replicate) replay() {
 			record.deleted = true
 		}
 
-		time.Sleep(90 * time.Second)
+		time.Sleep(m.waitReplay)
 	}
 }
 
