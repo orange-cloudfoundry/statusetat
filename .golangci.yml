@@ -1,0 +1,34 @@
+issues:
+  exclude-rules:
+    # Exclude issues bypassing staticcheck.conf
+    - linters:
+        - staticcheck
+      text: "SA1019:"
+  max-per-linter: 0
+  max-same-issues: 0
+
+linters:
+  disable-all: true
+  enable:
+    - deadcode
+    - errcheck
+    - gofmt
+    - gosimple
+    - ineffassign
+    - misspell
+    - staticcheck
+    - structcheck
+    - unconvert
+    - unused
+    - varcheck
+    - vet
+
+linters-settings:
+  errcheck:
+    ignore: github.com/hashicorp/terraform-plugin-sdk/helper/schema:ForceNew|Set|Partial|SetPartial,fmt:.*,io:Close
+  gofmt:
+    simplify: false
+
+run:
+  deadline: 5m
+  tests: false

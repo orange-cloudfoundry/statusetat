@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"plugin"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
-	"github.com/mitchellh/mapstructure"
 )
 
 func init() {
@@ -37,7 +37,7 @@ func (n Plugin) loadPlugin(path string) (notifiers.Notifier, error) {
 	notifierPlugin := registerPlugin.(func() notifiers.Notifier)()
 	name := notifierPlugin.Name()
 	if name == "" {
-		return nil, fmt.Errorf("Error on plugin %s: plugin must define its name.")
+		return nil, fmt.Errorf("Error on plugin %s: plugin must define its name.", path)
 	}
 
 	return notifierPlugin, nil

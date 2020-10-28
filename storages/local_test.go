@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/orange-cloudfoundry/statusetat/storages"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/storages"
 )
 
 var _ = Describe("Local", func() {
@@ -123,9 +123,9 @@ var _ = Describe("Local", func() {
 	})
 	Context("ByDate", func() {
 		It("Should give incidents in the datetime range", func() {
-			d2020 := time.Date(2020, 1, 1, 1, 1, 1, 1, time.Local)
-			d2019 := time.Date(2019, 1, 1, 1, 1, 1, 1, time.Local)
-			d2018 := time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local)
+			d2020 := time.Date(2020, 1, 1, 1, 1, 1, 1, time.Local).UTC()
+			d2019 := time.Date(2019, 1, 1, 1, 1, 1, 1, time.Local).UTC()
+			d2018 := time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local).UTC()
 			inc1 := models.Incident{
 				GUID:      "1",
 				CreatedAt: d2020,
