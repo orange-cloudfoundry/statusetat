@@ -57,7 +57,7 @@ func NewReplicateWithWaits(storesInit []Store, waitReplay, waitClean time.Durati
 	return repl
 }
 
-func (m Replicate) Creator() func(u *url.URL) (Store, error) {
+func (m *Replicate) Creator() func(u *url.URL) (Store, error) {
 	return func(u *url.URL) (Store, error) {
 		for _, s := range m.storesInit {
 			if !s.Detect(u) {
@@ -74,7 +74,7 @@ func (m Replicate) Creator() func(u *url.URL) (Store, error) {
 	}
 }
 
-func (m Replicate) Subscribe(email string) error {
+func (m *Replicate) Subscribe(email string) error {
 	var err error
 	allInError := true
 	for storeUrl, s := range m.stores {
@@ -91,7 +91,7 @@ func (m Replicate) Subscribe(email string) error {
 	return nil
 }
 
-func (m Replicate) Unsubscribe(email string) error {
+func (m *Replicate) Unsubscribe(email string) error {
 	var err error
 	allInError := true
 	for storeUrl, s := range m.stores {
@@ -108,7 +108,7 @@ func (m Replicate) Unsubscribe(email string) error {
 	return nil
 }
 
-func (m Replicate) Subscribers() ([]string, error) {
+func (m *Replicate) Subscribers() ([]string, error) {
 	var subs []string
 	var err error
 	for _, s := range m.stores {
@@ -121,11 +121,11 @@ func (m Replicate) Subscribers() ([]string, error) {
 	return subs, err
 }
 
-func (m Replicate) Detect(u *url.URL) bool {
+func (m *Replicate) Detect(u *url.URL) bool {
 	return true
 }
 
-func (m Replicate) Create(incident models.Incident) (models.Incident, error) {
+func (m *Replicate) Create(incident models.Incident) (models.Incident, error) {
 	var err error
 	allInError := true
 	for storeUrl, s := range m.stores {
@@ -142,7 +142,7 @@ func (m Replicate) Create(incident models.Incident) (models.Incident, error) {
 	return incident, nil
 }
 
-func (m Replicate) Update(guid string, incident models.Incident) (models.Incident, error) {
+func (m *Replicate) Update(guid string, incident models.Incident) (models.Incident, error) {
 	var err error
 	allInError := true
 	for storeUrl, s := range m.stores {
@@ -159,7 +159,7 @@ func (m Replicate) Update(guid string, incident models.Incident) (models.Inciden
 	return incident, nil
 }
 
-func (m Replicate) Delete(guid string) error {
+func (m *Replicate) Delete(guid string) error {
 	var err error
 	allInError := true
 	for storeUrl, s := range m.stores {
@@ -194,7 +194,7 @@ func (m *Replicate) addRecord(storeUrl string, action recordAction, data string,
 	*m.records = records
 }
 
-func (m Replicate) clean() {
+func (m *Replicate) clean() {
 	for {
 		m.mu.Lock()
 		finalRecord := make([]*record, 0)
@@ -210,7 +210,7 @@ func (m Replicate) clean() {
 	}
 }
 
-func (m Replicate) replay() {
+func (m *Replicate) replay() {
 	for {
 		m.mu.Lock()
 		todo := make([]*record, 0)
@@ -263,7 +263,7 @@ func (m Replicate) replay() {
 	}
 }
 
-func (m Replicate) Read(guid string) (models.Incident, error) {
+func (m *Replicate) Read(guid string) (models.Incident, error) {
 	var incident models.Incident
 	var err error
 	for _, s := range m.stores {
@@ -276,7 +276,7 @@ func (m Replicate) Read(guid string) (models.Incident, error) {
 	return incident, err
 }
 
-func (m Replicate) ByDate(from, to time.Time) ([]models.Incident, error) {
+func (m *Replicate) ByDate(from, to time.Time) ([]models.Incident, error) {
 	incidents := make([]models.Incident, 0)
 	var err error
 	for _, s := range m.stores {
@@ -289,6 +289,6 @@ func (m Replicate) ByDate(from, to time.Time) ([]models.Incident, error) {
 	return incidents, err
 }
 
-func (m Replicate) Ping() error {
+func (m *Replicate) Ping() error {
 	return nil
 }

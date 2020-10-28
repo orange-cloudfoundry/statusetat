@@ -8,10 +8,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/emitter"
-	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/gorilla/mux"
 	"github.com/nicklaw5/go-respond"
+	"github.com/orange-cloudfoundry/statusetat/emitter"
+	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/satori/go.uuid"
 )
 
@@ -367,13 +367,11 @@ func (a Serve) ReadMessage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	finalMessages := make(models.Messages, 0)
 	for _, msg := range incident.Messages {
 		if msg.GUID == messageGuid {
 			respond.NewResponse(w).Ok(msg)
 			return
 		}
-		finalMessages = append(finalMessages, msg)
 	}
 
 	JSONError(w, fmt.Errorf("message not found"), http.StatusNotFound)

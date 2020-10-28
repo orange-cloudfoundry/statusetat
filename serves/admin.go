@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/gorilla/mux"
 )
 
 var adminMenuItems = []string{"incident", "maintenance"}

@@ -29,11 +29,9 @@ var md = goldmark.New(
 	goldmark.WithParserOptions(
 		parser.WithAutoHeadingID(),
 		parser.WithAttribute(),
-
 	),
 	goldmark.WithRendererOptions(
 		html.WithUnsafe(),
-
 	),
 )
 

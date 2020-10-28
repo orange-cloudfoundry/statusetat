@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
-	"github.com/mitchellh/mapstructure"
 )
 
 func init() {
@@ -120,19 +120,19 @@ func (n Slack) Id() string {
 	return n.id
 }
 
-func (n Slack) colorState(state models.ComponentState) string {
-	switch state {
-	case models.DegradedPerformance:
-		return "#9c27b0"
-	case models.PartialOutage:
-		return "#ff5722"
-	case models.UnderMaintenance:
-		return "#9e9e9e"
-	case models.MajorOutage:
-		return "#e51c23"
-	}
-	return "#4CAF50"
-}
+// func (n Slack) colorState(state models.ComponentState) string {
+// 	switch state {
+// 	case models.DegradedPerformance:
+// 		return "#9c27b0"
+// 	case models.PartialOutage:
+// 		return "#ff5722"
+// 	case models.UnderMaintenance:
+// 		return "#9e9e9e"
+// 	case models.MajorOutage:
+// 		return "#e51c23"
+// 	}
+// 	return "#4CAF50"
+// }
 
 func (n Slack) colorStateIncident(state models.IncidentState) string {
 	switch state {

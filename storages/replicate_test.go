@@ -5,11 +5,11 @@ import (
 	"net/url"
 	"time"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/storages"
 	"github.com/orange-cloudfoundry/statusetat/storages/storagesfakes"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Replicate", func() {

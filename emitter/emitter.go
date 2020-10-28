@@ -3,8 +3,8 @@ package emitter
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . emitterInterface
 
 import (
-	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/olebedev/emitter"
+	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
 type emitterInterface interface {

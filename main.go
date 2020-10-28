@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/gobuffalo/packr/v2"
+	"github.com/gorilla/mux"
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/locations"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
@@ -15,8 +17,6 @@ import (
 	_ "github.com/orange-cloudfoundry/statusetat/notifiers/slack"
 	"github.com/orange-cloudfoundry/statusetat/serves"
 	"github.com/orange-cloudfoundry/statusetat/storages"
-	"github.com/gobuffalo/packr/v2"
-	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

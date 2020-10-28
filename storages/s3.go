@@ -9,14 +9,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/common"
-	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/orange-cloudfoundry/statusetat/common"
+	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
 type s3Session struct {
@@ -226,10 +226,6 @@ func (s S3) urlToSession(u *url.URL) (*s3Session, error) {
 		svc:     s3.New(sess),
 		awsSess: sess,
 	}, nil
-}
-
-func (s S3) path(name string) string {
-	return s.sess.path + strings.TrimPrefix(name, "/")
 }
 
 func (s S3) extractBucketPath(u *url.URL) (bucket string, path string) {

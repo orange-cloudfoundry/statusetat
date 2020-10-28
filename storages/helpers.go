@@ -11,8 +11,7 @@ import (
 const subscriberFilename = "subscribers.json"
 
 func makeHttpClient(u *url.URL) *http.Client {
-	var transport http.RoundTripper
-	transport = makeHttpTransport(u)
+	transport := makeHttpTransport(u)
 	client := &http.Client{
 		Transport: transport,
 		Timeout:   0,

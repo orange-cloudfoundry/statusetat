@@ -23,6 +23,7 @@ func (l Local) Creator() func(u *url.URL) (Store, error) {
 	return func(u *url.URL) (Store, error) {
 		path := strings.TrimPrefix(u.String(), "file://")
 		os.MkdirAll(path, 0775)
+
 		return &Local{
 			dir:   filepath.FromSlash(strings.TrimSuffix(path, "/")),
 			mutex: &sync.Mutex{},
@@ -121,6 +122,9 @@ func (l Local) Read(guid string) (models.Incident, error) {
 func (l Local) ByDate(from, to time.Time) ([]models.Incident, error) {
 	incidents := make([]models.Incident, 0)
 	err := filepath.Walk(l.dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil
+		}
 		if info.IsDir() {
 			return nil
 		}

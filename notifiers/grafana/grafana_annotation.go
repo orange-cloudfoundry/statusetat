@@ -9,14 +9,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
-	"github.com/mitchellh/mapstructure"
 )
 
-func init(){
+func init() {
 	notifiers.RegisterNotifier(&GrafanaAnnotation{})
 }
 

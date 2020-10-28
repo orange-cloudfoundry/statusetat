@@ -72,8 +72,7 @@ type EmojiRenderer struct {
 }
 
 func NewEmojiRenderer() renderer.NodeRenderer {
-	r := &EmojiRenderer{
-	}
+	r := &EmojiRenderer{}
 
 	return r
 }
@@ -90,16 +89,25 @@ func (r *EmojiRenderer) renderEmoji(w util.BufWriter, source []byte, node ast.No
 	n := node.(*Emoji)
 	key := ":" + string(n.Value) + ":"
 	if r.notAllowedBlock(n) {
-		w.WriteString(key)
+		_, err := w.WriteString(key)
+		if err != nil {
+			return 0, err
+		}
 		return ast.WalkContinue, nil
 	}
 
 	result, ok := emoji.CodeMap()[key]
 	if !ok {
-		w.WriteString(key)
+		_, err := w.WriteString(key)
+		if err != nil {
+			return 0, err
+		}
 		return ast.WalkContinue, nil
 	}
-	w.WriteString(result)
+	_, err := w.WriteString(result)
+	if err != nil {
+		return 0, err
+	}
 	return ast.WalkContinue, nil
 }
 

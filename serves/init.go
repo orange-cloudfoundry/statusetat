@@ -5,17 +5,16 @@ package serves
 import (
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"io"
 	"net/http"
 	"net/url"
 
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/extemplate"
-	"github.com/orange-cloudfoundry/statusetat/storages"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/goji/httpauth"
 	"github.com/gorilla/mux"
+	"github.com/orange-cloudfoundry/statusetat/config"
+	"github.com/orange-cloudfoundry/statusetat/extemplate"
+	"github.com/orange-cloudfoundry/statusetat/storages"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -28,7 +27,6 @@ type Serve struct {
 	xt         HtmlTemplater
 	baseInfo   config.BaseInfo
 	components config.Components
-	funcs      template.FuncMap
 	theme      config.Theme
 }
 
@@ -125,11 +123,14 @@ func JSONError(w http.ResponseWriter, err error, code int) {
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)
 	LogError(err, code)
-	json.NewEncoder(w).Encode(HttpError{
+	err = json.NewEncoder(w).Encode(HttpError{
 		Status:      code,
 		Description: http.StatusText(code),
 		Detail:      err.Error(),
 	})
+	if err != nil {
+		panic(err)
+	}
 }
 
 func LogError(err error, code int) {

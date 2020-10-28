@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"html/template"
 
+	"github.com/hashicorp/go-multierror"
+	"github.com/mitchellh/mapstructure"
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/extemplate"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
-	"github.com/hashicorp/go-multierror"
-	"github.com/mitchellh/mapstructure"
 	"gopkg.in/gomail.v2"
 )
 

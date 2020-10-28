@@ -6,9 +6,9 @@ import (
 	"sort"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/gorilla/mux"
 )
 
 type IndexData struct {
@@ -78,7 +78,7 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 	}
 
 	compStateGroup := make(map[string]models.ComponentState)
-	for k, _ := range a.components.Regroups() {
+	for k := range a.components.Regroups() {
 		compStateGroup[k] = models.Operational
 	}
 

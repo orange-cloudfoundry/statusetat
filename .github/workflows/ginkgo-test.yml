@@ -1,4 +1,4 @@
-name: Go
+name: ginkgo-test
 
 on:
   push:
@@ -26,7 +26,6 @@ jobs:
           go mod tidy
           go mod download
           go install github.com/onsi/ginkgo/ginkgo
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint
 
       - name: Test
         run: go test -v ./... -args -ginkgo.randomizeAllSpecs -ginkgo.trace

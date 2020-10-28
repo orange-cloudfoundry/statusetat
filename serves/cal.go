@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/models"
 	ics "github.com/arran4/golang-ical"
+	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
 func (a Serve) Ical(w http.ResponseWriter, req *http.Request) {

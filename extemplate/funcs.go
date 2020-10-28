@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/orange-cloudfoundry/statusetat/locations"
 	"github.com/orange-cloudfoundry/statusetat/markdown"
 	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/dustin/go-humanize"
 )
 
 func iconState(state models.ComponentState) string {

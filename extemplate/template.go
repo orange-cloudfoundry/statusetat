@@ -14,10 +14,10 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/gobuffalo/packr/v2"
 	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/markdown"
 	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/gobuffalo/packr/v2"
 )
 
 var extendsRegex *regexp.Regexp
@@ -203,7 +203,7 @@ func findTemplateFiles(box *packr.Box, extensions []string) (map[string]*templat
 	}
 
 	// find all template files
-	box.Walk(func(path string, file packr.File) error {
+	err := box.Walk(func(path string, file packr.File) error {
 
 		info, err := file.FileInfo()
 		if err != nil {
@@ -236,7 +236,7 @@ func findTemplateFiles(box *packr.Box, extensions []string) (map[string]*templat
 		return nil
 	})
 
-	return files, nil
+	return files, err
 }
 
 // newTemplateFile parses the file contents into something that text/template can understand

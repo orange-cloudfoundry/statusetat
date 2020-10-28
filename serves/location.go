@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/locations"
 	"github.com/gorilla/sessions"
+	"github.com/orange-cloudfoundry/statusetat/locations"
 )
 
 const (
@@ -36,10 +36,7 @@ func (a Serve) Location(req *http.Request) *time.Location {
 
 func (a Serve) IsDefaultLocation(req *http.Request) bool {
 	val := req.Context().Value(LocationContextKey)
-	if val == nil {
-		return true
-	}
-	return false
+	return val == nil
 }
 
 func NewLocationHandler(sessKey string) *LocationHandler {

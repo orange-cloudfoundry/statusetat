@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/orange-cloudfoundry/statusetat/models"
 	log "github.com/sirupsen/logrus"
 )
 
