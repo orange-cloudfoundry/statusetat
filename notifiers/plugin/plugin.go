@@ -77,3 +77,10 @@ func (n Plugin) Id() string {
 func (n Plugin) Notify(incident models.Incident) error {
 	return n.notifier.Notify(incident)
 }
+
+func (n Plugin) NotifySubscriber(incident models.Incident, subscribers []string) error {
+	if snotif, ok := n.notifier.(notifiers.NotifierSubscriber); ok {
+		return snotif.NotifySubscriber(incident, subscribers)
+	}
+	return nil
+}

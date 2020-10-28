@@ -69,7 +69,7 @@ type OptsEmail struct {
 	TxtScheduled     string   `mapstructure:"txt_scheduled"`
 	Subscribers      []string `mapstructure:"subscribers"`
 	From             string   `mapstructure:"from"`
-	SkipInsecure     bool     `mapstructure:"skip_insecure"`
+	SkipInsecure     bool     `mapstructure:"insecure_skip_verify"`
 }
 
 type Email struct {

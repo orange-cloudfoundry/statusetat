@@ -34,7 +34,7 @@ type OptsGrafanaAnnotation struct {
 	Endpoint           string `mapstructure:"endpoint"`
 	DashboardId        int    `mapstructure:"dashboard_id"`
 	PanelId            int    `mapstructure:"panel_id"`
-	Location           string `mapstructure:"location"`
+	TimeZone           string `mapstructure:"time_zone"`
 	InsecureSkipVerify bool   `mapstructure:"insecure_skip_verify"`
 }
 
@@ -52,12 +52,12 @@ func (n GrafanaAnnotation) Creator(params map[string]interface{}, baseInfo confi
 		return nil, err
 	}
 
-	if opts.Location == "" {
-		opts.Location = baseInfo.TimeZone
+	if opts.TimeZone == "" {
+		opts.TimeZone = baseInfo.TimeZone
 	}
 	opts.Endpoint = strings.TrimSuffix(opts.Endpoint, "/")
 
-	loc, err := time.LoadLocation(opts.Location)
+	loc, err := time.LoadLocation(opts.TimeZone)
 	if err != nil {
 		return nil, err
 	}
