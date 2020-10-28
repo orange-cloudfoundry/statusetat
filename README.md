@@ -286,3 +286,10 @@ path: <string>
 ## Api 
 
 To document
+
+## Credits
+
+This project was heavily inspired by [statusfy](https://github.com/juliomrqz/statusfy) mostly on the design part and 
+models of incidents/components.
+
+[Cachethq](https://cachethq.io/) is another source of inspiration for some details on the admin design part.
