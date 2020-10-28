@@ -1,0 +1,34 @@
+name: Go
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.15
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Get dependencies
+        run: |
+          go mod tidy
+          go mod download
+          go install github.com/onsi/ginkgo/ginkgo
+
+      #      - name: Build
+      #        run: go build -v .
+
+      - name: Test
+        run: go test -v ./... -args -ginkgo.randomizeAllSpecs -ginkgo.trace
