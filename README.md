@@ -138,8 +138,8 @@ params:
 
 Notify on a slack channel or mattermost channel new incidents or scheduled tasks.
 
-**Type name**: `slack`
-**Params**:
+- **Type name**: `slack`
+- **Params**:
 
 ```yaml
 # incoming endpoint url
@@ -160,8 +160,8 @@ endpoint: <string>
 
 Put a grafana annotation when incident start and when it's finished on a graph.
 
-**Type name**: `grafana_annotation`
-**Params**:
+- **Type name**: `grafana_annotation`
+- **Params**:
 
 ```yaml
 # Grafana api endpoint
@@ -274,8 +274,8 @@ You can build it with command line `go build -buildmode=plugin -o log-notif.so .
 
 You can now use it in your config with:
 
-**Type name**: `plugin` or notifier name you have set in func signature `Name() string`
-**Params**:
+- **Type name**: `plugin` or notifier name you have set in func signature `Name() string`
+- **Params**:
 ```yaml
 # path to .so to load
 # in our example it would be `./log-notif.so`
