@@ -37,6 +37,6 @@ checksum:
 release:
   github:
     owner: orange-cloudfoundry
-    name: aggregadantur
+    name: statusetat
   prerelease: auto
   name_template: '{{.Tag}}'
