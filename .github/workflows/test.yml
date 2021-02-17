@@ -1,15 +1,16 @@
-name: ginkgo-test
+name: lint-n-test
 
 on:
   push:
-    branches: [ master ]
+    tags:
+      - v*
+    branches:
+      - master
+      - main
   pull_request:
-    branches: [ master ]
 
 jobs:
-
-  build:
-    name: Build
+  lint-n-test:
     runs-on: ubuntu-latest
     steps:
 
@@ -29,3 +30,9 @@ jobs:
 
       - name: Test
         run: go test -v ./... -args -ginkgo.randomizeAllSpecs -ginkgo.trace
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
+          version: v1.32

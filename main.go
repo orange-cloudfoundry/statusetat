@@ -1,7 +1,7 @@
 package main
 
 import (
-	"flag"
+	"gopkg.in/alecthomas/kingpin.v2"
 	"net/http"
 	"net/url"
 	"strings"
@@ -20,6 +20,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/common/version"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 )
@@ -29,11 +30,16 @@ var (
 		Name: "statusetat_http_total_requests",
 		Help: "Duration of HTTP requests.",
 	}, []string{"code", "method", "path"})
+
+	configFile = kingpin.Flag("config", "Path to Configuration File").Short('c').Default("config.yml").String()
 )
 
 func main() {
-	configPtr := flag.String("config", "config.yml", "path to config file")
-	c, err := config.LoadConfig(*configPtr)
+	kingpin.Version(version.Print("statusetat"))
+	kingpin.HelpFlag.Short('h')
+	kingpin.Parse()
+
+	c, err := config.LoadConfig(*configFile)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
