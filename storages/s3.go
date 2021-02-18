@@ -74,10 +74,7 @@ func (s S3) storeSubscribers(subscribers []string) error {
 }
 
 func (s S3) Subscribe(email string) error {
-	subs, err := s.retrieveSubscribers()
-	if err != nil {
-		return err
-	}
+	subs, _ := s.retrieveSubscribers()
 	if common.InStrSlice(email, subs) {
 		return nil
 	}
