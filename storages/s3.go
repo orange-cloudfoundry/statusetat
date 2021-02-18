@@ -135,6 +135,9 @@ func (s *S3) ByDate(from, to time.Time) ([]models.Incident, error) {
 	}
 	incidents := make([]models.Incident, 0)
 	for _, obj := range objs.Contents {
+		if *obj.Key == subscriberFilename {
+			continue
+		}
 		// we can be in the future but not in the past inside an incident
 		// se we check for the past for earning time (to not retrieve file content)
 		if obj.LastModified.Before(to) {
