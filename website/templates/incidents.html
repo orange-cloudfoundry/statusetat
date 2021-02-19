@@ -16,7 +16,7 @@
                 {{ $groupState := index $.GroupComponentState $group }}
                 <ul class="collection with-header">
                   <li class="collection-header {{ $groupState | colorState }} global-status white-text">
-                      {{ if eq $group "" }}Global{{else}}{{$group}}{{end}}
+                      {{ if eq $group "" }}Global{{else}}{{$group | title }}{{end}}
                     <div class="secondary-content white-text">
                         {{ $groupState | textState | title }}
                       <i class="material-icons inline">{{ $groupState | iconState }}</i>
