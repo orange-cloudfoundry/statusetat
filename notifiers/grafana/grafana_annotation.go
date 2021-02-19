@@ -151,7 +151,6 @@ func (n GrafanaAnnotation) Notify(incident models.Incident) error {
 	msg := incident.MainMessage()
 	end := int64(0)
 	if incident.State == models.Resolved {
-
 		end = incident.UpdatedAt.In(n.loc).Unix() * 1000
 	}
 	b, _ := json.Marshal(ReqGrafanaAnnotation{

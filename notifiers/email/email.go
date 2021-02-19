@@ -36,9 +36,9 @@ const (
 {{ .Content | markdown }}
 </p>
 `
-	DefaultTxtScheduled = `<h1>Scheduled Task: {{ .IncidentTitle | title }}</h1>
+	DefaultTxtScheduled = `<h1>Scheduled Maintenance: {{ .IncidentTitle | title }}</h1>
 <ul>
-	<li><b>Impacted components</b>: {{ join .Incident.Components.Inline ", " }}</li>
+	<li><b>Components involved</b>: {{ join .Incident.Components.Inline ", " }}</li>
 	<li><b>Scheduled at</b>: {{ .Incident.CreatedAt | timeFormat }}</li>
 	<li><b>Duration</b>: {{ humanDuration .Incident.CreatedAt .Incident.ScheduledEnd }}</li>
 	<li><b>Link</b>: <a href="{{ .Link }}">{{ .Link }}</a></li>

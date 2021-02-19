@@ -61,7 +61,7 @@ var _ = Describe("Email", func() {
 					_, err := m.WriteTo(buf)
 					Expect(err).ToNot(HaveOccurred())
 
-					Expect(buf.String()).To(ContainSubstring("<h1>Scheduled Task"))
+					Expect(buf.String()).To(ContainSubstring("<h1>Scheduled Maintenance"))
 					return nil
 				}
 

@@ -181,7 +181,7 @@ func (n Slack) notifyScheduled(incident models.Incident) error {
 				Text:    msg.Content,
 				Fields: []SlackField{
 					{
-						Title: "Components placed in maintenance",
+						Title: "Components involved",
 						Value: "`" + strings.Join(incident.Components.Inline(), "`, `") + "`",
 						Short: nil,
 					},
@@ -228,10 +228,12 @@ func (n Slack) notifyIncident(incident models.Incident) error {
 		return nil
 	}
 	msg := incident.MainMessage()
+	pastTitle := ""
 	pretext := fmt.Sprintf("Incident is firing, follow it at [%s](%s).", n.baseUrl, n.baseUrl)
 	if incident.State == models.Resolved {
 		pretext = "Incident has been resolved"
 		msg = incident.LastMessage()
+		pastTitle = " was"
 	}
 	short := true
 	icon := n.opts.IconEmojiIncident
@@ -242,12 +244,12 @@ func (n Slack) notifyIncident(incident models.Incident) error {
 
 	fields := []SlackField{
 		{
-			Title: "Impacted components",
+			Title: "Impacted components" + pastTitle,
 			Value: "`" + strings.Join(incident.Components.Inline(), "` `") + "`",
 			Short: &short,
 		},
 		{
-			Title: "Impact",
+			Title: "Impact" + pastTitle,
 			Value: models.TextState(incident.ComponentState),
 			Short: &short,
 		},
