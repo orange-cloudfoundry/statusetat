@@ -24,6 +24,8 @@ type SlackOpts struct {
 	Endpoint           string `mapstructure:"endpoint"`
 	Channel            string `mapstructure:"channel"`
 	Username           string `mapstructure:"username"`
+	PretextIncident    string `mapstructure:"pretext_incident"`
+	PretextScheduled   string `mapstructure:"pretext_scheduled"`
 	IconEmojiIncident  string `mapstructure:"icon_emoji_incident"`
 	IconEmojiScheduled string `mapstructure:"icon_emoji_scheduled"`
 	InsecureSkipVerify bool   `mapstructure:"insecure_skip_verify"`
@@ -167,6 +169,7 @@ func (n Slack) notifyScheduled(incident models.Incident) error {
 	if icon == "" {
 		icon = "clock1"
 	}
+	pretext = n.opts.PretextScheduled + pretext
 	short := true
 	b, _ := json.Marshal(SlackRequest{
 		Channel:   n.opts.Channel,
@@ -240,6 +243,7 @@ func (n Slack) notifyIncident(incident models.Incident) error {
 	if icon == "" {
 		icon = "bell"
 	}
+	pretext = n.opts.PretextIncident + pretext
 	title := common.Title(msg.Title) + " - " + common.Title(models.TextIncidentState(incident.State))
 
 	fields := []SlackField{
