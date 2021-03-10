@@ -127,9 +127,25 @@ notifiers:
 ```yaml
 # type of notifier to use, you can found them in notifiers section of this doc
 type: <string>
+# only trigger for particular component(s)
+[ for: <for_component> ]
 # map of params for the notifier you use
 params:
   [ <string>: <any> ]
+```
+
+### for_component configurations
+
+```yaml
+# Set to true to mandatory match all filter
+# Think that you want to use an AND condition on true and OR condition on false
+[require_all: <bool> | default = false ]
+# Group which match component(s)
+groups:
+[ - <string> ]
+# Names which match component(s)
+names:
+[ - <string> ]
 ```
 
 ## Notifiers
