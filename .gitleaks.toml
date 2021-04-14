@@ -226,6 +226,7 @@ description = "File names of credentials"
 file = '''(?i)^(id_rsa|passwd|pgpass|shadow)'''
 
 [allowlist]
-description = "image allowlists"
-files = ['''(.*?)(jpg|gif|doc|pdf|bin|svg)$''', '''development.bats''', '''caulked.bats''', '''local.toml''']
-regexes = ['''CHANGEME|changeme|feedabee|EXAMPLE|23.22.13.113|1234567890''']
+description = "Allowlisted files"
+files = ['''^\.?gitleaks.toml$''',
+    '''(.*?)(png|jpg|gif|doc|docx|pdf|bin|xls|pyc|zip)$''',
+    '''(go.mod|go.sum)$''']
