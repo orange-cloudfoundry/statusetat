@@ -190,14 +190,15 @@ func (n Slack) notifyScheduled(incident models.Incident) error {
 					},
 					{
 						Title: "Scheduled at",
-						Value: incident.CreatedAt.In(n.loc).String(),
+						Value: fmt.Sprintf("%s %s", incident.CreatedAt.In(n.loc).Format("2006-01-02 15:04:05"), n.loc.String()),
 						Short: &short,
 					},
 					{
 						Title: "Duration",
-						Value: fmt.Sprintf("%s (Finish at %s)",
+						Value: fmt.Sprintf("%s (Finish at %s %s)",
 							common.HumanDuration(incident.CreatedAt, incident.ScheduledEnd),
-							incident.CreatedAt.In(n.loc).String(),
+							incident.ScheduledEnd.In(n.loc).Format("2006-01-02 15:04:05"),
+							n.loc.String(),
 						),
 						Short: &short,
 					},
@@ -259,7 +260,7 @@ func (n Slack) notifyIncident(incident models.Incident) error {
 		},
 		{
 			Title: "Trigger at",
-			Value: incident.CreatedAt.In(n.loc).String(),
+			Value: fmt.Sprintf("%s %s", incident.CreatedAt.In(n.loc).Format("2006-01-02 15:04:05"), n.loc.String()),
 			Short: &short,
 		},
 	}
@@ -267,7 +268,7 @@ func (n Slack) notifyIncident(incident models.Incident) error {
 	if incident.State == models.Resolved {
 		fields = append(fields, SlackField{
 			Title: "End at",
-			Value: incident.UpdatedAt.In(n.loc).String(),
+			Value: fmt.Sprintf("%s %s", incident.UpdatedAt.In(n.loc).Format("2006-01-02 15:04:05"), n.loc.String()),
 			Short: &short,
 		})
 	}
