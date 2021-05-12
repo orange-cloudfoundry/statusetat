@@ -242,7 +242,9 @@ func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	emitter.Emit(incident)
+	if !incidentUpdate.NoNotify {
+		emitter.Emit(incident)
+	}
 	respond.NewResponse(w).Ok(incident)
 }
 

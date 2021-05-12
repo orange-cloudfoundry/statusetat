@@ -122,6 +122,7 @@
                 if (guid) {
                     method = "PUT";
                     path = "/v1/incidents/" + guid + "?partial_update_message";
+                    data["no_notify"] = true
                 }
                 console.log(data);
                 $.ajax({

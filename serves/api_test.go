@@ -287,6 +287,44 @@ var _ = Describe("Api", func() {
 			Expect((*finalIncident.Components)[0].Group).To(Equal(Component1.Group))
 
 		})
+		Context("when no_notify is set to true", func() {
+
+			It("should only update modified field and do not emit updated incident", func() {
+				cpns := &models.Components{{
+					Name:  Component1.Name,
+					Group: Component1.Group,
+				}}
+				updateBefore := time.Now().AddDate(0, 0, -2).UTC()
+				inc1 := models.Incident{
+					GUID:        "1",
+					CreatedAt:   time.Now().AddDate(0, 0, -2).UTC(),
+					UpdatedAt:   updateBefore,
+					Components:  cpns,
+					IsScheduled: false,
+					State:       models.Monitoring,
+				}
+				_, err := fakeStoreMem.Create(inc1)
+				Expect(err).ToNot(HaveOccurred())
+				state := models.Unresolved
+				rr := CallRequest(NewRequestIntAdmin(http.MethodPut, "/v1/incidents/1", models.IncidentUpdateRequest{
+					State:    &state,
+					NoNotify: true,
+				}))
+				Expect(rr.CheckError()).ToNot(HaveOccurred())
+				Expect(fakeEmitter.EmitCallCount()).To(Equal(0))
+
+				finalIncident, err := fakeStoreMem.Read("1")
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(finalIncident.GUID).To(Equal("1"))
+				Expect(finalIncident.UpdatedAt).ToNot(Equal(updateBefore))
+				Expect(finalIncident.State).To(Equal(models.Unresolved))
+				Expect(*finalIncident.Components).To(HaveLen(1))
+				Expect((*finalIncident.Components)[0].Name).To(Equal(Component1.Name))
+				Expect((*finalIncident.Components)[0].Group).To(Equal(Component1.Group))
+
+			})
+		})
 		It("should override all message when param partial_update_message not set", func() {
 			cpns := &models.Components{{
 				Name:  Component1.Name,

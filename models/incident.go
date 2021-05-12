@@ -29,6 +29,7 @@ type IncidentUpdateRequest struct {
 	IsScheduled    *bool           `json:"is_scheduled"`
 	ScheduledEnd   time.Time       `json:"scheduled_end"`
 	Origin         *string         `json:"origin"`
+	NoNotify       bool            `json:"no_notify"`
 }
 
 func (i Incident) MainMessage() Message {
@@ -47,6 +48,10 @@ func (i Incident) LastMessage() Message {
 		return Message{}
 	}
 	return i.Messages[0]
+}
+
+func (i Incident) IsNew() bool {
+	return i.CreatedAt.Equal(i.UpdatedAt)
 }
 
 type Incidents []Incident
