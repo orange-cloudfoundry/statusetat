@@ -122,6 +122,9 @@ func (l Local) Read(guid string) (models.Incident, error) {
 func (l Local) ByDate(from, to time.Time) ([]models.Incident, error) {
 	incidents := make([]models.Incident, 0)
 	err := filepath.Walk(l.dir, func(path string, info os.FileInfo, err error) error {
+		if filepath.Base(path) == subscriberFilename {
+			return nil
+		}
 		if err != nil {
 			return nil
 		}

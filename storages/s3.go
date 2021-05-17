@@ -138,11 +138,7 @@ func (s *S3) ByDate(from, to time.Time) ([]models.Incident, error) {
 		if *obj.Key == subscriberFilename {
 			continue
 		}
-		// we can be in the future but not in the past inside an incident
-		// se we check for the past for earning time (to not retrieve file content)
-		if obj.LastModified.Before(to) {
-			continue
-		}
+
 		incident, err := s.Read(*obj.Key)
 		if err != nil {
 			return incidents, err
