@@ -43,6 +43,17 @@ func (i Incident) UpdateMessages() []Message {
 	return i.Messages[:len(i.Messages)-1]
 }
 
+func (i Incident) UpdateMessagesReverse() []Message {
+	messages := i.UpdateMessages()
+	newOrder := make([]Message, len(messages))
+	p := len(messages) - 1
+	for _, message := range messages {
+		newOrder[p] = message
+		p--
+	}
+	return newOrder
+}
+
 func (i Incident) LastMessage() Message {
 	if len(i.Messages) == 0 {
 		return Message{}
