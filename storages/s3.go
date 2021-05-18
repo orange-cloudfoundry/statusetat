@@ -121,9 +121,12 @@ func (s *S3) Read(guid string) (models.Incident, error) {
 	}
 	defer obj.Body.Close()
 	var incident models.Incident
-	sort.Sort(models.Messages(incident.Messages))
 	err = json.NewDecoder(obj.Body).Decode(&incident)
-	return incident, err
+	if err != nil {
+		return models.Incident{}, err
+	}
+	sort.Sort(models.Messages(incident.Messages))
+	return incident, nil
 }
 
 func (s *S3) ByDate(from, to time.Time) ([]models.Incident, error) {
