@@ -21,9 +21,9 @@ func Emit(incident models.Incident) {
 }
 
 func On() <-chan emitter.Event {
-
 	return e.On("incident", emitter.Sync)
 }
+
 func Off(events ...<-chan emitter.Event) {
 	e.Off("incident", events...)
 }

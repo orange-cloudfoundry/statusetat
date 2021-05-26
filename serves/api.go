@@ -248,6 +248,22 @@ func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Ok(incident)
 }
 
+func (a Serve) Notify(w http.ResponseWriter, req *http.Request) {
+	v := mux.Vars(req)
+	guid := v["guid"]
+
+	incident, err := a.store.Read(guid)
+	if err != nil {
+		if os.IsNotExist(err) {
+			JSONError(w, err, http.StatusNotFound)
+			return
+		}
+		JSONError(w, err, http.StatusPreconditionRequired)
+		return
+	}
+	emitter.Emit(incident)
+}
+
 func (a Serve) Delete(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	guid := v["guid"]

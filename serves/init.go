@@ -91,6 +91,7 @@ func RegisterWithHtmlTemplater(
 	subRouter.Handle("/incidents", bauthHandler(http.HandlerFunc(api.CreateIncident))).Methods(http.MethodPost)
 	subRouter.Handle("/incidents/{guid}", bauthHandler(http.HandlerFunc(api.Update))).Methods(http.MethodPut)
 	subRouter.Handle("/incidents/{guid}", bauthHandler(http.HandlerFunc(api.Delete))).Methods(http.MethodDelete)
+	subRouter.Handle("/incidents/{guid}/notify", bauthHandler(http.HandlerFunc(api.Notify))).Methods(http.MethodPut)
 	subRouter.Handle("/incidents/{incident_guid}/messages", bauthHandler(http.HandlerFunc(api.AddMessage))).Methods(http.MethodPost)
 	subRouter.Handle("/incidents/{incident_guid}/messages/{message_guid}", bauthHandler(http.HandlerFunc(api.UpdateMessage))).Methods(http.MethodPut)
 	subRouter.Handle("/incidents/{incident_guid}/messages/{message_guid}", bauthHandler(http.HandlerFunc(api.DeleteMessage))).Methods(http.MethodDelete)

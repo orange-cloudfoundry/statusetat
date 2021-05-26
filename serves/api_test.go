@@ -541,6 +541,14 @@ var _ = Describe("Api", func() {
 				Expect(finalIncident.Messages[0].Content).To(Equal("a content changed"))
 			})
 		})
+		Context("Notify", func() {
+			It("should emit incident for notify", func() {
+				rr := CallRequest(NewRequestIntAdmin(http.MethodPut, "/v1/incidents/1/notify", nil))
+
+				Expect(rr.CheckError()).ToNot(HaveOccurred())
+				Expect(fakeEmitter.EmitCallCount()).To(Equal(1))
+			})
+		})
 	})
 
 })

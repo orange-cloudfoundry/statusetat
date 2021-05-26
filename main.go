@@ -13,6 +13,7 @@ import (
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
 	_ "github.com/orange-cloudfoundry/statusetat/notifiers/email"
 	_ "github.com/orange-cloudfoundry/statusetat/notifiers/grafana"
+	_ "github.com/orange-cloudfoundry/statusetat/notifiers/log"
 	_ "github.com/orange-cloudfoundry/statusetat/notifiers/plugin"
 	_ "github.com/orange-cloudfoundry/statusetat/notifiers/slack"
 	"github.com/orange-cloudfoundry/statusetat/serves"

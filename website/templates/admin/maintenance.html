@@ -17,6 +17,7 @@
                     <form>
                       <input type="hidden" name="guid" value="{{ .GUID }}">
                       <a href="#!" class="secondary-content waves-effect waves-light btn red white-text tooltipped delete-incident" data-tooltip="Delete maintenance"><i class="material-icons">delete</i></a>
+                      <a href="#!" class="secondary-content waves-effect waves-light btn orange lighten-2 white-text tooltipped-btn notify-incident" data-tooltip="Re-send Notification"><i class="material-icons">notifications_active</i></a>
                       <a href="/admin/maintenance/edit/{{ .GUID }}" class="secondary-content waves-effect waves-light btn grey lighten-4 grey-text tooltipped" data-tooltip="Edit maintenance"><i class="material-icons">edit</i></a>
                         {{ if eq .State 0 }}
                           <a href="#!" class="secondary-content waves-effect waves-light btn green lighten-1 white-text tooltipped mark-as-set-state" data-state="1" data-tooltip="Mark as finished">
@@ -91,4 +92,5 @@
       });
   </script>
   {{ template "admin/delete-incident.html" . }}
+  {{ template "admin/notify-incident.html" . }}
 {{end}}
