@@ -126,7 +126,7 @@ hr {
 }
 
 .incident .incident-title h5 {
-    line-height: 18px;
+    line-height: 20px;
 }
 
 .incident .incident-state-details {
@@ -1252,4 +1252,12 @@ time.human {
 .incident-main-message .task-list-item input {
     margin: 0 .2em .25em -1.6em;
     vertical-align: middle;
+}
+
+.incident-title .components-badges.float-badges {
+    width: 500px;
+}
+
+.incident-title .components-badges.float-badges span {
+    margin-bottom: 2px;
 }

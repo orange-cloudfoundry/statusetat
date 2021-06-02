@@ -1,18 +1,21 @@
 <div class="incident z-depth-1">
-    {{ $mainMsg := .MainMessage }}
+  {{ $mainMsg := .MainMessage }}
   <div class="incident-title">
     <span class="badge {{ .State | colorIncidentState }} white-text left z-depth-2">{{ .State | textIncidentState | title }}</span>
-    <div class="components-badges right">
-        {{ range .Components }}
-          <span class="badge grey lighten-4 grey-text left">{{ . }}</span>
-        {{ end }}
+    <div class="components-badges float-badges right">
+      {{ range .Components }}
+      <span class="badge grey lighten-4 grey-text left">{{ . }}</span>
+      {{ end }}
     </div>
-    <a href="/incidents/{{ .GUID }}" class="">
+    <a class="" href="/incidents/{{ .GUID }}">
       <h5 class="{{ .State | colorIncidentState }}-text">{{ $mainMsg.Title | title | markdownNoParaph }}</h5>
     </a>
   </div>
+  <div class="clearfix"></div>
   <div class="incident-state-details">
-    <time class="right grey-text human tooltipped" datetime="{{ .CreatedAt | timeStdFormat }}" data-tooltip="{{ .CreatedAt | timeFormat }}">{{ .CreatedAt | humanTime }}</time>
+    <time class="right grey-text human tooltipped" data-tooltip="{{ .CreatedAt | timeFormat }}" datetime="{{ .CreatedAt | timeStdFormat }}">
+      {{ .CreatedAt | humanTime }}
+    </time>
     <div class="{{ .ComponentState | colorState }}-text">
       <i class="material-icons inline tiny">{{ .ComponentState | iconState }}</i>
       <span class="title">{{ .ComponentState | textState | title }}</span>
@@ -22,15 +25,17 @@
     <p class="markdown">{{ $mainMsg.Content | markdown }}</p>
   </div>
   <div class="incident-updates">
-      {{ range .UpdateMessagesReverse }}
-        <div class="divider"></div>
-        <div class="update">
-          <h6>{{ .Title | title | markdownNoParaph}}</h6>
-          <p>
-              {{ .Content | markdown }}
-          </p>
-          <time class="grey-text human tooltipped" datetime="{{ .CreatedAt | timeStdFormat }}" data-tooltip="{{ .CreatedAt | timeFormat }}">{{ .CreatedAt | humanTime }}</time>
-        </div>
-      {{ end }}
+    {{ range .UpdateMessagesReverse }}
+    <div class="divider"></div>
+    <div class="update">
+      <h6>{{ .Title | title | markdownNoParaph}}</h6>
+      <p>
+        {{ .Content | markdown }}
+      </p>
+      <time class="grey-text human tooltipped" data-tooltip="{{ .CreatedAt | timeFormat }}" datetime="{{ .CreatedAt | timeStdFormat }}">
+        {{ .CreatedAt | humanTime }}
+      </time>
+    </div>
+    {{ end }}
   </div>
 </div>
