@@ -34,6 +34,7 @@ type OptsGrafanaAnnotation struct {
 	Endpoint           string `mapstructure:"endpoint"`
 	DashboardId        int    `mapstructure:"dashboard_id"`
 	PanelId            int    `mapstructure:"panel_id"`
+	Tag                string `mapstructure:"tag"`
 	TimeZone           string `mapstructure:"time_zone"`
 	InsecureSkipVerify bool   `mapstructure:"insecure_skip_verify"`
 }
@@ -158,7 +159,7 @@ func (n GrafanaAnnotation) Notify(incident models.Incident) error {
 		PanelID:     n.opts.PanelId,
 		Time:        incident.CreatedAt.In(n.loc).Unix() * 1000,
 		TimeEnd:     end,
-		Tags:        []string{n.incidentTag(incident)},
+		Tags:        []string{n.incidentTag(incident), n.opts.Tag},
 		Text:        fmt.Sprintf("%s -- %s", msg.Title, msg.Content),
 	})
 	req, err := http.NewRequest(http.MethodPost, n.opts.Endpoint+"/api/annotations", bytes.NewBuffer(b))
