@@ -188,6 +188,8 @@ api_key: <string>
 dashboard_id: <string>
 # Panel id in dashboard to set annotation
 panel_id: <string>
+# tag used in grafana to filter global annotations
+[ tag: <string> ]
 # time zone to use when sending annotation
 [ time_zone: <string> ]
 # skip ssl verification when sending notification
