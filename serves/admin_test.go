@@ -58,7 +58,7 @@ var _ = Describe("Admin", func() {
 				After     time.Time
 			}{}
 
-			fakeHtmlTemplater.ExecuteTemplateStub = TemplateUnmarshalIn("admin/incidents.html", &dataRetrieve)
+			fakeHtmlTemplater.ExecuteTemplateStub = TemplateUnmarshalIn("admin/incidents.gohtml", &dataRetrieve)
 			rr := CallRequest(NewRequestIntAdmin(http.MethodGet, "/admin/dashboard", nil))
 			Expect(rr.CheckError()).ToNot(HaveOccurred())
 			Expect(fakeHtmlTemplater.ExecuteTemplateCallCount()).To(Equal(1))
@@ -119,7 +119,7 @@ var _ = Describe("Admin", func() {
 				Maintenance []models.Incident
 			}{}
 
-			fakeHtmlTemplater.ExecuteTemplateStub = TemplateUnmarshalIn("admin/maintenance.html", &dataRetrieve)
+			fakeHtmlTemplater.ExecuteTemplateStub = TemplateUnmarshalIn("admin/maintenance.gohtml", &dataRetrieve)
 			rr := CallRequest(NewRequestIntAdmin(http.MethodGet, "/admin/maintenance", nil))
 			Expect(rr.CheckError()).ToNot(HaveOccurred())
 			Expect(fakeHtmlTemplater.ExecuteTemplateCallCount()).To(Equal(1))
@@ -144,7 +144,7 @@ var _ = Describe("Admin", func() {
 						Incident models.Incident
 					}{}
 
-					fakeHtmlTemplater.ExecuteTemplateStub = TemplateUnmarshalIn("admin/add_edit_incident.html", &dataRetrieve)
+					fakeHtmlTemplater.ExecuteTemplateStub = TemplateUnmarshalIn("admin/add_edit_incident.gohtml", &dataRetrieve)
 					rr := CallRequest(NewRequestIntAdmin(http.MethodGet, "/admin/incident/add", nil))
 					Expect(rr.CheckError()).ToNot(HaveOccurred())
 					Expect(fakeHtmlTemplater.ExecuteTemplateCallCount()).To(Equal(1))
@@ -167,7 +167,7 @@ var _ = Describe("Admin", func() {
 						Incident models.Incident
 					}{}
 
-					fakeHtmlTemplater.ExecuteTemplateStub = TemplateUnmarshalIn("admin/add_edit_maintenance.html", &dataRetrieve)
+					fakeHtmlTemplater.ExecuteTemplateStub = TemplateUnmarshalIn("admin/add_edit_maintenance.gohtml", &dataRetrieve)
 					rr := CallRequest(NewRequestIntAdmin(http.MethodGet, "/admin/maintenance/add", nil))
 					Expect(rr.CheckError()).ToNot(HaveOccurred())
 					Expect(fakeHtmlTemplater.ExecuteTemplateCallCount()).To(Equal(1))
@@ -217,7 +217,7 @@ var _ = Describe("Admin", func() {
 						Incident models.Incident
 					}{}
 
-					fakeHtmlTemplater.ExecuteTemplateStub = TemplateUnmarshalIn("admin/add_edit_incident.html", &dataRetrieve)
+					fakeHtmlTemplater.ExecuteTemplateStub = TemplateUnmarshalIn("admin/add_edit_incident.gohtml", &dataRetrieve)
 					rr := CallRequest(NewRequestIntAdmin(http.MethodGet, "/admin/incident/edit/1", nil))
 					Expect(rr.CheckError()).ToNot(HaveOccurred())
 					Expect(fakeHtmlTemplater.ExecuteTemplateCallCount()).To(Equal(1))
@@ -239,7 +239,7 @@ var _ = Describe("Admin", func() {
 						Incident models.Incident
 					}{}
 
-					fakeHtmlTemplater.ExecuteTemplateStub = TemplateUnmarshalIn("admin/add_edit_maintenance.html", &dataRetrieve)
+					fakeHtmlTemplater.ExecuteTemplateStub = TemplateUnmarshalIn("admin/add_edit_maintenance.gohtml", &dataRetrieve)
 					rr := CallRequest(NewRequestIntAdmin(http.MethodGet, "/admin/maintenance/edit/2", nil))
 					Expect(rr.CheckError()).ToNot(HaveOccurred())
 					Expect(fakeHtmlTemplater.ExecuteTemplateCallCount()).To(Equal(1))
