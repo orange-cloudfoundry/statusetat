@@ -1,4 +1,4 @@
-{{ extends "admin/index.html" }}
+{{ extends "admin/index.gohtml" }}
 {{ define "title" }}{{.BaseInfo.Title}} - Admin incidents{{ end }}
 {{ define "before-content"}}
     {{ range .Incidents }}
@@ -236,6 +236,6 @@
           })
       });
   </script>
-  {{ template "admin/delete-incident.html" . }}
-  {{ template "admin/notify-incident.html" . }}
+  {{ template "admin/delete-incident.gohtml" . }}
+  {{ template "admin/notify-incident.gohtml" . }}
 {{end}}

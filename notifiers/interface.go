@@ -18,3 +18,7 @@ type Notifier interface {
 type NotifierSubscriber interface {
 	NotifySubscriber(incident models.Incident, subscribers []string) error
 }
+
+type NotifierMetadataField interface {
+	MetadataFields() []models.MetadataField
+}

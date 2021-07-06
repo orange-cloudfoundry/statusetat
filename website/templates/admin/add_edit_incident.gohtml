@@ -1,20 +1,43 @@
-{{ extends "admin/index.html" }}
+{{ extends "admin/index.gohtml" }}
 {{ define "title" }}{{.BaseInfo.Title}} - Admin report incident{{ end }}
 {{ define "content" }}
   <div class="row">
     <div class="col s12">
       <div class="head">
-        <h4><a href="/admin/maintenance" class="black-text">Maintenance</a>
-          &gt; {{ if .Incident.GUID }}edit{{else}}add{{end}} maintenance</h4>
+        <h4><a href="/admin/incident" class="black-text">Incidents</a>
+          &gt; {{ if .Incident.GUID }}edit{{else}}report{{end}} incident</h4>
         <div class="divider"></div>
       </div>
       <form class="col s12" id="form-incident">
         <input type="hidden" name="incident-guid" value="{{ .Incident.GUID }}">
         <input type="hidden" name="message-guid" value="{{ .Incident.MainMessage.GUID }}">
         <div class="row">
-          <div class="input-field col s12">
-            <input id="title" name="title" type="text" value="{{ .Incident.MainMessage.Title }}" class="validate">
+          <div class="input-field col s10">
+            <input id="title" name="title" type="text" value="{{ .Incident.MainMessage.Title }}" class="validate markdown">
             <label for="title">Title *</label>
+          </div>
+          <div class="input-field col s2">
+            <select id="mark-as" name="incident-state">
+                {{ range .IncidentStates }}
+                  <option value="{{ . }}" class="{{ . | colorIncidentState }}-text" {{ if eq $.Incident.State . }}selected{{end}}>{{ . | textIncidentState | title }}</option>
+                {{ end }}
+            </select>
+            <label for="mark-as">Mark As *</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col s12">
+            <label>Components State *</label>
+            <p>
+                {{ range .ComponentStates }}
+                  <label>
+                    <input name="components-state" type="radio" {{ if eq $.Incident.ComponentState . }}checked{{end}} value="{{ . }}"/>
+                    <span class="{{ . | colorState }}-text">
+                        {{ . | textState | title}}
+                    </span>
+                  </label>
+                {{ end }}
+            </p>
           </div>
         </div>
         <div class="row">
@@ -32,28 +55,32 @@
         </div>
         <div class="row">
           <div class="input-field col s8">
-            <input id="created-at-date" type="text" name="created-at-date" class="datepicker validate" value="{{ .Incident.CreatedAt | timeFmtCustom "2006-01-02" }}">
-            <label for="created-at-date">At what date this will start ? *</label>
+            <input id="created-at-date" type="text" name="date" class="datepicker validate" value="{{ .Incident.CreatedAt | timeFmtCustom "2006-01-02" }}">
+            <label for="created-at-date">At what date this incident occurred ? *</label>
           </div>
           <div class="input-field col s4">
-            <input id="created-at-time" type="text" name="created-at-time" class="timepicker validate" value="{{ .Incident.CreatedAt | timeFmtCustom "15:04" }}">
+            <input id="created-at-time" type="text" name="time" class="timepicker validate" value="{{ .Incident.CreatedAt | timeFmtCustom "15:04" }}">
             <label for="created-at-time">And at what time ? *</label>
           </div>
         </div>
-        <div class="row">
-          <div class="input-field col s8">
-            <input id="scheduled-end-at-date" type="text" name="scheduled-end-at-date" class="datepicker validate" value="{{ .Incident.ScheduledEnd | timeFmtCustom "2006-01-02" }}">
-            <label for="scheduled-end-at-date">At what date this will end ? *</label>
-          </div>
-          <div class="input-field col s4">
-            <input id="scheduled-end-at-time" type="text" name="scheduled-end-at-time" class="timepicker validate" value="{{ .Incident.ScheduledEnd | timeFmtCustom "15:04" }}">
-            <label for="scheduled-end-at-time">And at what time ? *</label>
-          </div>
-        </div>
+          {{ if gt .MetadataFields.LenIncident 0 }}
+            <div class="row">
+              <h4>Metadata field for notifier</h4>
+              <hr/>
+                {{ range .MetadataFields }}
+                    {{ if not .ForScheduled }}
+                      <div class="input-field col s12">
+                          {{ .ToHTML | safeHTML }}
+                      </div>
+                    {{ end }}
+                {{ end }}
+            </div>
+          {{end}}
+
         <div class="row">
           <div class="col s12">
             <button type="submit" class="waves-effect waves-light btn green lighten-1 white-text">
-                {{ if .Incident.GUID }}Edit{{else}}Add Maintenance{{end}}
+                {{ if .Incident.GUID }}Edit{{else}}Report{{end}}
             </button>
             <button type="button" data-target="preview-incident" class="waves-effect waves-light btn grey lighten-4 grey-text modal-trigger">
               Preview
@@ -68,27 +95,15 @@
   </div>
 {{end}}
 {{ define "pre_body_close" }}
-    {{ template "admin/chips-components.html" . }}
+    {{ template "admin/chips-components.gohtml" . }}
     <script type="text/javascript">
         $(document).ready(function () {
             $('.cancel-btn').click(function (e) {
-                window.location.replace("/admin/maintenance");
+                window.location.replace("/admin/incident");
             })
-
-            M.Datepicker.getInstance(document.getElementById('created-at-date')).options.onSelect = function (newDate) {
-                $('#scheduled-end-at-date').val(moment(newDate).format('YYYY-MM-DD'));
-            }
-
-            M.Timepicker.getInstance(document.getElementById('created-at-time')).options.onSelect = function (hours, minutes) {
-                $('#scheduled-end-at-time').val(moment(hours + ":" + minutes, "HH:mm").add(2, 'hours').format('HH:mm'));
-            }
-
-            let createdAt = Date.parse({{ .Incident.CreatedAt | timeStdFormat }});
-            let scheduledEnd = Date.parse({{ .Incident.ScheduledEnd | timeStdFormat }});
-            $("#created-at-date").val(moment(createdAt).format('YYYY-MM-DD'));
-            $("#scheduled-end-at-date").val(moment(scheduledEnd).format('YYYY-MM-DD'));
-            $("#created-at-time").val(moment(createdAt).format('HH:mm'));
-            $("#scheduled-end-at-time").val(moment(scheduledEnd).format('HH:mm'));
+            let d = Date.parse({{ .Incident.CreatedAt | timeStdFormat }});
+            $("#created-at-date").val(moment(d).format('YYYY-MM-DD'));
+            $("#created-at-time").val(moment(d).format('HH:mm'));
             $('#form-incident button[type="submit"]').click(function (e) {
                 e.preventDefault();
                 $('.alert-box .alert').hide();
@@ -101,6 +116,17 @@
                 btn.addClass("disabled");
                 let componentTags = M.Chips.getInstance(document.querySelector('.chips-components')).chipsData;
                 let components = [];
+                let metadata = [];
+
+                document.querySelectorAll('.metadata-field').forEach(function (item) {
+                    metadata.push({
+                        "key": item.getAttribute("name"),
+                        "value": item.value,
+                    })
+                })
+                if (metadata.length === 0) {
+                    metadata = null;
+                }
 
                 componentTags.forEach(element => components.push(element.tag));
                 let guid = formData.get("incident-guid");
@@ -113,10 +139,10 @@
                     }],
                     "incident_guid": formData.get("incident-guid"),
                     "state": parseInt(formData.get("incident-state"), 10),
+                    "component_state": parseInt(formData.get("components-state"), 10),
                     "components": components,
-                    "is_scheduled": true,
-                    "created_at": moment(formData.get("created-at-date") + " " + formData.get("created-at-time"), "YYYY-MM-DD HH:mm").format(),
-                    "scheduled_end": moment(formData.get("scheduled-end-at-date") + " " + formData.get("scheduled-end-at-time"), "YYYY-MM-DD HH:mm").format(),
+                    "created_at": moment(formData.get("date") + " " + formData.get("time"), "YYYY-MM-DD HH:mm").format()
+                    "metadata": metadata,
                 }
 
                 if (guid) {
@@ -142,7 +168,7 @@
                         $('.alert-box .alert').show();
                     },
                     success: function (msg) {
-                        window.location.replace("/admin/maintenance");
+                        window.location.replace("/admin/incident");
                     }
                 });
             })

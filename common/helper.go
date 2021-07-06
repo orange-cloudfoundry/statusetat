@@ -3,6 +3,7 @@ package common
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/orange-cloudfoundry/statusetat/models"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -59,4 +60,12 @@ func MakeHttpTransport(skipInsecure bool) http.RoundTripper {
 			InsecureSkipVerify: skipInsecure,
 		},
 	}
+}
+
+func MetadataToMap(metadata []models.Metadata) map[string]string {
+	m := make(map[string]string)
+	for _, elem := range metadata {
+		m[elem.Key] = elem.Value
+	}
+	return m
 }

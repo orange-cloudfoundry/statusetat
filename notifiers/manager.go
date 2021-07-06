@@ -2,9 +2,9 @@ package notifiers
 
 import (
 	"fmt"
-
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/emitter"
+	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/storages"
 	log "github.com/sirupsen/logrus"
 )
@@ -18,6 +18,8 @@ var toNotifies = []ToNotifie{}
 
 var notifiers = []Notifier{}
 
+var metadataFields = make(models.MetadataFields, 0)
+
 func RegisterNotifier(notifier Notifier) {
 	notifiers = append(notifiers, notifier)
 }
@@ -25,18 +27,32 @@ func RegisterNotifier(notifier Notifier) {
 func AddNotifier(name string, params map[string]interface{}, forComp config.ForComponent, baseInfo config.BaseInfo) error {
 	for _, n := range notifiers {
 		if n.Name() == name {
-			toNotify, err := n.Creator(params, baseInfo)
+			notifier, err := n.Creator(params, baseInfo)
 			if err != nil {
 				return err
 			}
+			if metanotif, ok := n.(NotifierMetadataField); ok {
+
+				for _, field := range metanotif.MetadataFields() {
+					err := field.Validate()
+					if err != nil {
+						return err
+					}
+					metadataFields = append(metadataFields, field)
+				}
+			}
 			toNotifies = append(toNotifies, ToNotifie{
-				Notifier: toNotify,
+				Notifier: notifier,
 				For:      forComp,
 			})
 			return nil
 		}
 	}
 	return fmt.Errorf("Could not find notifier with name '%s' .", name)
+}
+
+func NotifiersMetadataFields() models.MetadataFields {
+	return metadataFields
 }
 
 func Notify(store storages.Store) {

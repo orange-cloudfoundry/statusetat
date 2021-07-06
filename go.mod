@@ -1,6 +1,6 @@
 module github.com/orange-cloudfoundry/statusetat
 
-go 1.15
+go 1.16
 
 require (
 	github.com/alecthomas/chroma v0.7.2-0.20200305040604-4f3623dce67a
@@ -20,6 +20,7 @@ require (
 	github.com/karrick/godirwalk v1.15.6 // indirect
 	github.com/kyokomi/emoji v2.2.4+incompatible
 	github.com/lib/pq v1.6.0 // indirect
+	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.2.3
 	github.com/mitchellh/mapstructure v1.3.2
 	github.com/nicklaw5/go-respond v0.0.0-20190722175312-54f5cd3d2246
@@ -31,6 +32,7 @@ require (
 	github.com/rs/cors v1.7.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.7.0
+	github.com/speps/go-hashids/v2 v2.0.1 // indirect
 	github.com/tdewolff/minify/v2 v2.7.6
 	github.com/yuin/goldmark v1.2.1
 	github.com/yuin/goldmark-highlighting v0.0.0-20200307114337-60d527fdb691

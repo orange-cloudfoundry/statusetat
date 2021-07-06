@@ -136,7 +136,7 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 		timezone = a.Location(req).String()
 	}
 	sort.Sort(sort.Reverse(timelineDates))
-	err = a.xt.ExecuteTemplate(w, "incidents.html", IndexData{
+	err = a.xt.ExecuteTemplate(w, "incidents.gohtml", IndexData{
 		BaseInfo:            a.baseInfo,
 		GroupComponentState: compStateGroup,
 		ComponentStatesData: componentStatesByGroup,
@@ -164,7 +164,7 @@ func (a Serve) ShowIncident(w http.ResponseWriter, req *http.Request) {
 	if !a.IsDefaultLocation(req) {
 		timezone = a.Location(req).String()
 	}
-	err = a.xt.ExecuteTemplate(w, "one_incident.html", struct {
+	err = a.xt.ExecuteTemplate(w, "one_incident.gohtml", struct {
 		BaseInfo config.BaseInfo
 		Incident models.Incident
 		Timezone string
@@ -231,7 +231,7 @@ func (a Serve) History(w http.ResponseWriter, req *http.Request) {
 	}
 
 	sort.Sort(sort.Reverse(timelineDates))
-	err = a.xt.ExecuteTemplate(w, "history.html", struct {
+	err = a.xt.ExecuteTemplate(w, "history.gohtml", struct {
 		IndexData
 		Before time.Time
 		After  time.Time

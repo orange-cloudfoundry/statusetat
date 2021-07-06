@@ -1,4 +1,4 @@
-{{ extends "admin/index.html" }}
+{{ extends "admin/index.gohtml" }}
 {{ define "title" }}{{.BaseInfo.Title}} - Admin maintenance{{ end }}
 {{ define "content" }}
   <div class="row">
@@ -91,6 +91,6 @@
           })
       });
   </script>
-  {{ template "admin/delete-incident.html" . }}
-  {{ template "admin/notify-incident.html" . }}
+  {{ template "admin/delete-incident.gohtml" . }}
+  {{ template "admin/notify-incident.gohtml" . }}
 {{end}}

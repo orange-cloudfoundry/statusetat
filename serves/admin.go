@@ -1,6 +1,7 @@
 package serves
 
 import (
+	"github.com/orange-cloudfoundry/statusetat/notifiers"
 	"net/http"
 	"time"
 
@@ -40,7 +41,7 @@ func (a Serve) AdminIncidents(w http.ResponseWriter, req *http.Request) {
 		timezone = a.Location(req).String()
 	}
 
-	err = a.xt.ExecuteTemplate(w, "admin/incidents.html", struct {
+	err = a.xt.ExecuteTemplate(w, "admin/incidents.gohtml", struct {
 		adminDefaultData
 		Incidents      []models.Incident
 		IncidentStates []models.IncidentState
@@ -95,12 +96,13 @@ func (a Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Reque
 		timezone = a.Location(req).String()
 	}
 
-	err = a.xt.ExecuteTemplate(w, "admin/add_edit_"+typ+".html", struct {
+	err = a.xt.ExecuteTemplate(w, "admin/add_edit_"+typ+".gohtml", struct {
 		adminDefaultData
 		Components      []string
 		IncidentStates  []models.IncidentState
 		ComponentStates []models.ComponentState
 		Incident        models.Incident
+		MetadataFields  models.MetadataFields
 	}{
 		adminDefaultData: adminDefaultData{
 			BaseInfo:   a.baseInfo,
@@ -113,6 +115,7 @@ func (a Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Reque
 		IncidentStates:  models.AllIncidentState,
 		ComponentStates: models.AllComponentState,
 		Incident:        incident,
+		MetadataFields:  notifiers.NotifiersMetadataFields(),
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -131,10 +134,11 @@ func (a Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
 	if !a.IsDefaultLocation(req) {
 		timezone = a.Location(req).String()
 	}
-	err = a.xt.ExecuteTemplate(w, "admin/maintenance.html", struct {
+	err = a.xt.ExecuteTemplate(w, "admin/maintenance.gohtml", struct {
 		adminDefaultData
 		Maintenance    []models.Incident
 		IncidentStates []models.IncidentState
+		MetadataFields models.MetadataFields
 	}{
 		adminDefaultData: adminDefaultData{
 			BaseInfo:   a.baseInfo,
@@ -144,6 +148,7 @@ func (a Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
 		},
 		Maintenance:    maintenance,
 		IncidentStates: models.AllIncidentState,
+		MetadataFields: notifiers.NotifiersMetadataFields(),
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)

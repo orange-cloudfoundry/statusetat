@@ -84,3 +84,10 @@ func (n Plugin) NotifySubscriber(incident models.Incident, subscribers []string)
 	}
 	return nil
 }
+
+func (n Plugin) MetadataFields() []models.MetadataField {
+	if metanotif, ok := n.notifier.(notifiers.NotifierMetadataField); ok {
+		return metanotif.MetadataFields()
+	}
+	return nil
+}

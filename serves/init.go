@@ -40,7 +40,7 @@ func Register(
 ) error {
 	xt := extemplate.New()
 	box := packr.New("templates", "../website/templates")
-	err := xt.ParseDir(box, []string{".html"})
+	err := xt.ParseDir(box, []string{".gohtml"})
 	if err != nil {
 		return err
 	}

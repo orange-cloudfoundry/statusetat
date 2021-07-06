@@ -1,4 +1,4 @@
-{{ extends "index.html" }}
+{{ extends "index.gohtml" }}
 {{ define "content" }}
 
     {{ with .Theme.PreStatus }}
@@ -56,7 +56,7 @@
               <p>{{ . | markdown }}</p>
             {{end}}
             {{ range . }}
-                {{ template "scheduled.html" . }}
+                {{ template "scheduled.gohtml" . }}
             {{end}}
             {{ with $.Theme.PostMaintenance }}
               <p>{{ . | markdown }}</p>
@@ -84,7 +84,7 @@
                   <div class="timeline-incident-body">
                       {{ if $incidents }}
                           {{ range $incidents }}
-                              {{ template "incident.html" . }}
+                              {{ template "incident.gohtml" . }}
                           {{end}}
                       {{ else }}
                         <div class="message">
