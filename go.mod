@@ -26,7 +26,7 @@ require (
 	github.com/kyokomi/emoji v2.2.4+incompatible
 	github.com/lib/pq v1.10.2 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7 // indirect
-	github.com/maxbrunsfeld/counterfeiter/v6 v6.2.3
+	github.com/maxbrunsfeld/counterfeiter/v6 v6.4.1
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/nicklaw5/go-respond v0.0.0-20190722175312-54f5cd3d2246
 	github.com/olebedev/emitter v0.0.0-20190110104742-e8d1457e6aee
