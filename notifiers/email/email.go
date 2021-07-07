@@ -36,11 +36,11 @@ const (
 {{ .Content | markdown }}
 </p>
 `
-	DefaultTxtScheduled = `<h1>Scheduled Maintenance: {{ .IncidentTitle | title }}</h1>
+	DefaultTxtScheduled = `<h1>Scheduled Maintenance{{if eq .Incident.State 0 }} has started{{end}}{{if eq .Incident.State 1 }} has finished{{end}}: {{ .IncidentTitle | title }}</h1>
 <ul>
 	<li><b>Components involved</b>: {{ join .Incident.Components.Inline ", " }}</li>
 	<li><b>Scheduled at</b>: {{ .Incident.CreatedAt | timeFormat }}</li>
-	<li><b>Duration</b>: {{ humanDuration .Incident.CreatedAt .Incident.ScheduledEnd }}</li>
+	<li><b>{{if not ( eq .Incident.State 1) }}Planned{{else}}Final{{end}} Duration</b>: {{ humanDuration .Incident.CreatedAt .Incident.ScheduledEnd }}</li>
 	<li><b>Link</b>: <a href="{{ .Link }}">{{ .Link }}</a></li>
 </ul>
 
@@ -49,7 +49,7 @@ const (
 {{ .Content | markdown }}
 </p>
 `
-	DefaultSubjectScheduled = "[{{ .TitleSite }} Scheduled task] {{ .IncidentTitle | title }}"
+	DefaultSubjectScheduled = "[{{ .TitleSite }} Scheduled task{{if eq .Incident.State 0 }} has started{{end}}{{if eq .Incident.State 1 }} has finished{{end}}] {{ .IncidentTitle | title }}"
 	DefaultFrom             = "no-reply@local"
 )
 

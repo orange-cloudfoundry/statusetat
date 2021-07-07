@@ -57,7 +57,7 @@
                 {{ range .MetadataFields }}
                     {{ if .ForScheduled }}
                       <div class="input-field col s12">
-                          {{ .ToHTML | safeHTML }}
+                          {{ template "admin/metadata_field.gohtml" . }}
                       </div>
                     {{ end }}
                 {{ end }}
@@ -128,6 +128,12 @@
 
                 componentTags.forEach(element => components.push(element.tag));
 
+                let state = 0;
+                if (formData.get("incident-guid") === "") {
+                    // set state idle by default
+                    state = 3;
+                }
+
                 let guid = formData.get("incident-guid");
                 let data = {
                     "messages": [{
@@ -137,7 +143,7 @@
                         "content": formData.get("content")
                     }],
                     "incident_guid": formData.get("incident-guid"),
-                    "state": parseInt(formData.get("incident-state"), 10),
+                    "state": state,
                     "components": components,
                     "is_scheduled": true,
                     "created_at": moment(formData.get("created-at-date") + " " + formData.get("created-at-time"), "YYYY-MM-DD HH:mm").format(),

@@ -48,6 +48,8 @@ func colorIncidentState(state models.IncidentState) string {
 		return "deep-orange"
 	case models.Monitoring:
 		return "blue"
+	case models.Idle:
+		return "gray"
 	}
 	return "green"
 }
@@ -72,6 +74,8 @@ func colorHexIncidentState(state models.IncidentState) string {
 		return "#ff5722"
 	case models.Monitoring:
 		return "#2196F3"
+	case models.Idle:
+		return "#888888"
 	}
 	return "#4CAF50"
 }

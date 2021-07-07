@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"time"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
 	"github.com/orange-cloudfoundry/statusetat/notifiers/email"
 	"github.com/orange-cloudfoundry/statusetat/notifiers/email/emailfakes"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"gopkg.in/gomail.v2"
 )
 
@@ -46,7 +46,7 @@ var _ = Describe("Email", func() {
 	})
 	Context("Notify", func() {
 		Context("Is scheduled task", func() {
-			It("should wrote on slack a scheduled task message", func() {
+			It("should wrote on slack a scheduled task message if state is idle", func() {
 				subscriber := "user@user.com"
 
 				fakeDialer.DialAndSendStub = func(message ...*gomail.Message) error {
@@ -62,6 +62,7 @@ var _ = Describe("Email", func() {
 					Expect(err).ToNot(HaveOccurred())
 
 					Expect(buf.String()).To(ContainSubstring("<h1>Scheduled Maintenance"))
+					Expect(buf.String()).To(ContainSubstring("Planned Duration"))
 					return nil
 				}
 
@@ -75,9 +76,81 @@ var _ = Describe("Email", func() {
 						},
 					},
 					IsScheduled: true,
+					State:       models.Idle,
 				}, []string{subscriber})
 				Expect(err).ToNot(HaveOccurred())
 			})
+
+			It("should wrote on slack a scheduled task started message if state is unresolved", func() {
+				subscriber := "user@user.com"
+
+				fakeDialer.DialAndSendStub = func(message ...*gomail.Message) error {
+					Expect(message).To(HaveLen(1))
+					m := message[0]
+					Expect(m.GetHeader("From")).To(ContainElement("me@me.com"))
+					Expect(m.GetHeader("To")).To(ContainElement(subscriber))
+					Expect(m.GetHeader("Subject")).To(HaveLen(1))
+					Expect(m.GetHeader("Subject")[0]).To(ContainSubstring("Scheduled task has started]"))
+					Expect(m.GetHeader("Auto-submitted")).To(ContainElement("auto-generated"))
+					buf := &bytes.Buffer{}
+					_, err := m.WriteTo(buf)
+					Expect(err).ToNot(HaveOccurred())
+
+					Expect(buf.String()).To(ContainSubstring("<h1>Scheduled Maintenance"))
+					Expect(buf.String()).To(ContainSubstring("Planned Duration"))
+					return nil
+				}
+
+				err := notifier.(notifiers.NotifierSubscriber).NotifySubscriber(models.Incident{
+					GUID: "aguid",
+					Messages: []models.Message{
+						{
+							CreatedAt: time.Time{},
+							Title:     "A title",
+							Content:   "content",
+						},
+					},
+					IsScheduled: true,
+					State:       models.Unresolved,
+				}, []string{subscriber})
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			It("should wrote on slack a scheduled task finished message if state is resolved", func() {
+				subscriber := "user@user.com"
+
+				fakeDialer.DialAndSendStub = func(message ...*gomail.Message) error {
+					Expect(message).To(HaveLen(1))
+					m := message[0]
+					Expect(m.GetHeader("From")).To(ContainElement("me@me.com"))
+					Expect(m.GetHeader("To")).To(ContainElement(subscriber))
+					Expect(m.GetHeader("Subject")).To(HaveLen(1))
+					Expect(m.GetHeader("Subject")[0]).To(ContainSubstring("Scheduled task has finished]"))
+					Expect(m.GetHeader("Auto-submitted")).To(ContainElement("auto-generated"))
+					buf := &bytes.Buffer{}
+					_, err := m.WriteTo(buf)
+					Expect(err).ToNot(HaveOccurred())
+
+					Expect(buf.String()).To(ContainSubstring("<h1>Scheduled Maintenance"))
+					Expect(buf.String()).To(ContainSubstring("Final Duration"))
+					return nil
+				}
+
+				err := notifier.(notifiers.NotifierSubscriber).NotifySubscriber(models.Incident{
+					GUID: "aguid",
+					Messages: []models.Message{
+						{
+							CreatedAt: time.Time{},
+							Title:     "A title",
+							Content:   "content",
+						},
+					},
+					IsScheduled: true,
+					State:       models.Resolved,
+				}, []string{subscriber})
+				Expect(err).ToNot(HaveOccurred())
+			})
+
 		})
 		Context("Is incident", func() {
 			It("should wrote on slack a scheduled task message", func() {

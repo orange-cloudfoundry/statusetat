@@ -99,6 +99,8 @@ func TextIncidentState(state IncidentState) string {
 		return "resolved"
 	case Monitoring:
 		return "monitoring"
+	case Idle:
+		return "idle"
 	}
 	return "unresolved"
 }

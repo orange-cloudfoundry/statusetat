@@ -1,0 +1,34 @@
+{{ if eq .InputType 0 }}
+  <input id="{{.Id}}" type="text" name="{{.Id}}" class="metadata-field">
+  <label for="{{.Id}}" class="tooltip" data-position="bottom" data-tooltip="{{.Info}}">{{.Name | title}}</label>
+{{end}}
+{{ if eq .InputType 1 }}
+  <input id="{{.Id}}" type="password" name="{{.Id}}" class="metadata-field">
+  <label for="{{.Id}}" class="tooltip" data-position="bottom" data-tooltip="{{.Info}}">{{.Name | title}}</label>
+{{end}}
+{{ if eq .InputType 2 }}
+  <label for="{{.Id}}" title="{{.Id}}" data-position="bottom" data-tooltip="{{.Info}}">
+    <input type="checkbox" id="{{.Id}}" name="{{.Id}}" class="metadata-field"/>
+    <span>{{.Name | title}}</span>
+  </label>
+{{end}}
+{{ if eq .InputType 3 }}
+    {{.Name}}:
+    {{ range $index, $element := .Opts }}
+      <p>
+        <label for="{{$.Id}}" class="tooltip" data-position="bottom" data-tooltip="{{$.Info}}">
+          <input name="{{$.Id}}" value="{{$element}}" class="metadata-field" type="radio" {{if eq $index 0}}checked{{end}} />
+          <span>{{$element | title}}</span>
+        </label>
+      </p>
+    {{end}}
+{{end}}
+{{ if eq .InputType 4 }}
+  <select id="{{.Id}}" name="{{.Id}}" class="metadata-field">
+    <option value="" disabled selected>Choose your option</option>
+      {{ range .Opts }}
+        <option value="{{.}}">{{.}}</option>
+      {{end}}
+  </select>
+  <label for="{{.Id}}" class="tooltip" data-position="bottom" data-tooltip="{{.Info}}">{{.Name | title}}</label>
+{{end}}

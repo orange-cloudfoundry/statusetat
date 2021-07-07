@@ -21,14 +21,16 @@ func init() {
 }
 
 type SlackOpts struct {
-	Endpoint           string `mapstructure:"endpoint"`
-	Channel            string `mapstructure:"channel"`
-	Username           string `mapstructure:"username"`
-	PretextIncident    string `mapstructure:"pretext_incident"`
-	PretextScheduled   string `mapstructure:"pretext_scheduled"`
-	IconEmojiIncident  string `mapstructure:"icon_emoji_incident"`
-	IconEmojiScheduled string `mapstructure:"icon_emoji_scheduled"`
-	InsecureSkipVerify bool   `mapstructure:"insecure_skip_verify"`
+	Endpoint                  string `mapstructure:"endpoint"`
+	Channel                   string `mapstructure:"channel"`
+	Username                  string `mapstructure:"username"`
+	PretextIncident           string `mapstructure:"pretext_incident"`
+	PretextScheduled          string `mapstructure:"pretext_scheduled"`
+	IconEmojiIncident         string `mapstructure:"icon_emoji_incident"`
+	IconEmojiScheduled        string `mapstructure:"icon_emoji_scheduled"`
+	IconEmojiScheduledStarted string `mapstructure:"icon_emoji_scheduled_started"`
+	IconEmojiScheduledFinish  string `mapstructure:"icon_emoji_scheduled_finish"`
+	InsecureSkipVerify        bool   `mapstructure:"insecure_skip_verify"`
 }
 
 type SlackRequest struct {
@@ -144,22 +146,40 @@ func (n Slack) notifyScheduled(incident models.Incident) error {
 		return nil
 	}
 	msg := incident.MainMessage()
-	color := "#607d8b"
-	pretext := fmt.Sprintf("Maintenance has been scheduled, follow it at [%s](%s).", n.baseUrl, n.baseUrl)
-	if incident.State == models.Resolved {
-		pretext = "Maintenance is finished."
-		msg = incident.LastMessage()
-		color = "#4CAF50"
-	}
+	color := "#888888"
+	pretext := fmt.Sprintf("Maintenance **has been scheduled**, follow it at [%s](%s).", n.baseUrl, n.baseUrl)
+	username := fmt.Sprintf("%s - Scheduled maintenance", n.opts.Username)
 	icon := n.opts.IconEmojiScheduled
 	if icon == "" {
 		icon = "clock1"
 	}
+
+	titleDuration := "Planned Duration"
+	if incident.State == models.Resolved {
+		pretext = "Maintenance **is finished**."
+		msg = incident.LastMessage()
+		color = "#4CAF50"
+		icon = n.opts.IconEmojiScheduledFinish
+		if icon == "" {
+			icon = "checkered_flag"
+		}
+		titleDuration = "Final Duration"
+	}
+	if incident.State == models.Unresolved {
+		username = fmt.Sprintf("%s - Scheduled maintenance started", n.opts.Username)
+		pretext = fmt.Sprintf("Maintenance **has started**, follow it at [%s](%s).", n.baseUrl, n.baseUrl)
+		color = "#607d8b"
+		icon = n.opts.IconEmojiScheduledStarted
+		if icon == "" {
+			icon = "arrow_forward"
+		}
+	}
+
 	pretext = n.opts.PretextScheduled + pretext
 	short := true
 	b, _ := json.Marshal(SlackRequest{
 		Channel:   n.opts.Channel,
-		Username:  fmt.Sprintf("%s - Scheduled maintenance", n.opts.Username),
+		Username:  username,
 		IconEmoji: icon,
 		IconURL:   "",
 		LinkNames: false,
@@ -180,7 +200,7 @@ func (n Slack) notifyScheduled(incident models.Incident) error {
 						Short: &short,
 					},
 					{
-						Title: "Duration",
+						Title: titleDuration,
 						Value: fmt.Sprintf("%s (Finish at %s %s)",
 							common.HumanDuration(incident.CreatedAt, incident.ScheduledEnd),
 							incident.ScheduledEnd.In(n.loc).Format("2006-01-02 15:04:05"),

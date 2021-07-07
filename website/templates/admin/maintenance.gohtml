@@ -16,6 +16,8 @@
                   <li class="collection-item incident-item avatar">
                     <form>
                       <input type="hidden" name="guid" value="{{ .GUID }}">
+                      <input type="hidden" name="previous_state" value="{{ .State }}">
+
                       <a href="#!" class="secondary-content waves-effect waves-light btn red white-text tooltipped delete-incident" data-tooltip="Delete maintenance"><i class="material-icons">delete</i></a>
                       <a href="#!" class="secondary-content waves-effect waves-light btn orange lighten-2 white-text tooltipped-btn notify-incident" data-tooltip="Re-send Notification"><i class="material-icons">notifications_active</i></a>
                       <a href="/admin/maintenance/edit/{{ .GUID }}" class="secondary-content waves-effect waves-light btn grey lighten-4 grey-text tooltipped" data-tooltip="Edit maintenance"><i class="material-icons">edit</i></a>
@@ -24,8 +26,8 @@
                             <i class="material-icons">done</i>
                           </a>
                         {{ else }}
-                          <a href="#!" class="secondary-content waves-effect waves-light btn blue-grey lighten-1 white-text tooltipped mark-as-set-state" data-state="0" data-tooltip="Marks as continued">
-                            <i class="material-icons">forward</i>
+                          <a href="#!" class="secondary-content waves-effect waves-light btn blue-grey lighten-1 white-text tooltipped mark-as-set-state" data-state="0" data-tooltip="Marks as started">
+                            <i class="material-icons">play_arrow</i>
                           </a>
                         {{ end }}
                     </form>
@@ -60,20 +62,30 @@
           $(".mark-as-set-state").click(function () {
               let guid = $(this).closest('form').find('input[name="guid"]').val();
               let btn = $(this);
-              let state = $(this).data("state");
+              let state = parseInt($(this).data("state"), 10);
+              let previousState = parseInt($(this).closest('form').find('input[name="previous_state"]').val(), 10);
               let previousContent = $(this).html();
               $(this).html($('.preloader-box').html())
               $(this).addClass("disabled");
               $('.alert-box .alert').hide();
+
+              let data = {
+                  "guid": guid,
+                  "state": state
+              };
+              if (previousState === 3 && state === 0) {
+                  data["created_at"] = moment().format();
+              }
+              if (previousState === 0 && state === 1) {
+                  data["scheduled_end"] = moment().format();
+              }
+
               $.ajax({
                   url: '/v1/incidents/' + guid,
                   type: 'PUT',
                   async: false,
                   cache: false,
-                  data: JSON.stringify({
-                      "guid": guid,
-                      "state": state
-                  }),
+                  data: JSON.stringify(data),
                   contentType: 'application/json',
                   dataType: "json",
                   timeout: 30000,

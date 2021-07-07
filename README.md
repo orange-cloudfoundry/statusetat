@@ -166,8 +166,12 @@ endpoint: <string>
 [ channel: <string> ]
 # Specify icon emoji incident to show on message
 [ icon_emoji_incident: <string> | default = "bell" ]
-# Specify icon emoji scheduled tasks to show on message
+# Specify icon emoji scheduled tasks to show when planified
 [ icon_emoji_scheduled: <string> | default = "clock1" ]
+# Specify icon emoji scheduled tasks to show when started
+[ icon_emoji_scheduled_started: <string> | default = "clock1" ]
+# Specify icon emoji scheduled tasks to show when finished
+[ icon_emoji_scheduled_finish: <string> | default = "clock1" ]
 # skip ssl verification when sending notification
 [ insecure_skip_verify: <bool> ]
 ```
