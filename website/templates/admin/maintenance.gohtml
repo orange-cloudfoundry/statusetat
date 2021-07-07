@@ -79,7 +79,9 @@
               if (previousState === 0 && state === 1) {
                   data["scheduled_end"] = moment().format();
               }
-
+              if (previousState === 1 && state === 0) {
+                  data["scheduled_end"] = moment().add(2, 'h').format();
+              }
               $.ajax({
                   url: '/v1/incidents/' + guid,
                   type: 'PUT',

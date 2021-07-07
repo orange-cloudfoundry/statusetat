@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"reflect"
 )
 
 type Metadata struct {
@@ -26,7 +27,8 @@ type MetadataField struct {
 	Info         string
 	InputType    InputTypeMedata
 	ForScheduled bool
-	Opts         []string
+	Opts         interface{}
+	DefaultOpt   interface{}
 }
 
 func (m MetadataField) Validate() error {
@@ -37,9 +39,28 @@ func (m MetadataField) Validate() error {
 		return fmt.Errorf("Id must be defined")
 	}
 	switch m.InputType {
-	case Radio, Select:
-		if len(m.Opts) == 0 {
-			return fmt.Errorf("Opts must be set for a radio or select metadata field")
+	case Radio:
+		valOf := reflect.ValueOf(m.Opts)
+		if valOf.IsNil() {
+			return fmt.Errorf("Opts must be set for a radio as a slice")
+		}
+		if valOf.Kind() != reflect.Slice && valOf.Kind() != reflect.Array {
+			return fmt.Errorf("Opts must be set for a radio as a slice, type %s given", valOf.Type())
+		}
+		if valOf.Len() == 0 {
+			return fmt.Errorf("Opts must be set for a radio as a slice, empty one given")
+		}
+
+	case Select:
+		valOf := reflect.ValueOf(m.Opts)
+		if valOf.IsNil() {
+			return fmt.Errorf("Opts must be set for a select as a map")
+		}
+		if valOf.Kind() != reflect.Map {
+			return fmt.Errorf("Opts must be set for a select as a map, type %s given", valOf.Type())
+		}
+		if valOf.Len() == 0 {
+			return fmt.Errorf("Opts must be be set for a select as a map, empty one given")
 		}
 	}
 	return nil

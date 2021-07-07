@@ -25,9 +25,18 @@
 {{end}}
 {{ if eq .InputType 4 }}
   <select id="{{.Id}}" name="{{.Id}}" class="metadata-field">
-    <option value="" disabled selected>Choose your option</option>
-      {{ range .Opts }}
-        <option value="{{.}}">{{.}}</option>
+      {{if .DefaultOpt }}
+        <option value="{{index .Opts .DefaultOpt}}">{{.DefaultOpt}}</option>
+      {{end}}
+      {{ range $key, $val := .Opts }}
+          {{if not $.DefaultOpt}}
+            <option value="{{$val}}">{{$key}}</option>
+          {{end}}
+          {{if $.DefaultOpt}}
+              {{if not (eq $key $.DefaultOpt)}}
+                <option value="{{$val}}">{{$key}}</option>
+              {{end}}
+          {{end}}
       {{end}}
   </select>
   <label for="{{.Id}}" class="tooltip" data-position="bottom" data-tooltip="{{.Info}}">{{.Name | title}}</label>
