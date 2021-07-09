@@ -57,7 +57,7 @@
                 {{ range .MetadataFields }}
                     {{ if .ForScheduled }}
                       <div class="input-field col s12">
-                          {{ template "admin/metadata_field.gohtml" (dict "Incident" $.Incident "Field" .) }}
+                          {{ template "components/metadata_field.gohtml" (dict "Incident" $.Incident "Field" .) }}
                       </div>
                     {{ end }}
                 {{ end }}
@@ -81,7 +81,7 @@
   </div>
 {{end}}
 {{ define "pre_body_close" }}
-    {{ template "admin/chips-components.gohtml" . }}
+    {{ template "components/chips-components.gohtml" . }}
     <script type="text/javascript">
         $(document).ready(function () {
             $('.cancel-btn').click(function (e) {

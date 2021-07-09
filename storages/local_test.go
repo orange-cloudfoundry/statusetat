@@ -145,7 +145,7 @@ var _ = Describe("Local", func() {
 			_, err = localStorage.Create(inc3)
 			Expect(err).To(BeNil())
 
-			incidents, err := localStorage.ByDate(d2020, d2019)
+			incidents, err := localStorage.ByDate(d2019, d2020)
 			Expect(err).To(BeNil())
 			Expect(incidents).Should(HaveLen(2))
 			Expect(incidents[0].CreatedAt).Should(Equal(d2020))

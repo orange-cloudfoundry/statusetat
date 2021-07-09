@@ -167,7 +167,7 @@ var _ = Describe("Db", func() {
 			_, err = store.Create(inc3)
 			Expect(err).To(BeNil())
 
-			incidents, err := store.ByDate(d2020, d2019)
+			incidents, err := store.ByDate(d2019, d2020)
 			Expect(err).To(BeNil())
 			Expect(incidents).Should(HaveLen(2))
 

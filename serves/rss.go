@@ -41,7 +41,7 @@ func (a Serve) Atom(w http.ResponseWriter, req *http.Request) {
 
 func (a Serve) feed(req *http.Request) (*feeds.Feed, error) {
 	loc := a.Location(req)
-	incidents, err := a.store.ByDate(time.Now().In(loc), time.Now().Add(-7*24*time.Hour).In(loc))
+	incidents, err := a.store.ByDate(time.Now().Add(-7*24*time.Hour).In(loc), time.Now().In(loc))
 	if err != nil {
 		return nil, err
 	}

@@ -66,6 +66,7 @@
             After <i class="material-icons">chevron_right</i></a>
         </li>
       </ul>
+        {{template "components/period-show.gohtml" (dict "From" .From "To" .To)}}
     </div>
   </div>
 {{end}}

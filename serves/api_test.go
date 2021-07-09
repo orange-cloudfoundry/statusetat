@@ -148,8 +148,8 @@ var _ = Describe("Api", func() {
 				Expect(finalIncidents[1].GUID).To(Equal("1"))
 			})
 			It("should give ordered incidents between date given by user", func() {
-				from := time.Now().AddDate(0, 0, 2).UTC()
-				to := time.Now().AddDate(0, 0, -10).UTC()
+				from := time.Now().AddDate(0, 0, -10).UTC()
+				to := time.Now().AddDate(0, 0, 2).UTC()
 				target := fmt.Sprintf(
 					"/v1/incidents?from=%s&to=%s",
 					from.Format(time.RFC3339),
@@ -169,8 +169,8 @@ var _ = Describe("Api", func() {
 		})
 		Context("with all_types param set", func() {
 			It("should give ordered incidents between date given by user", func() {
-				from := time.Now().AddDate(0, 0, 2).UTC()
-				to := time.Now().AddDate(0, 0, -10).UTC()
+				from := time.Now().AddDate(0, 0, -10).UTC()
+				to := time.Now().AddDate(0, 0, 2).UTC()
 				target := fmt.Sprintf(
 					"/v1/incidents?from=%s&to=%s&all_types=true",
 					from.Format(time.RFC3339),

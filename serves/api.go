@@ -121,7 +121,12 @@ func (a Serve) parseDate(req *http.Request, key string, defaultTime time.Time) (
 
 func (a Serve) ByDate(w http.ResponseWriter, req *http.Request) {
 	var err error
-	incidents, err := a.incidentsByParamsDate(req)
+	from, to, err := a.periodFromReq(req, -7, 0)
+	if err != nil {
+		JSONError(w, err, http.StatusInternalServerError)
+		return
+	}
+	incidents, err := a.incidentsByParamsDate(from, to, a.isAllType(req))
 	if err != nil {
 		JSONError(w, err, http.StatusInternalServerError)
 		return
@@ -222,7 +227,6 @@ func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
 	if incidentUpdate.Metadata != nil {
 		incident.Metadata = *incidentUpdate.Metadata
 	}
-	fmt.Println(incident.ScheduledEnd)
 	if incident.IsScheduled && incident.CreatedAt.After(incident.ScheduledEnd) {
 		JSONError(w, fmt.Errorf("Start date of scheduled maintenance must be before end date"), http.StatusPreconditionFailed)
 		return

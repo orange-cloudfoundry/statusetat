@@ -8,19 +8,8 @@ import (
 	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
-func (a Serve) scheduled(req *http.Request) ([]models.Incident, error) {
+func (a Serve) scheduled(from, to time.Time) ([]models.Incident, error) {
 	scheduled := make([]models.Incident, 0)
-
-	y, m, d := time.Now().Date()
-	from, err := a.parseDate(req, "from", time.Date(y, m, d, 0, 0, 0, 0, a.Location(req)))
-	if err != nil {
-		return []models.Incident{}, err
-	}
-
-	to, err := a.parseDate(req, "to", from.AddDate(0, 0, 26))
-	if err != nil {
-		return []models.Incident{}, err
-	}
 
 	incidents, err := a.store.ByDate(from, to)
 	if err != nil {
@@ -36,25 +25,33 @@ func (a Serve) scheduled(req *http.Request) ([]models.Incident, error) {
 	return scheduled, nil
 }
 
-func (a Serve) incidentsByParamsDate(req *http.Request) ([]models.Incident, error) {
-	var err error
+func (a Serve) periodFromReq(req *http.Request, nbDaysFrom, nbDaysTo int) (from, to time.Time, err error) {
+	defaultNbDaysFrom := time.Duration(nbDaysFrom) * 24 * time.Hour
+	defaultNbDaysTo := time.Duration(nbDaysTo) * 24 * time.Hour
+
 	y, m, d := time.Now().Date()
-	from, err := a.parseDate(req, "from", time.Date(y, m, d, 0, 0, 0, 0, a.Location(req)))
+	from, err = a.parseDate(req, "from", time.Date(y, m, d, 0, 0, 0, 0, a.Location(req)).Add(defaultNbDaysFrom))
 	if err != nil {
-		return []models.Incident{}, err
+		return time.Time{}, time.Time{}, err
 	}
 
-	to, err := a.parseDate(req, "to", from.Add(7*24*time.Hour))
+	to, err = a.parseDate(req, "to", from.Add(-defaultNbDaysFrom+defaultNbDaysTo+23*time.Hour+59*time.Minute+59*time.Second))
 	if err != nil {
-		return []models.Incident{}, err
+		return time.Time{}, time.Time{}, err
 	}
+	return from, to, nil
 
-	allType := false
-	dateQuery := req.URL.Query().Get("all_types")
-	if dateQuery != "" {
-		allType = true
+}
+
+func (a Serve) isAllType(req *http.Request) bool {
+	allTypeQuery := req.URL.Query().Get("all_types")
+	if allTypeQuery != "" {
+		return true
 	}
+	return false
+}
 
+func (a Serve) incidentsByParamsDate(from, to time.Time, allType bool) ([]models.Incident, error) {
 	incidents, err := a.store.ByDate(from, to)
 	if err != nil {
 		return []models.Incident{}, err

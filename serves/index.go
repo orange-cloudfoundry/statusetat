@@ -53,7 +53,13 @@ type ComponentStateData struct {
 
 func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 
-	incidents, err := a.incidentsByParamsDate(req)
+	from, to, err := a.periodFromReq(req, -7, 0)
+	if err != nil {
+		HTMLError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	incidents, err := a.incidentsByParamsDate(from, to, false)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
 		return
@@ -111,11 +117,6 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 		}
 
 	}
-	from, err := a.parseDate(req, "from", time.Now().In(a.Location(req)))
-	if err != nil {
-		HTMLError(w, err, http.StatusInternalServerError)
-		return
-	}
 
 	for i := 0; i < 7; i++ {
 		date := a.timelineFormat(from.AddDate(0, 0, -i))
@@ -125,7 +126,13 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	scheduled, err := a.scheduled(req)
+	fromScheduled, toScheduled, err := a.periodFromReq(req, 0, 26)
+	if err != nil {
+		HTMLError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	scheduled, err := a.scheduled(fromScheduled, toScheduled)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
 		return
@@ -182,17 +189,15 @@ func (a Serve) ShowIncident(w http.ResponseWriter, req *http.Request) {
 }
 
 func (a Serve) History(w http.ResponseWriter, req *http.Request) {
-	loc := a.Location(req)
-	y, m, d := time.Now().Date()
-	from, err := a.parseDate(req, "from", time.Date(y, m, d, 0, 0, 0, 0, loc))
+	from, to, err := a.periodFromReq(req, -7, 0)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	after := from.Add(7 * 24 * time.Hour)
+	after := from.Add(8 * 24 * time.Hour)
 
-	incidents, err := a.incidentsByParamsDate(req)
+	incidents, err := a.incidentsByParamsDate(from, to, a.isAllType(req))
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
 		return

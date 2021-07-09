@@ -9,8 +9,12 @@ import (
 )
 
 func (a Serve) Ical(w http.ResponseWriter, req *http.Request) {
-
-	scheduled, err := a.scheduled(req)
+	from, to, err := a.periodFromReq(req, -26, 26)
+	if err != nil {
+		HTMLError(w, err, http.StatusInternalServerError)
+		return
+	}
+	scheduled, err := a.scheduled(from, to)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
 		return

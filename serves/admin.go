@@ -20,18 +20,16 @@ type adminDefaultData struct {
 }
 
 func (a Serve) AdminIncidents(w http.ResponseWriter, req *http.Request) {
-	loc := a.Location(req)
-	y, m, d := time.Now().Date()
-	from, err := a.parseDate(req, "from", time.Date(y, m, d, 0, 0, 0, 0, loc))
+	from, to, err := a.periodFromReq(req, -7, 0)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	after := from.Add(7 * 24 * time.Hour)
-	before := from.AddDate(0, 0, -7)
+	after := from.Add(8 * 24 * time.Hour)
+	before := from.AddDate(0, 0, -8)
 
-	incidents, err := a.incidentsByParamsDate(req)
+	incidents, err := a.incidentsByParamsDate(from, to, false)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
 		return
@@ -48,6 +46,8 @@ func (a Serve) AdminIncidents(w http.ResponseWriter, req *http.Request) {
 		IncidentStates []models.IncidentState
 		Before         time.Time
 		After          time.Time
+		From           time.Time
+		To             time.Time
 	}{
 		adminDefaultData: adminDefaultData{
 			BaseInfo:   a.baseInfo,
@@ -60,6 +60,8 @@ func (a Serve) AdminIncidents(w http.ResponseWriter, req *http.Request) {
 
 		After:  after,
 		Before: before,
+		From:   from,
+		To:     to,
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -125,18 +127,16 @@ func (a Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Reque
 }
 
 func (a Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
-	loc := a.Location(req)
-	y, m, d := time.Now().Date()
-	from, err := a.parseDate(req, "from", time.Date(y, m, d, 0, 0, 0, 0, loc))
+	from, to, err := a.periodFromReq(req, -26, 26)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	after := from.Add(26 * 24 * time.Hour)
-	before := from.AddDate(0, 0, -26)
+	after := from.Add(27 * 24 * time.Hour)
+	before := from.AddDate(0, 0, -27)
 
-	maintenance, err := a.scheduled(req)
+	maintenance, err := a.scheduled(from, to)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
 		return
@@ -154,6 +154,8 @@ func (a Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
 		MetadataFields models.MetadataFields
 		Before         time.Time
 		After          time.Time
+		From           time.Time
+		To             time.Time
 	}{
 		adminDefaultData: adminDefaultData{
 			BaseInfo:   a.baseInfo,
@@ -166,6 +168,8 @@ func (a Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
 		MetadataFields: notifiers.NotifiersMetadataFields(),
 		After:          after,
 		Before:         before,
+		From:           from,
+		To:             to,
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
