@@ -148,11 +148,11 @@
     <div class="col s12 center-align">
       <ul class="pagination">
         <li>
-          <a href="/admin/incident?from={{ .After | timeStdFormat }}"><i class="material-icons">chevron_left</i>
-            After</a></li>
+          <a href="/admin/incident?from={{ .Before | timeStdFormat }}"><i class="material-icons">chevron_left</i> Before</a>
+        </li>
         <li>
-          <a href="/admin/incident?from={{ .Before | timeStdFormat }}">Before
-            <i class="material-icons">chevron_right</i></a>
+          <a href="/admin/incident?from={{ .After | timeStdFormat }}">
+            After <i class="material-icons">chevron_right</i></a>
         </li>
       </ul>
     </div>

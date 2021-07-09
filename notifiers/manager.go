@@ -31,7 +31,7 @@ func AddNotifier(name string, params map[string]interface{}, forComp config.ForC
 			if err != nil {
 				return err
 			}
-			if metanotif, ok := n.(NotifierMetadataField); ok {
+			if metanotif, ok := notifier.(NotifierMetadataField); ok {
 
 				for _, field := range metanotif.MetadataFields() {
 					err := field.Validate()

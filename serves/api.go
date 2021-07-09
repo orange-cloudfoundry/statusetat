@@ -222,9 +222,9 @@ func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
 	if incidentUpdate.Metadata != nil {
 		incident.Metadata = *incidentUpdate.Metadata
 	}
-
+	fmt.Println(incident.ScheduledEnd)
 	if incident.IsScheduled && incident.CreatedAt.After(incident.ScheduledEnd) {
-		JSONError(w, fmt.Errorf("Start date of scheduled maintenance can be before end date"), http.StatusPreconditionFailed)
+		JSONError(w, fmt.Errorf("Start date of scheduled maintenance must be before end date"), http.StatusPreconditionFailed)
 		return
 	}
 
@@ -482,6 +482,10 @@ func (a Serve) ShowFlagIncidentStates(w http.ResponseWriter, req *http.Request) 
 		},
 		{
 			Value:       models.Monitoring,
+			Description: models.TextIncidentState(models.Monitoring),
+		},
+		{
+			Value:       models.Idle,
 			Description: models.TextIncidentState(models.Monitoring),
 		},
 	}

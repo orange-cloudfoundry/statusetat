@@ -241,12 +241,9 @@ and template function available at https://github.com/orange-cloudfoundry/status
 
 You can create a plugin for notification for your own need.
 
-Plugin are native golang plugin which doc can be found here: https://golang.org/pkg/plugin/ this will **not** let you have 
-plugin on windows os.
+Plugin are grpc golang plugin which doc can be found here: https://github.com/hashicorp/go-plugin .
 
-You must implement `notifiers.Notify` and additionally implement `notifiers.NotifierSubscriber` which can be found at 
-https://github.com/orange-cloudfoundry/statusetat/blob/master/notifiers/interface.go and register it with 
-`Register() notifiers.Notifier` function signature.
+You must implement [plugin.Notifier](/notifiers/plugin/interface.go).
 
 Example of implementation:
 
@@ -254,30 +251,31 @@ Example of implementation:
 package main
 
 import (
-    "strings"
-    "github.com/orange-cloudfoundry/statusetat/config"
-    "github.com/orange-cloudfoundry/statusetat/models"
-    "github.com/orange-cloudfoundry/statusetat/notifiers"
-    log "github.com/sirupsen/logrus"
+	pluginhc "github.com/hashicorp/go-plugin"
+	"github.com/orange-cloudfoundry/statusetat/config"
+	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/notifiers/plugin"
+	log "github.com/sirupsen/logrus"
+	"strings"
 )
-
-func Register() notifiers.Notifier {
-	return &LogNotifier{}
-}
 
 type LogNotifier struct {
 }
 
-func (n LogNotifier) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
-	return &LogNotifier{}, nil
+func (n *LogNotifier) Init(baseInfo config.BaseInfo, params map[string]interface{}) error {
+	return nil
 }
 
-func (n LogNotifier) Name() string {
-	return "log_notifier"
+func (n LogNotifier) Name() (string, error) {
+	return "log_notifier", nil
 }
 
-func (n LogNotifier) Id() string {
-	return "log_notifier1"
+func (n LogNotifier) Id() (string, error) {
+	return "log_notifier1", nil
+}
+
+func (n LogNotifier) MetadataFields() ([]models.MetadataField, error) {
+	return []models.MetadataField{}, nil
 }
 
 func (n LogNotifier) Notify(incident models.Incident) error {
@@ -290,9 +288,22 @@ func (n LogNotifier) NotifySubscriber(incident models.Incident, subscribers []st
 	return nil
 }
 
+func main() {
+	pluginhc.Serve(&pluginhc.ServeConfig{
+		HandshakeConfig: plugin.Handshake,
+		Plugins: map[string]pluginhc.Plugin{
+			"notifier": &plugin.NotifierGRPCPlugin{
+				Impl: &LogNotifier{},
+			},
+		},
+
+		// A non-nil value here enables gRPC serving for this plugin...
+		GRPCServer: pluginhc.DefaultGRPCServer,
+	})
+}
 ```
 
-You can build it with command line `go build -buildmode=plugin -o log-notif.so .`
+You can build it with command line `go build -o log-notif .`
 
 You can now use it in your config with:
 
@@ -300,8 +311,9 @@ You can now use it in your config with:
 - **Params**:
 ```yaml
 # path to .so to load
-# in our example it would be `./log-notif.so`
+# in our example it would be `./log-notif`
 path: <string>
+# all remaining arguments will be pass at Init
 ```
 
 

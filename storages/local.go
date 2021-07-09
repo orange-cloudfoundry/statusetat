@@ -142,7 +142,7 @@ func (l Local) ByDate(from, to time.Time) ([]models.Incident, error) {
 		if err != nil {
 			return err
 		}
-		if incident.CreatedAt.After(from) || incident.CreatedAt.Before(to) {
+		if incident.CreatedAt.Before(from) || incident.CreatedAt.After(to) {
 			return nil
 		}
 

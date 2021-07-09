@@ -117,7 +117,7 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	for i := 0; i <= 6; i++ {
+	for i := 0; i < 7; i++ {
 		date := a.timelineFormat(from.AddDate(0, 0, -i))
 		if _, ok := timeline[date]; !ok {
 			timeline[date] = []models.Incident{}
@@ -183,7 +183,8 @@ func (a Serve) ShowIncident(w http.ResponseWriter, req *http.Request) {
 
 func (a Serve) History(w http.ResponseWriter, req *http.Request) {
 	loc := a.Location(req)
-	from, err := a.parseDate(req, "from", time.Now().In(loc))
+	y, m, d := time.Now().Date()
+	from, err := a.parseDate(req, "from", time.Date(y, m, d, 0, 0, 0, 0, loc))
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
 		return
@@ -216,14 +217,14 @@ func (a Serve) History(w http.ResponseWriter, req *http.Request) {
 	var before time.Time
 	var subDate time.Time
 	for i := 0; i <= 6; i++ {
-		subDate = from.AddDate(0, 0, -i)
+		subDate = from.AddDate(0, 0, i)
 		date := a.timelineFormat(subDate)
 		if _, ok := timeline[date]; !ok {
 			timeline[date] = []models.Incident{}
 			timelineDates = append(timelineDates, date)
 		}
 	}
-	before = subDate.AddDate(0, 0, -1)
+	before = from.AddDate(0, 0, -7)
 
 	timezone := ""
 	if !a.IsDefaultLocation(req) {

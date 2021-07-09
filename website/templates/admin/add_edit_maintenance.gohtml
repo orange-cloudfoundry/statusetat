@@ -57,7 +57,7 @@
                 {{ range .MetadataFields }}
                     {{ if .ForScheduled }}
                       <div class="input-field col s12">
-                          {{ template "admin/metadata_field.gohtml" . }}
+                          {{ template "admin/metadata_field.gohtml" (dict "Incident" $.Incident "Field" .) }}
                       </div>
                     {{ end }}
                 {{ end }}

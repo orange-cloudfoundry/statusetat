@@ -31,12 +31,14 @@
     <div class="col s1"></div>
     <div class="col s10 center-align">
       <ul class="pagination">
+
         <li>
-          <a href="/history?all_types=true&from={{ .After | timeStdFormat }}"><i class="material-icons">chevron_left</i>
-            After</a></li>
+          <a href="/history?all_types=true&from={{ .Before | timeStdFormat }}"><i class="material-icons">chevron_left</i>
+            Before</a>
+        </li>
         <li>
-          <a href="/history?all_types=true&from={{ .Before | timeStdFormat }}">Before
-            <i class="material-icons">chevron_right</i></a>
+          <a href="/history?all_types=true&from={{ .After | timeStdFormat }}">
+            After <i class="material-icons">chevron_right</i></a>
         </li>
       </ul>
     </div>

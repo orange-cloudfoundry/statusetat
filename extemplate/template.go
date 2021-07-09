@@ -48,6 +48,9 @@ var registeredFuncs = template.FuncMap{
 	"join":                  strings.Join,
 	"netUrl":                netUrl,
 	"timeNow":               timeNow,
+	"dict":                  dict,
+	"metadataValue":         metadataValue,
+	"timeAddDay":            timeAddDay,
 }
 
 func AddFuncs(funcs template.FuncMap) {

@@ -1,13 +1,14 @@
 package plugin
 
 import (
-	"fmt"
-	"plugin"
-
+	pluginhc "github.com/hashicorp/go-plugin"
 	"github.com/mitchellh/mapstructure"
+	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
+	"github.com/sirupsen/logrus"
+	"os/exec"
 )
 
 func init() {
@@ -22,25 +23,32 @@ type optsPlugin struct {
 }
 
 type Plugin struct {
-	notifier notifiers.Notifier
+	notifier    Notifier
+	BaseRequest Base
 }
 
-func (n Plugin) loadPlugin(path string) (notifiers.Notifier, error) {
-	p, err := plugin.Open(path)
+func (n Plugin) loadPlugin(path string) (Notifier, error) {
+	client := pluginhc.NewClient(&pluginhc.ClientConfig{
+		HandshakeConfig: Handshake,
+		Plugins: map[string]pluginhc.Plugin{
+			"notifier": &NotifierGRPCPlugin{},
+		},
+		Cmd:              exec.Command(path),
+		Logger:           common.NewLogrusHclogger(logrus.StandardLogger()),
+		AllowedProtocols: []pluginhc.Protocol{pluginhc.ProtocolGRPC},
+	})
+
+	rpcClient, err := client.Client()
 	if err != nil {
-		return nil, fmt.Errorf("Error on plugin %s: %s", path, err.Error())
-	}
-	registerPlugin, err := p.Lookup(RegisterFuncName)
-	if err != nil {
-		return nil, fmt.Errorf("Error on plugin %s: %s", path, err.Error())
-	}
-	notifierPlugin := registerPlugin.(func() notifiers.Notifier)()
-	name := notifierPlugin.Name()
-	if name == "" {
-		return nil, fmt.Errorf("Error on plugin %s: plugin must define its name.", path)
+		return nil, err
 	}
 
-	return notifierPlugin, nil
+	raw, err := rpcClient.Dispense("notifier")
+	if err != nil {
+		return nil, err
+	}
+
+	return raw.(Notifier), nil
 
 }
 
@@ -54,12 +62,16 @@ func (n Plugin) Creator(params map[string]interface{}, baseInfo config.BaseInfo)
 	if err != nil {
 		return nil, err
 	}
-	notifier, err := p.Creator(opts.Params, baseInfo)
+	err = p.Init(baseInfo, opts.Params)
 	if err != nil {
 		return nil, err
 	}
 	return &Plugin{
-		notifier: notifier,
+		notifier: p,
+		BaseRequest: Base{
+			BaseInfo: baseInfo,
+			Params:   opts.Params,
+		},
 	}, nil
 }
 
@@ -67,11 +79,24 @@ func (n Plugin) Name() string {
 	if n.notifier == nil {
 		return "plugin"
 	}
-	return n.notifier.Name()
+	name, err := n.notifier.Name()
+	if err != nil {
+		logrus.Errorf("Error from plugin: %s", err.Error())
+		return "plugin"
+	}
+	return name
 }
 
 func (n Plugin) Id() string {
-	return n.notifier.Id()
+	if n.notifier == nil {
+		return "plugin"
+	}
+	id, err := n.notifier.Id()
+	if err != nil {
+		logrus.Errorf("Error from plugin: %s", err.Error())
+		return "plugin"
+	}
+	return id
 }
 
 func (n Plugin) Notify(incident models.Incident) error {
@@ -79,15 +104,14 @@ func (n Plugin) Notify(incident models.Incident) error {
 }
 
 func (n Plugin) NotifySubscriber(incident models.Incident, subscribers []string) error {
-	if snotif, ok := n.notifier.(notifiers.NotifierSubscriber); ok {
-		return snotif.NotifySubscriber(incident, subscribers)
-	}
-	return nil
+	return n.notifier.NotifySubscriber(incident, subscribers)
 }
 
 func (n Plugin) MetadataFields() []models.MetadataField {
-	if metanotif, ok := n.notifier.(notifiers.NotifierMetadataField); ok {
-		return metanotif.MetadataFields()
+	fields, err := n.notifier.MetadataFields()
+	if err != nil {
+		logrus.Errorf("Error from plugin: %s", err.Error())
+		return nil
 	}
-	return nil
+	return fields
 }

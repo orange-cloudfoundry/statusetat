@@ -146,7 +146,7 @@ func (s *S3) ByDate(from, to time.Time) ([]models.Incident, error) {
 		if err != nil {
 			return incidents, err
 		}
-		if incident.CreatedAt.After(from) || incident.CreatedAt.Before(to) {
+		if incident.CreatedAt.Before(from) || incident.CreatedAt.After(to) {
 			continue
 		}
 		sort.Sort(models.Messages(incident.Messages))

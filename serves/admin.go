@@ -21,7 +21,8 @@ type adminDefaultData struct {
 
 func (a Serve) AdminIncidents(w http.ResponseWriter, req *http.Request) {
 	loc := a.Location(req)
-	from, err := a.parseDate(req, "from", time.Now().In(loc))
+	y, m, d := time.Now().Date()
+	from, err := a.parseDate(req, "from", time.Date(y, m, d, 0, 0, 0, 0, loc))
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
 		return
@@ -124,6 +125,17 @@ func (a Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Reque
 }
 
 func (a Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
+	loc := a.Location(req)
+	y, m, d := time.Now().Date()
+	from, err := a.parseDate(req, "from", time.Date(y, m, d, 0, 0, 0, 0, loc))
+	if err != nil {
+		HTMLError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	after := from.Add(26 * 24 * time.Hour)
+	before := from.AddDate(0, 0, -26)
+
 	maintenance, err := a.scheduled(req)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -134,11 +146,14 @@ func (a Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
 	if !a.IsDefaultLocation(req) {
 		timezone = a.Location(req).String()
 	}
+
 	err = a.xt.ExecuteTemplate(w, "admin/maintenance.gohtml", struct {
 		adminDefaultData
 		Maintenance    []models.Incident
 		IncidentStates []models.IncidentState
 		MetadataFields models.MetadataFields
+		Before         time.Time
+		After          time.Time
 	}{
 		adminDefaultData: adminDefaultData{
 			BaseInfo:   a.baseInfo,
@@ -149,6 +164,8 @@ func (a Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
 		Maintenance:    maintenance,
 		IncidentStates: models.AllIncidentState,
 		MetadataFields: notifiers.NotifiersMetadataFields(),
+		After:          after,
+		Before:         before,
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)

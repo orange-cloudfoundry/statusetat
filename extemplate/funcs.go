@@ -2,6 +2,7 @@ package extemplate
 
 import (
 	"encoding/json"
+	"errors"
 	"html/template"
 	"net/url"
 	"reflect"
@@ -49,7 +50,7 @@ func colorIncidentState(state models.IncidentState) string {
 	case models.Monitoring:
 		return "blue"
 	case models.Idle:
-		return "gray"
+		return "grey"
 	}
 	return "green"
 }
@@ -91,6 +92,10 @@ func timeFmtCustom(layout string, t time.Time) string {
 
 func timeStdFormat(t time.Time) string {
 	return t.Format(time.RFC3339)
+}
+
+func timeAddDay(t time.Time, nbDays int) time.Time {
+	return t.Add(time.Duration(nbDays) * 24 * time.Hour)
 }
 
 func stateFromIncidents(incidents []models.Incident) models.ComponentState {
@@ -163,4 +168,28 @@ func markdownNoParaph(content string) template.HTML {
 	b := markdown.Convert([]byte(content))
 	content = strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(string(b)), "<p>"), "</p>")
 	return template.HTML(content)
+}
+
+func metadataValue(metadata []models.Metadata, key string) string {
+	for _, data := range metadata {
+		if data.Key == key {
+			return data.Value
+		}
+	}
+	return ""
+}
+
+func dict(values ...interface{}) (map[string]interface{}, error) {
+	if len(values)%2 != 0 {
+		return nil, errors.New("invalid dict call")
+	}
+	dict := make(map[string]interface{}, len(values)/2)
+	for i := 0; i < len(values); i += 2 {
+		key, ok := values[i].(string)
+		if !ok {
+			return nil, errors.New("dict keys must be strings")
+		}
+		dict[key] = values[i+1]
+	}
+	return dict, nil
 }

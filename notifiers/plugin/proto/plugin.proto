@@ -1,0 +1,131 @@
+// protoc -I notifiers/plugin/proto/ --go_out=notifiers/plugin/proto --go_opt=paths=source_relative --go-grpc_out=notifiers/plugin/proto --go-grpc_opt=paths=source_relative plugin.proto
+syntax = "proto3";
+
+package types;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/orange-cloudfoundry/statusetat/notifiers/plugin/proto";
+
+message Incident {
+    string guid = 1;
+    LocalizedTime created_at = 2;
+    LocalizedTime updated_at = 3;
+    enum State {
+        UNRESOLVED = 0;
+        RESOLVED = 1;
+        MONITORING = 2;
+        IDLE = 3;
+    }
+    State state = 4;
+    enum ComponentState {
+        OPERATIONAL = 0;
+        UNDER_MAINTENANCE = 1;
+        DEGRADED_PERFORMANCE = 2;
+        PARTIAL_OUTAGE = 3;
+        MAJOR_OUTAGE = 4;
+    }
+    ComponentState component_state = 5;
+    repeated Component components = 6;
+    repeated Message messages = 7;
+    map<string, string> metadata = 8;
+    bool is_scheduled = 9;
+    LocalizedTime scheduled_end = 10;
+    string origin = 11;
+}
+
+message Message {
+    string guid = 1;
+    LocalizedTime created_at = 2;
+    string title = 3;
+    string content = 4;
+}
+
+message Component {
+    string name = 1;
+    string group = 2;
+}
+
+message LocalizedTime {
+    google.protobuf.Timestamp time = 1;
+    string location = 2;
+}
+
+message RadioOpts {
+    repeated string opts = 4;
+}
+
+message MetadataField {
+    string name = 1;
+    string id = 2;
+    string info = 3;
+    enum InputType {
+        TEXT = 0;
+        PASSWORD = 1;
+        CHECKBOX = 2;
+        RADIO = 3;
+        SELECT = 4;
+    }
+    InputType input_type = 4;
+    bool for_scheduled = 5;
+    oneof opts {
+        RadioOpts radio_opts = 6;
+        google.protobuf.Struct select_opts = 7;
+    }
+    oneof DefaultOpt {
+        string default_opt_key = 8;
+    }
+}
+
+message BaseInfo {
+    string base_url = 1;
+    string support = 2;
+    string contact = 3;
+    string title = 4;
+    string time_zone = 5;
+}
+
+message InitRequest {
+    BaseInfo base_info = 1;
+    google.protobuf.Struct params = 2;
+}
+
+message ListMetadataField {
+    repeated MetadataField fields = 1;
+}
+
+message Error {
+    string detail = 1;
+}
+
+message NotifyRequest {
+    Incident incident = 1;
+}
+
+message NotifySubscriberRequest {
+    Incident incident = 1;
+    repeated string subscribers = 2;
+}
+
+message ErrorResponse {
+    Error error = 1;
+}
+
+message NameResponse {
+    string name = 1;
+}
+
+message IdResponse {
+    string id = 1;
+}
+
+service Notifier {
+    rpc Init(InitRequest) returns (google.protobuf.Empty);
+    rpc Name(google.protobuf.Empty) returns (NameResponse);
+    rpc Id(google.protobuf.Empty) returns (IdResponse);
+    rpc Notify(NotifyRequest) returns (ErrorResponse);
+    rpc NotifySubscriber(NotifySubscriberRequest) returns (ErrorResponse);
+    rpc MetadataFields(google.protobuf.Empty) returns (ListMetadataField);
+}

@@ -70,7 +70,7 @@
                 {{ range .MetadataFields }}
                     {{ if not .ForScheduled }}
                       <div class="input-field col s12">
-                          {{ template "admin/metadata_field.gohtml" . }}
+                          {{ template "admin/metadata_field.gohtml" (dict "Incident" $.Incident "Field" .) }}
                       </div>
                     {{ end }}
                 {{ end }}
@@ -141,7 +141,7 @@
                     "state": parseInt(formData.get("incident-state"), 10),
                     "component_state": parseInt(formData.get("components-state"), 10),
                     "components": components,
-                    "created_at": moment(formData.get("date") + " " + formData.get("time"), "YYYY-MM-DD HH:mm").format()
+                    "created_at": moment(formData.get("date") + " " + formData.get("time"), "YYYY-MM-DD HH:mm").format(),
                     "metadata": metadata,
                 }
 

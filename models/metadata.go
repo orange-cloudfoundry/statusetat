@@ -11,10 +11,10 @@ type Metadata struct {
 	Value        string `json:"value"`
 }
 
-type InputTypeMedata uint
+type InputTypeMetadata int
 
 const (
-	Text InputTypeMedata = iota
+	Text InputTypeMetadata = iota
 	Password
 	Checkbox
 	Radio
@@ -25,7 +25,7 @@ type MetadataField struct {
 	Name         string
 	Id           string
 	Info         string
-	InputType    InputTypeMedata
+	InputType    InputTypeMetadata
 	ForScheduled bool
 	Opts         interface{}
 	DefaultOpt   interface{}

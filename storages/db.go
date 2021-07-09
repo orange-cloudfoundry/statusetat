@@ -188,7 +188,7 @@ func (s DB) ByDate(from, to time.Time) ([]models.Incident, error) {
 	var incidents []models.Incident
 	err := s.db.Preload("Messages", func(db *gorm.DB) *gorm.DB {
 		return db.Order("messages.created_at DESC")
-	}).Preload("Metadata").Where("created_at BETWEEN ? AND ?", to, from).Find(&incidents).Error
+	}).Preload("Metadata").Where("created_at BETWEEN ? AND ?", from, to).Find(&incidents).Error
 	return incidents, err
 }
 
