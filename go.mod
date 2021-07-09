@@ -14,15 +14,14 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/sessions v1.2.0
 	github.com/hako/durafmt v0.0.0-20200605151348-3a43fc422dd9
-	github.com/hashicorp/go-hclog v0.14.1 // indirect
+	github.com/hashicorp/go-hclog v0.14.1
 	github.com/hashicorp/go-multierror v1.1.0
-	github.com/hashicorp/go-plugin v1.4.2 // indirect
+	github.com/hashicorp/go-plugin v1.4.2
 	github.com/jinzhu/gorm v1.9.14
 	github.com/jinzhu/now v1.1.1 // indirect
 	github.com/karrick/godirwalk v1.15.6 // indirect
 	github.com/kyokomi/emoji v2.2.4+incompatible
 	github.com/lib/pq v1.6.0 // indirect
-	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.2.3
 	github.com/mitchellh/mapstructure v1.3.2
 	github.com/nicklaw5/go-respond v0.0.0-20190722175312-54f5cd3d2246
@@ -37,8 +36,8 @@ require (
 	github.com/tdewolff/minify/v2 v2.7.6
 	github.com/yuin/goldmark v1.2.1
 	github.com/yuin/goldmark-highlighting v0.0.0-20200307114337-60d527fdb691
-	google.golang.org/grpc v1.39.0 // indirect
-	google.golang.org/protobuf v1.25.0 // indirect
+	google.golang.org/grpc v1.39.0
+	google.golang.org/protobuf v1.25.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
