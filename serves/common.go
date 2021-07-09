@@ -44,11 +44,7 @@ func (a Serve) periodFromReq(req *http.Request, nbDaysFrom, nbDaysTo int) (from,
 }
 
 func (a Serve) isAllType(req *http.Request) bool {
-	allTypeQuery := req.URL.Query().Get("all_types")
-	if allTypeQuery != "" {
-		return true
-	}
-	return false
+	return req.URL.Query().Get("all_types") != ""
 }
 
 func (a Serve) incidentsByParamsDate(from, to time.Time, allType bool) ([]models.Incident, error) {
