@@ -31,19 +31,24 @@
                           </a>
                         {{ end }}
                     </form>
-                    <span class="title">
-                    {{$mainMsg.Title | title | markdownNoParaph }}
-                </span>
+                    <span class="title{{ if eq .State 1}} {{ .State | colorIncidentState }}-text{{end}}">
+                        {{if eq .State 1 }}
+                          <del>{{$mainMsg.Title | title | markdownNoParaph }}</del>
+                        {{else}}
+                            {{$mainMsg.Title | title | markdownNoParaph }}
+                        {{end}}
+                    </span>
                     <p>
                         {{ range .Components }}
                           <span class="badge grey lighten-4 grey-text">{{ . }}</span>
                         {{ end }}
                       <br/>
                       <span class="details-date">
-                    Scheduled in:
-                  <time class="grey-text human tooltipped" datetime="{{ .CreatedAt | timeStdFormat }}" data-tooltip="{{ .CreatedAt | timeFormat }}">{{ .CreatedAt | humanTime }}</time>
+                        Scheduled in:
+                        <time class="grey-text human tooltipped" datetime="{{ .CreatedAt | timeStdFormat }}" data-tooltip="{{ .CreatedAt | timeFormat }}">{{ .CreatedAt | humanTime }}</time>
                         - Duration: <time class="grey-text human tooltipped" data-prefix="End at: " data-tooltip="{{ .ScheduledEnd | timeFormat }}" datetime="{{ .ScheduledEnd | timeStdFormat}}">{{ humanDuration .CreatedAt .ScheduledEnd }}</time>
-                  </span>
+                        - State: <span class="{{ .State | colorIncidentState }}-text">{{ .State | textScheduledState | title }}</span>
+                      </span>
                     </p>
 
                   </li>

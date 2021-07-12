@@ -27,6 +27,7 @@ var registeredFuncs = template.FuncMap{
 	"colorState":            colorState,
 	"colorIncidentState":    colorIncidentState,
 	"textIncidentState":     models.TextIncidentState,
+	"textScheduledState":    models.TextScheduledState,
 	"textState":             models.TextState,
 	"timeFormat":            timeFormat,
 	"timeStdFormat":         timeStdFormat,

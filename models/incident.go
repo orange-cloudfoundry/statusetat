@@ -104,3 +104,15 @@ func TextIncidentState(state IncidentState) string {
 	}
 	return "unresolved"
 }
+
+func TextScheduledState(state IncidentState) string {
+	switch state {
+	case Resolved:
+		return "finished"
+	case Monitoring:
+		return "monitoring"
+	case Idle:
+		return "idle"
+	}
+	return "started"
+}
