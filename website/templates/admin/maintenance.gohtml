@@ -31,12 +31,9 @@
                           </a>
                         {{ end }}
                     </form>
-                    <span class="title{{ if eq .State 1}} {{ .State | colorIncidentState }}-text{{end}}">
-                        {{if eq .State 1 }}
-                          <del>{{$mainMsg.Title | title | markdownNoParaph }}</del>
-                        {{else}}
-                            {{$mainMsg.Title | title | markdownNoParaph }}
-                        {{end}}
+                    <span class="title">
+                        <span class="badge {{ .State | colorIncidentState }} white-text">{{ .State | textScheduledState | title }}</span>
+                        {{$mainMsg.Title | title | markdownNoParaph }}
                     </span>
                     <p>
                         {{ range .Components }}
@@ -47,7 +44,6 @@
                         Scheduled in:
                         <time class="grey-text human tooltipped" datetime="{{ .CreatedAt | timeStdFormat }}" data-tooltip="{{ .CreatedAt | timeFormat }}">{{ .CreatedAt | humanTime }}</time>
                         - Duration: <time class="grey-text human tooltipped" data-prefix="End at: " data-tooltip="{{ .ScheduledEnd | timeFormat }}" datetime="{{ .ScheduledEnd | timeStdFormat}}">{{ humanDuration .CreatedAt .ScheduledEnd }}</time>
-                        - State: <span class="{{ .State | colorIncidentState }}-text">{{ .State | textScheduledState | title }}</span>
                       </span>
                     </p>
 
