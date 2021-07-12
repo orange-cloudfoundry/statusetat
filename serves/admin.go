@@ -20,14 +20,14 @@ type adminDefaultData struct {
 }
 
 func (a Serve) AdminIncidents(w http.ResponseWriter, req *http.Request) {
-	from, to, err := a.periodFromReq(req, -7, 0)
+	from, to, err := a.periodFromReq(req, -6, 0)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	after := from.Add(8 * 24 * time.Hour)
-	before := from.AddDate(0, 0, -8)
+	after := from.Add(7 * 24 * time.Hour)
+	before := from.AddDate(0, 0, -7)
 
 	incidents, err := a.incidentsByParamsDate(from, to, false)
 	if err != nil {
