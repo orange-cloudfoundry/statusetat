@@ -11,6 +11,7 @@
       <form class="col s12" id="form-incident">
         <input type="hidden" name="incident-guid" value="{{ .Incident.GUID }}">
         <input type="hidden" name="message-guid" value="{{ .Incident.MainMessage.GUID }}">
+        <input type="hidden" name="incident-state" value="{{ .Incident.State }}">
         <div class="row">
           <div class="input-field col s12">
             <input id="title" name="title" type="text" value="{{ .Incident.MainMessage.Title }}" class="validate">
@@ -86,15 +87,15 @@
         $(document).ready(function () {
             $('.cancel-btn').click(function (e) {
                 window.location.replace("/admin/maintenance");
-            })
+            });
 
             M.Datepicker.getInstance(document.getElementById('created-at-date')).options.onSelect = function (newDate) {
                 $('#scheduled-end-at-date').val(moment(newDate).format('YYYY-MM-DD'));
-            }
+            };
 
             M.Timepicker.getInstance(document.getElementById('created-at-time')).options.onSelect = function (hours, minutes) {
                 $('#scheduled-end-at-time').val(moment(hours + ":" + minutes, "HH:mm").add(2, 'hours').format('HH:mm'));
-            }
+            };
 
             let createdAt = Date.parse({{ .Incident.CreatedAt | timeStdFormat }});
             let scheduledEnd = Date.parse({{ .Incident.ScheduledEnd | timeStdFormat }});
@@ -120,15 +121,15 @@
                     metadata.push({
                         "key": item.getAttribute("name"),
                         "value": item.value,
-                    })
-                })
+                    });
+                });
                 if (metadata.length === 0) {
                     metadata = null;
                 }
 
                 componentTags.forEach(element => components.push(element.tag));
 
-                let state = 0;
+                let state = parseInt(formData.get("incident-state"), 10);
                 if (formData.get("incident-guid") === "") {
                     // set state idle by default
                     state = 3;
@@ -149,12 +150,12 @@
                     "created_at": moment(formData.get("created-at-date") + " " + formData.get("created-at-time"), "YYYY-MM-DD HH:mm").format(),
                     "scheduled_end": moment(formData.get("scheduled-end-at-date") + " " + formData.get("scheduled-end-at-time"), "YYYY-MM-DD HH:mm").format(),
                     "metadata": metadata,
-                }
+                };
 
                 if (guid) {
                     method = "PUT";
                     path = "/v1/incidents/" + guid + "?partial_update_message";
-                    data["no_notify"] = true
+                    data["no_notify"] = true;
                 }
                 console.log(data);
                 $.ajax({
@@ -177,7 +178,7 @@
                         window.location.replace("/admin/maintenance");
                     }
                 });
-            })
-        })
+            });
+        });
     </script>
 {{end}}
