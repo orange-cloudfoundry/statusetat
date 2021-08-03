@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/mapstructure"
+
 	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
@@ -139,7 +140,7 @@ func (n GrafanaAnnotation) incidentTag(incident models.Incident) string {
 }
 
 func (n GrafanaAnnotation) Notify(incident models.Incident) error {
-	if incident.IsScheduled {
+	if incident.State == models.Idle {
 		return nil
 	}
 	if len(incident.Messages) > 1 && incident.State != models.Resolved {
