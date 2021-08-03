@@ -2,11 +2,13 @@ package notifiers
 
 import (
 	"fmt"
+
+	log "github.com/sirupsen/logrus"
+
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/emitter"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/storages"
-	log "github.com/sirupsen/logrus"
 )
 
 type ToNotifie struct {
@@ -53,6 +55,18 @@ func AddNotifier(name string, params map[string]interface{}, forComp config.ForC
 
 func NotifiersMetadataFields() models.MetadataFields {
 	return metadataFields
+}
+
+func NotifiersPreCheckers(components models.Components) []NotifierPreCheck {
+	notifiers := make([]NotifierPreCheck, 0)
+	for _, tn := range toNotifies {
+		preChecker, ok := tn.Notifier.(NotifierPreCheck)
+		if !ok || !tn.For.MatchComponents(components) {
+			continue
+		}
+		notifiers = append(notifiers, preChecker)
+	}
+	return notifiers
 }
 
 func Notify(store storages.Store) {

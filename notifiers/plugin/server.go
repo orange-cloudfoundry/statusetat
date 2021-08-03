@@ -3,11 +3,13 @@ package plugin
 import (
 	"context"
 	"fmt"
+
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/structpb"
+
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers/plugin/proto"
-	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/structpb"
 )
 
 type GRPCServer struct {
@@ -116,3 +118,16 @@ func (s GRPCServer) MetadataFields(ctx context.Context, request *emptypb.Empty) 
 	}
 	return &proto.ListMetadataField{Fields: protoFields}, nil
 }
+
+func (s GRPCServer) PreCheck(ctx context.Context, request *proto.NotifyRequest) (*proto.ErrorResponse, error) {
+	err := s.Impl.PreCheck(ProtoToIncident(request.Incident))
+	if err != nil {
+		return &proto.ErrorResponse{
+			Error: &proto.Error{
+				Detail: err.Error(),
+			},
+		}, nil
+	}
+	return &proto.ErrorResponse{}, nil
+}
+

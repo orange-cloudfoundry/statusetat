@@ -9,10 +9,14 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/hashicorp/go-multierror"
 	"github.com/nicklaw5/go-respond"
+	"github.com/satori/go.uuid"
+
+	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/emitter"
 	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/satori/go.uuid"
+	"github.com/orange-cloudfoundry/statusetat/notifiers"
 )
 
 func (a Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
@@ -75,6 +79,13 @@ func (a Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
 
 	incident.GUID = guid.String()
 	incident.Messages = a.messagesGuid(guid.String(), incident.Messages, loc)
+
+	err = a.runPreCheck(incident)
+	if err != nil {
+		JSONError(w, err, http.StatusPreconditionFailed)
+		return
+	}
+
 	incident, err = a.store.Create(incident)
 	if err != nil {
 		JSONError(w, err, http.StatusInternalServerError)
@@ -236,6 +247,12 @@ func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
 
 	incident.UpdatedAt = time.Now()
 
+	err = a.runPreCheck(incident)
+	if err != nil {
+		JSONError(w, err, http.StatusPreconditionFailed)
+		return
+	}
+
 	incident, err = a.store.Update(guid, incident)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -250,6 +267,20 @@ func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
 		emitter.Emit(incident)
 	}
 	respond.NewResponse(w).Ok(incident)
+}
+
+func (a Serve) runPreCheck(incident models.Incident) error {
+	var result error
+	for _, preChecker := range notifiers.NotifiersPreCheckers(*incident.Components) {
+		err := preChecker.PreCheck(incident)
+		if err != nil {
+			result = multierror.Append(result, err)
+		}
+	}
+	if result != nil {
+		result.(*multierror.Error).ErrorFormat = common.ListFormatHTMLFunc
+	}
+	return result
 }
 
 func (a Serve) Notify(w http.ResponseWriter, req *http.Request) {

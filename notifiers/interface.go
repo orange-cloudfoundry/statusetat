@@ -1,7 +1,6 @@
 package notifiers
 
-//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Notifier
-//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . NotifierSubscriber
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . NotifierAllInOne
 
 import (
 	"github.com/orange-cloudfoundry/statusetat/config"
@@ -21,4 +20,16 @@ type NotifierSubscriber interface {
 
 type NotifierMetadataField interface {
 	MetadataFields() []models.MetadataField
+}
+
+type NotifierPreCheck interface {
+	PreCheck(incident models.Incident) error
+}
+
+// special interface for creating a moke
+type NotifierAllInOne interface {
+	Notifier
+	NotifierSubscriber
+	NotifierMetadataField
+	NotifierPreCheck
 }

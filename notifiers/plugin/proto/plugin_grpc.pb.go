@@ -25,6 +25,7 @@ type NotifierClient interface {
 	Notify(ctx context.Context, in *NotifyRequest, opts ...grpc.CallOption) (*ErrorResponse, error)
 	NotifySubscriber(ctx context.Context, in *NotifySubscriberRequest, opts ...grpc.CallOption) (*ErrorResponse, error)
 	MetadataFields(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListMetadataField, error)
+	PreCheck(ctx context.Context, in *NotifyRequest, opts ...grpc.CallOption) (*ErrorResponse, error)
 }
 
 type notifierClient struct {
@@ -89,6 +90,15 @@ func (c *notifierClient) MetadataFields(ctx context.Context, in *emptypb.Empty, 
 	return out, nil
 }
 
+func (c *notifierClient) PreCheck(ctx context.Context, in *NotifyRequest, opts ...grpc.CallOption) (*ErrorResponse, error) {
+	out := new(ErrorResponse)
+	err := c.cc.Invoke(ctx, "/types.Notifier/PreCheck", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NotifierServer is the server API for Notifier service.
 // All implementations must embed UnimplementedNotifierServer
 // for forward compatibility
@@ -99,6 +109,7 @@ type NotifierServer interface {
 	Notify(context.Context, *NotifyRequest) (*ErrorResponse, error)
 	NotifySubscriber(context.Context, *NotifySubscriberRequest) (*ErrorResponse, error)
 	MetadataFields(context.Context, *emptypb.Empty) (*ListMetadataField, error)
+	PreCheck(context.Context, *NotifyRequest) (*ErrorResponse, error)
 	mustEmbedUnimplementedNotifierServer()
 }
 
@@ -123,6 +134,9 @@ func (UnimplementedNotifierServer) NotifySubscriber(context.Context, *NotifySubs
 }
 func (UnimplementedNotifierServer) MetadataFields(context.Context, *emptypb.Empty) (*ListMetadataField, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MetadataFields not implemented")
+}
+func (UnimplementedNotifierServer) PreCheck(context.Context, *NotifyRequest) (*ErrorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PreCheck not implemented")
 }
 func (UnimplementedNotifierServer) mustEmbedUnimplementedNotifierServer() {}
 
@@ -245,6 +259,24 @@ func _Notifier_MetadataFields_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Notifier_PreCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NotifyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotifierServer).PreCheck(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/types.Notifier/PreCheck",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotifierServer).PreCheck(ctx, req.(*NotifyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Notifier_ServiceDesc is the grpc.ServiceDesc for Notifier service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -275,6 +307,10 @@ var Notifier_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MetadataFields",
 			Handler:    _Notifier_MetadataFields_Handler,
+		},
+		{
+			MethodName: "PreCheck",
+			Handler:    _Notifier_PreCheck_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

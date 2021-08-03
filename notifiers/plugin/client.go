@@ -3,12 +3,14 @@ package plugin
 import (
 	"context"
 	"fmt"
+
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/structpb"
+
 	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers/plugin/proto"
-	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/structpb"
 )
 
 type GRPCClient struct {
@@ -103,4 +105,17 @@ func (m *GRPCClient) MetadataFields() ([]models.MetadataField, error) {
 	}
 	return fields, err
 
+}
+
+func (m *GRPCClient) PreCheck(incident models.Incident) error {
+	resp, err := m.client.PreCheck(context.Background(), &proto.NotifyRequest{
+		Incident: IncidentToProto(incident),
+	})
+	if err != nil {
+		return err
+	}
+	if resp.GetError() != nil {
+		return fmt.Errorf(resp.GetError().GetDetail())
+	}
+	return nil
 }

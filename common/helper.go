@@ -3,11 +3,12 @@ package common
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/orange-cloudfoundry/statusetat/models"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
 type HeaderTransport struct {
@@ -105,4 +106,14 @@ func cleanupMapValue(v interface{}) interface{} {
 	default:
 		return fmt.Sprintf("%v", v)
 	}
+}
+
+func ListFormatHTMLFunc(es []error) string {
+	message := fmt.Sprintf("<p>%d errors occurred: <br/><ul>", len(es))
+
+	for _, err := range es {
+		message += fmt.Sprintf("<li>%s</li>", err)
+	}
+	message += "</ul></p>"
+	return message
 }

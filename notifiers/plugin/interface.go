@@ -2,11 +2,13 @@ package plugin
 
 import (
 	"context"
+
 	pluginhc "github.com/hashicorp/go-plugin"
+	"google.golang.org/grpc"
+
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers/plugin/proto"
-	"google.golang.org/grpc"
 )
 
 // Handshake is a common handshake that is shared by plugin and host.
@@ -29,6 +31,7 @@ type Notifier interface {
 	MetadataFields() ([]models.MetadataField, error)
 	Notify(incident models.Incident) error
 	NotifySubscriber(incident models.Incident, subscribers []string) error
+	PreCheck(incident models.Incident) error
 }
 
 type NotifierGRPCPlugin struct {

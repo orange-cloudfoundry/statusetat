@@ -262,6 +262,10 @@ import (
 type LogNotifier struct {
 }
 
+func (n LogNotifier) PreCheck(incident models.Incident) error {
+	return nil
+}
+
 func (n *LogNotifier) Init(baseInfo config.BaseInfo, params map[string]interface{}) error {
 	return nil
 }
