@@ -94,7 +94,7 @@
         <div class="divider"></div>
       </div>
         {{ if .Incidents }}
-          <ul class="collection">
+          <ul class="collection collection-incidents">
               {{ range .Incidents }}
                   {{ $mainMsg := .MainMessage }}
                   <li class="collection-item incident-item avatar">
@@ -168,19 +168,19 @@
               let modal = btn.closest('.modal');
               $('.alert-box .alert', modal).hide();
               let tabContent = $(".tab-content.active", modal);
-              let method = "POST"
-              let incidentGuid = $('input[name="incident-guid"]', tabContent).val()
-              let path = "/v1/incidents/" + incidentGuid + "/messages"
+              let method = "POST";
+              let incidentGuid = $('input[name="incident-guid"]', tabContent).val();
+              let path = "/v1/incidents/" + incidentGuid + "/messages";
               let data = {
                   "title": $('input[name="title"]', tabContent).val(),
                   "content": $('textarea[name="content"]', tabContent).val(),
                   "incident_guid": incidentGuid,
-              }
+              };
               let messageGuid = $('input[name="message-guid"]', tabContent).val();
               if (messageGuid) {
-                  method = "PUT"
-                  path = "/v1/incidents/" + incidentGuid + "/messages/" + messageGuid
-                  data.message_guid = messageGuid
+                  method = "PUT";
+                  path = "/v1/incidents/" + incidentGuid + "/messages/" + messageGuid;
+                  data.message_guid = messageGuid;
               }
               btn.append($('.preloader-box').html());
               btn.addClass("disabled");
@@ -203,7 +203,7 @@
                       document.location.reload(true);
                   }
               });
-          })
+          });
 
           $(".mark-as-set-state").click(function () {
 
@@ -234,7 +234,7 @@
                       document.location.reload(true);
                   }
               });
-          })
+          });
       });
   </script>
   {{ template "admin/delete-incident.gohtml" . }}

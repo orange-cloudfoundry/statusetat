@@ -10,7 +10,7 @@
         <div class="divider"></div>
       </div>
         {{ if .Maintenance }}
-          <ul class="collection">
+          <ul class="collection collection-incidents">
               {{ range .Maintenance }}
                   {{ $mainMsg := .MainMessage }}
                   <li class="collection-item incident-item avatar">
@@ -81,7 +81,7 @@
               let state = parseInt($(this).data("state"), 10);
               let previousState = parseInt($(this).closest('form').find('input[name="previous_state"]').val(), 10);
               let previousContent = $(this).html();
-              $(this).html($('.preloader-box').html())
+              $(this).html($('.preloader-box').html());
               $(this).addClass("disabled");
               $('.alert-box .alert').hide();
 
@@ -118,7 +118,7 @@
                       document.location.reload(true);
                   }
               });
-          })
+          });
       });
   </script>
   {{ template "admin/delete-incident.gohtml" . }}

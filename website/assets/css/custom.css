@@ -1310,4 +1310,7 @@ time.human {
     list-style-type: initial;
 }
 
+.collection-incidents {
+    overflow: visible;
+}
 
