@@ -1258,3 +1258,48 @@ time.human {
     margin-bottom: 2px;
     margin-top: 2px;
 }
+
+.scheduled.incident .incident-main-message {
+    position: relative;
+}
+
+.scheduled.incident .show-more-button-wrapper {
+    width: 100%;
+    text-align: center;
+}
+
+.scheduled.incident .show-more-button-wrapper .btn {
+    display: none;
+    position: absolute;
+    bottom: -25px;
+    z-index: 100;
+    text-align: center;
+    width: 14%;
+    left: 43%;
+}
+
+.scheduled.incident .show-more-button-wrapper .btn .line {
+    display: inline-block;
+    flex-basis: 200px;
+    height: 1px;
+    margin-top: 12px;
+    background-color: rgba(221, 221, 221, 0.1);
+}
+
+
+.scheduled.incident .fade {
+    display: none;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 75%);
+    height: 100px;
+    margin-top: -100px;
+    position: relative;
+}
+
+
+.scheduled.incident .markdown {
+    position: relative;
+    overflow: hidden;
+    transition: max-height .5s ease;
+}
+
+

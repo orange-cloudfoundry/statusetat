@@ -7,7 +7,7 @@ function loadTimezone() {
 $(document).ready(function () {
     $('.alert .close').click(function () {
         $(this).parent().fadeOut(300, function () {
-            $(this).closest()
+            $(this).closest();
             $(this).hide();
         });
     });
@@ -75,10 +75,10 @@ $(document).ready(function () {
 
     $("time").each(function (index) {
         if (!($(this).attr("datetime"))) {
-            return
+            return;
         }
         let d = Date.parse($(this).attr("datetime"));
-        let prefix = ""
+        let prefix = "";
         if ($(this).data("prefix")) {
             prefix = $(this).data("prefix");
         }
@@ -108,10 +108,36 @@ $(document).ready(function () {
                 $(btn).before('<span style="color: red;">Code ' + err.responseJSON.status + ' ' + err.responseJSON.description + ': ' + err.responseJSON.detail + '</span>     ');
             },
             success: function (msg) {
-                console.log("yes");
                 $('#subscribe-email').html("Successfully registered your email");
             }
         });
+    });
+
+    $('.scheduled.incident').each(function () {
+        if ($('.markdown', this).height() < 100) {
+            return;
+        }
+        $('.markdown', this).data('real-height', $('.markdown', this).height());
+        $('.markdown', this).css('max-height', '100px');
+        $('.btn', this).show();
+        $('.btn', this).data('action', 'show-more');
+        $('.fade', this).show();
+    });
+
+    $('.show-more-button-wrapper .btn').click(function (e) {
+        e.preventDefault();
+        const parent = $(this).parent().parent();
+        if ($('.btn', parent).data('action') === 'show-more') {
+            $('.markdown', parent).css("max-height", $('.markdown', parent).data('real-height') + 'px');
+            $('.fade', parent).hide();
+            $('.btn', parent).data('action', 'show-less');
+            $('.btn', parent).html('<i class="material-icons">arrow_drop_up</i> Show less');
+        } else {
+            $('.markdown', parent).css("max-height", "100px");
+            $('.fade', parent).show();
+            $('.btn', parent).data('action', 'show-more');
+            $('.btn', parent).html('<i class="material-icons">arrow_drop_down</i> Show more');
+        }
     });
 
 });

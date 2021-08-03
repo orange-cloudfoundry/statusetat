@@ -1,4 +1,4 @@
-<div class="incident z-depth-1">
+<div class="scheduled incident z-depth-1">
     {{ $mainMsg := .MainMessage }}
 
   <div class="incident-title">
@@ -44,6 +44,12 @@
   </div>
   <hr/>
   <div class="incident-main-message">
-    <p class="markdown">{{ $mainMsg.Content | markdown }}</p>
+    <div class="show-more-button-wrapper">
+      <a href="#" class="waves-effect waves-light btn blue lighten-5 black-text btn-small">
+        <i class="material-icons">arrow_drop_down</i> Show more
+      </a>
+    </div>
+    <div class="markdown">{{ $mainMsg.Content | markdown }}</div>
+    <div class="fade"></div>
   </div>
 </div>
