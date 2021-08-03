@@ -130,4 +130,3 @@ func (s GRPCServer) PreCheck(ctx context.Context, request *proto.NotifyRequest) 
 	}
 	return &proto.ErrorResponse{}, nil
 }
-
