@@ -172,6 +172,23 @@ func (m Retry) ByDate(from, to time.Time) ([]models.Incident, error) {
 	return []models.Incident{}, err
 }
 
+func (m Retry) Persistents() ([]models.Incident, error) {
+	var err error
+	var ret []models.Incident
+	for i := 0; i < m.nbRetry; i++ {
+		ret, err = m.next.Persistents()
+		if err != nil {
+			if os.IsNotExist(err) {
+				return []models.Incident{}, err
+			}
+			time.Sleep(m.sleepTime)
+			continue
+		}
+		return ret, err
+	}
+	return []models.Incident{}, err
+}
+
 func (m Retry) Ping() error {
 	var err error
 	for i := 0; i < m.nbRetry; i++ {

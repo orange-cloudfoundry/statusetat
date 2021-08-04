@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+
 	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/models"
 )
@@ -31,6 +32,10 @@ type S3 struct {
 }
 
 func (s *S3) Create(incident models.Incident) (models.Incident, error) {
+	if incident.Persistent {
+		err := s.addPersistent(incident)
+		return incident, err
+	}
 	b, _ := json.Marshal(incident)
 	uploader := s3manager.NewUploader(s.sess.awsSess)
 	_, err := uploader.Upload(&s3manager.UploadInput{
@@ -73,6 +78,25 @@ func (s S3) storeSubscribers(subscribers []string) error {
 	return err
 }
 
+func (s S3) addPersistent(incident models.Incident) error {
+	incidents, err := s.Persistents()
+	if err != nil {
+		return err
+	}
+	incidents = models.Incidents(incidents).Filter(incident.GUID)
+	incidents = append(incidents, incident)
+	return s.storePersistents(incidents)
+}
+
+func (s S3) removePersistent(guid string) error {
+	incidents, err := s.Persistents()
+	if err != nil {
+		return err
+	}
+	incidents = models.Incidents(incidents).Filter(guid)
+	return s.storePersistents(incidents)
+}
+
 func (s S3) Subscribe(email string) error {
 	subs, _ := s.retrieveSubscribers()
 	if common.InStrSlice(email, subs) {
@@ -91,11 +115,29 @@ func (s S3) Unsubscribe(email string) error {
 	return s.storeSubscribers(subs)
 }
 
+func (s S3) storePersistents(incidents []models.Incident) error {
+	sort.Sort(models.Incidents(incidents))
+	b, _ := json.Marshal(incidents)
+	uploader := s3manager.NewUploader(s.sess.awsSess)
+	_, err := uploader.Upload(&s3manager.UploadInput{
+		Bucket: &s.sess.bucket,
+		Key:    aws.String(persistentFilename),
+		Body:   bytes.NewBuffer(b),
+	})
+	return err
+}
+
 func (s S3) Subscribers() ([]string, error) {
 	return s.retrieveSubscribers()
 }
 
 func (s *S3) Update(guid string, incident models.Incident) (models.Incident, error) {
+	if incident.Persistent {
+		_ = s.Delete(guid) // nolint
+		err := s.addPersistent(incident)
+		return incident, err
+	}
+	_ = s.removePersistent(guid) // nolint
 	incident.GUID = guid
 	return s.Create(incident)
 }
@@ -138,7 +180,8 @@ func (s *S3) ByDate(from, to time.Time) ([]models.Incident, error) {
 	}
 	incidents := make([]models.Incident, 0)
 	for _, obj := range objs.Contents {
-		if *obj.Key == subscriberFilename {
+		if *obj.Key == subscriberFilename ||
+			*obj.Key == persistentFilename {
 			continue
 		}
 
@@ -225,6 +268,26 @@ func (s S3) urlToSession(u *url.URL) (*s3Session, error) {
 		svc:     s3.New(sess),
 		awsSess: sess,
 	}, nil
+}
+
+func (s S3) Persistents() ([]models.Incident, error) {
+	obj, err := s.sess.svc.GetObject(&s3.GetObjectInput{
+		Bucket: &s.sess.bucket,
+		Key:    aws.String(persistentFilename),
+	})
+	if err != nil {
+		if aerr, ok := err.(awserr.RequestFailure); ok && aerr.StatusCode() == 404 {
+			return []models.Incident{}, os.ErrNotExist
+		}
+		return []models.Incident{}, err
+	}
+	defer obj.Body.Close()
+	subs := make([]models.Incident, 0)
+	err = json.NewDecoder(obj.Body).Decode(&subs)
+	if err != nil {
+		return []models.Incident{}, err
+	}
+	return subs, err
 }
 
 func (s S3) extractBucketPath(u *url.URL) (bucket string, path string) {

@@ -63,6 +63,15 @@
             <label for="created-at-time">And at what time ? *</label>
           </div>
         </div>
+
+        <div class="row">
+          <div class="col s12">
+            <label>
+              <input type="checkbox" class="filled-in" {{ if or .Incident.Persistent .CheckPersistent }}checked="checked"{{end}} name="persistent"/>
+              <span>Is a persistent incident ?</span>
+            </label>
+          </div>
+        </div>
           {{ if gt .MetadataFields.LenIncident 0 }}
             <div class="row">
               <h4>Metadata field for notifier</h4>
@@ -100,7 +109,7 @@
         $(document).ready(function () {
             $('.cancel-btn').click(function (e) {
                 window.location.replace("/admin/incident");
-            })
+            });
             let d = Date.parse({{ .Incident.CreatedAt | timeStdFormat }});
             $("#created-at-date").val(moment(d).format('YYYY-MM-DD'));
             $("#created-at-time").val(moment(d).format('HH:mm'));
@@ -122,12 +131,11 @@
                     metadata.push({
                         "key": item.getAttribute("name"),
                         "value": item.value,
-                    })
-                })
+                    });
+                });
                 if (metadata.length === 0) {
                     metadata = null;
                 }
-
                 componentTags.forEach(element => components.push(element.tag));
                 let guid = formData.get("incident-guid");
                 let data = {
@@ -143,14 +151,13 @@
                     "components": components,
                     "created_at": moment(formData.get("date") + " " + formData.get("time"), "YYYY-MM-DD HH:mm").format(),
                     "metadata": metadata,
-                }
-
+                    "persistent": !!formData.get("persistent"),
+                };
                 if (guid) {
                     method = "PUT";
                     path = "/v1/incidents/" + guid + "?partial_update_message";
-                    data["no_notify"] = true
+                    data["no_notify"] = true;
                 }
-                console.log(data);
                 $.ajax({
                     url: path,
                     type: method,
@@ -168,10 +175,10 @@
                         $('.alert-box .alert').show();
                     },
                     success: function (msg) {
-                        window.location.replace("/admin/incident");
+                        window.location.replace(`/admin/${formData.get("persistent") ? 'persistent_incident' : 'incident'}`);
                     }
                 });
-            })
-        })
+            });
+        });
     </script>
 {{end}}

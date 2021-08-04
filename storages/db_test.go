@@ -7,6 +7,7 @@ import (
 	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/storages"
 )
@@ -67,6 +68,7 @@ var _ = Describe("Db", func() {
 			db.First(&incDb)
 
 			Expect(incDb.GUID).To(Equal(inc.GUID))
+			Expect(incDb.Persistent).To(Equal(inc.Persistent))
 		})
 	})
 	Context("Update", func() {
@@ -141,7 +143,7 @@ var _ = Describe("Db", func() {
 		})
 	})
 	Context("ByDate", func() {
-		It("Should give incidents in the datetime range", func() {
+		It("Should give incidents in the datetime range without showing persistent", func() {
 			d2020 := time.Date(2020, 1, 1, 1, 1, 1, 0, time.UTC)
 			d2019 := time.Date(2019, 1, 1, 1, 1, 1, 0, time.UTC)
 			d2018 := time.Date(2018, 1, 1, 1, 1, 1, 0, time.UTC)
@@ -160,11 +162,20 @@ var _ = Describe("Db", func() {
 				CreatedAt: d2018,
 				UpdatedAt: d2018,
 			}
+			inc4 := models.Incident{
+				GUID:       "4",
+				CreatedAt:  d2019,
+				UpdatedAt:  d2019,
+				Persistent: true,
+			}
+
 			_, err := store.Create(inc1)
 			Expect(err).To(BeNil())
 			_, err = store.Create(inc2)
 			Expect(err).To(BeNil())
 			_, err = store.Create(inc3)
+			Expect(err).To(BeNil())
+			_, err = store.Create(inc4)
 			Expect(err).To(BeNil())
 
 			incidents, err := store.ByDate(d2019, d2020)
@@ -173,6 +184,35 @@ var _ = Describe("Db", func() {
 
 			Expect(incidents[0].CreatedAt).Should(Equal(d2020))
 			Expect(incidents[1].CreatedAt).Should(Equal(d2019))
+		})
+	})
+
+	Context("Persistents", func() {
+		It("Should only see persistents incident", func() {
+			d2020 := time.Date(2020, 1, 1, 1, 1, 1, 0, time.UTC)
+			d2019 := time.Date(2019, 1, 1, 1, 1, 1, 0, time.UTC)
+			inc1 := models.Incident{
+				GUID:      "1",
+				CreatedAt: d2020,
+				UpdatedAt: d2020,
+			}
+			inc2 := models.Incident{
+				GUID:       "2",
+				CreatedAt:  d2019,
+				UpdatedAt:  d2019,
+				Persistent: true,
+			}
+
+			_, err := store.Create(inc1)
+			Expect(err).To(BeNil())
+			_, err = store.Create(inc2)
+			Expect(err).To(BeNil())
+
+			incidents, err := store.Persistents()
+			Expect(err).To(BeNil())
+			Expect(incidents).Should(HaveLen(1))
+
+			Expect(incidents[0].GUID).Should(Equal("2"))
 		})
 	})
 

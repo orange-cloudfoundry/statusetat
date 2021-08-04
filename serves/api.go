@@ -146,6 +146,16 @@ func (a Serve) ByDate(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Ok(incidents)
 }
 
+func (a Serve) Persistents(w http.ResponseWriter, req *http.Request) {
+	var err error
+	incidents, err := a.store.Persistents()
+	if err != nil {
+		JSONError(w, err, http.StatusInternalServerError)
+		return
+	}
+	respond.NewResponse(w).Ok(incidents)
+}
+
 func (a Serve) Incident(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	guid := v["guid"]
@@ -198,6 +208,10 @@ func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
 
 	if incidentUpdate.IsScheduled != nil {
 		incident.IsScheduled = *incidentUpdate.IsScheduled
+	}
+
+	if incidentUpdate.Persistent != nil {
+		incident.Persistent = *incidentUpdate.Persistent
 	}
 
 	if !incidentUpdate.ScheduledEnd.IsZero() {

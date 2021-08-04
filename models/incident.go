@@ -16,6 +16,7 @@ type Incident struct {
 	IsScheduled    bool           `json:"is_scheduled"`
 	ScheduledEnd   time.Time      `json:"scheduled_end"`
 	Origin         string         `json:"origin"`
+	Persistent     bool           `json:"persistent"`
 }
 
 type IncidentUpdateRequest struct {
@@ -30,6 +31,7 @@ type IncidentUpdateRequest struct {
 	ScheduledEnd   time.Time       `json:"scheduled_end"`
 	Origin         *string         `json:"origin"`
 	NoNotify       bool            `json:"no_notify"`
+	Persistent     *bool           `json:"persistent"`
 }
 
 func (i Incident) MainMessage() Message {
@@ -77,6 +79,26 @@ func (p Incidents) Less(i, j int) bool {
 
 func (p Incidents) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
+}
+
+func (p Incidents) Find(guid string) Incident {
+	for _, incident := range p {
+		if incident.GUID == guid {
+			return incident
+		}
+	}
+	return Incident{}
+}
+
+func (p Incidents) Filter(guid string) Incidents {
+	incidents := make(Incidents, 0)
+	for _, incident := range p {
+		if incident.GUID == guid {
+			continue
+		}
+		incidents = append(incidents, incident)
+	}
+	return incidents
 }
 
 func TextState(state ComponentState) string {

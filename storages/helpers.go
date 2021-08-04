@@ -9,6 +9,7 @@ import (
 )
 
 const subscriberFilename = "subscribers.json"
+const persistentFilename = "persistents.json"
 
 func makeHttpClient(u *url.URL) *http.Client {
 	transport := makeHttpTransport(u)

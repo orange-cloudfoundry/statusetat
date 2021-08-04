@@ -9,6 +9,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/storages"
 )
@@ -89,6 +90,61 @@ var _ = Describe("Local", func() {
 
 			Expect(statFileUpdated.Size() > statFileBefore.Size()).To(BeTrue(), "file before update is bigger than updated")
 		})
+		Context("Incident was previously a persistent incident", func() {
+			It("should remove persistent incident and add it to incidents", func() {
+				inc := models.Incident{
+					GUID: "aguid",
+				}
+				newInc, err := localStorage.Create(inc)
+				Expect(newInc).To(BeEquivalentTo(inc))
+				Expect(err).To(BeNil())
+				_, err = os.Stat(filepath.Join(tmpDirLocal, inc.GUID))
+				Expect(err).ToNot(HaveOccurred())
+
+				persistents, err := localStorage.Persistents()
+				Expect(err).ToNot(HaveOccurred())
+				Expect(persistents).To(HaveLen(0))
+
+				inc.Persistent = true
+				updatedInc, err := localStorage.Update(inc.GUID, inc)
+				Expect(err).ToNot(HaveOccurred())
+				persistents, err = localStorage.Persistents()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(persistents).To(HaveLen(1))
+				Expect(updatedInc).To(BeEquivalentTo(inc))
+				_, err = os.Stat(filepath.Join(tmpDirLocal, inc.GUID))
+				Expect(err).To(HaveOccurred())
+			})
+		})
+		Context("Incident become a persistent incident", func() {
+			It("should remove persistent incident and add it to incidents", func() {
+				inc := models.Incident{
+					GUID:       "aguid",
+					Persistent: true,
+				}
+				newInc, err := localStorage.Create(inc)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(newInc).To(BeEquivalentTo(inc))
+
+				_, err = os.Stat(filepath.Join(tmpDirLocal, inc.GUID))
+				Expect(err).To(HaveOccurred())
+				persistents, err := localStorage.Persistents()
+				Expect(err).ToNot(HaveOccurred())
+				Expect(persistents).To(HaveLen(1))
+
+				inc.Persistent = false
+				updatedInc, err := localStorage.Update(inc.GUID, inc)
+				Expect(err).ToNot(HaveOccurred())
+				persistents, err = localStorage.Persistents()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(persistents).To(HaveLen(0))
+				Expect(updatedInc).To(BeEquivalentTo(inc))
+				_, err = os.Stat(filepath.Join(tmpDirLocal, inc.GUID))
+				Expect(err).ToNot(HaveOccurred())
+			})
+		})
 	})
 	Context("Delete", func() {
 		It("should delete file ", func() {
@@ -122,7 +178,7 @@ var _ = Describe("Local", func() {
 		})
 	})
 	Context("ByDate", func() {
-		It("Should give incidents in the datetime range", func() {
+		It("Should give incidents in the datetime range without showing persistent", func() {
 			d2020 := time.Date(2020, 1, 1, 1, 1, 1, 1, time.Local).UTC()
 			d2019 := time.Date(2019, 1, 1, 1, 1, 1, 1, time.Local).UTC()
 			d2018 := time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local).UTC()
@@ -138,11 +194,20 @@ var _ = Describe("Local", func() {
 				GUID:      "3",
 				CreatedAt: d2018,
 			}
+			inc4 := models.Incident{
+				GUID:       "4",
+				CreatedAt:  d2019,
+				UpdatedAt:  d2019,
+				Persistent: true,
+			}
+
 			_, err := localStorage.Create(inc1)
 			Expect(err).To(BeNil())
 			_, err = localStorage.Create(inc2)
 			Expect(err).To(BeNil())
 			_, err = localStorage.Create(inc3)
+			Expect(err).To(BeNil())
+			_, err = localStorage.Create(inc4)
 			Expect(err).To(BeNil())
 
 			incidents, err := localStorage.ByDate(d2019, d2020)
@@ -151,6 +216,35 @@ var _ = Describe("Local", func() {
 			Expect(incidents[0].CreatedAt).Should(Equal(d2020))
 			Expect(incidents[1].CreatedAt).Should(Equal(d2019))
 
+		})
+	})
+
+	Context("Persistents", func() {
+		It("Should only see persistents incident", func() {
+			d2020 := time.Date(2020, 1, 1, 1, 1, 1, 0, time.UTC)
+			d2019 := time.Date(2019, 1, 1, 1, 1, 1, 0, time.UTC)
+			inc1 := models.Incident{
+				GUID:      "1",
+				CreatedAt: d2020,
+				UpdatedAt: d2020,
+			}
+			inc2 := models.Incident{
+				GUID:       "2",
+				CreatedAt:  d2019,
+				UpdatedAt:  d2019,
+				Persistent: true,
+			}
+
+			_, err := localStorage.Create(inc1)
+			Expect(err).To(BeNil())
+			_, err = localStorage.Create(inc2)
+			Expect(err).To(BeNil())
+
+			incidents, err := localStorage.Persistents()
+			Expect(err).To(BeNil())
+			Expect(incidents).Should(HaveLen(1))
+
+			Expect(incidents[0].GUID).Should(Equal("2"))
 		})
 	})
 

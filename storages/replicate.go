@@ -6,8 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/models"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
 const (
@@ -281,6 +282,19 @@ func (m *Replicate) ByDate(from, to time.Time) ([]models.Incident, error) {
 	var err error
 	for _, s := range m.stores {
 		incidents, err = s.ByDate(from, to)
+		if err != nil {
+			continue
+		}
+		return incidents, nil
+	}
+	return incidents, err
+}
+
+func (m *Replicate) Persistents() ([]models.Incident, error) {
+	incidents := make([]models.Incident, 0)
+	var err error
+	for _, s := range m.stores {
+		incidents, err = s.Persistents()
 		if err != nil {
 			continue
 		}

@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -15,8 +16,9 @@ import (
 )
 
 type Local struct {
-	dir   string
-	mutex *sync.Mutex
+	dir             string
+	mutexSubscriber *sync.Mutex
+	mutexPersistent *sync.Mutex
 }
 
 func (l Local) Creator() func(u *url.URL) (Store, error) {
@@ -25,8 +27,9 @@ func (l Local) Creator() func(u *url.URL) (Store, error) {
 		os.MkdirAll(path, 0775)
 
 		return &Local{
-			dir:   filepath.FromSlash(strings.TrimSuffix(path, "/")),
-			mutex: &sync.Mutex{},
+			dir:             filepath.FromSlash(strings.TrimSuffix(path, "/")),
+			mutexSubscriber: &sync.Mutex{},
+			mutexPersistent: &sync.Mutex{},
 		}, nil
 	}
 }
@@ -36,6 +39,10 @@ func (l Local) Detect(u *url.URL) bool {
 }
 
 func (l Local) Create(incident models.Incident) (models.Incident, error) {
+	if incident.Persistent {
+		err := l.addPersistent(incident)
+		return incident, err
+	}
 	b, _ := json.Marshal(incident)
 	err := ioutil.WriteFile(l.path(incident.GUID), b, 0644)
 	return incident, err
@@ -57,10 +64,54 @@ func (l Local) retrieveSubscribers() ([]string, error) {
 	return subs, err
 }
 
+func (l Local) Persistents() ([]models.Incident, error) {
+	b, err := ioutil.ReadFile(l.path(persistentFilename))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []models.Incident{}, nil
+		}
+		return []models.Incident{}, err
+	}
+	subs := make([]models.Incident, 0)
+	err = json.Unmarshal(b, &subs)
+	if err != nil {
+		return []models.Incident{}, err
+	}
+	return subs, err
+}
+
+func (l Local) addPersistent(incident models.Incident) error {
+	incidents, err := l.Persistents()
+	if err != nil {
+		return err
+	}
+	incidents = models.Incidents(incidents).Filter(incident.GUID)
+	incidents = append(incidents, incident)
+	return l.storePersistents(incidents)
+}
+
+func (l Local) removePersistent(guid string) error {
+	incidents, err := l.Persistents()
+	if err != nil {
+		return err
+	}
+	incidents = models.Incidents(incidents).Filter(guid)
+	return l.storePersistents(incidents)
+}
+
+func (l Local) storePersistents(incidents []models.Incident) error {
+	sort.Sort(models.Incidents(incidents))
+	b, _ := json.Marshal(incidents)
+	l.mutexPersistent.Lock()
+	defer l.mutexPersistent.Unlock()
+	err := ioutil.WriteFile(l.path(persistentFilename), b, 0644)
+	return err
+}
+
 func (l Local) storeSubscribers(subscribers []string) error {
 	b, _ := json.Marshal(subscribers)
-	l.mutex.Lock()
-	defer l.mutex.Unlock()
+	l.mutexSubscriber.Lock()
+	defer l.mutexSubscriber.Unlock()
 	err := ioutil.WriteFile(l.path(subscriberFilename), b, 0644)
 	return err
 }
@@ -91,12 +142,23 @@ func (l Local) Subscribers() ([]string, error) {
 }
 
 func (l Local) Update(guid string, incident models.Incident) (models.Incident, error) {
+	if incident.Persistent {
+		_ = l.Delete(guid) // nolint
+		err := l.addPersistent(incident)
+		return incident, err
+	}
+
+	_ = l.removePersistent(guid) // nolint
 	b, _ := json.Marshal(incident)
 	err := ioutil.WriteFile(l.path(guid), b, 0644)
 	return incident, err
 }
 
 func (l Local) Delete(guid string) error {
+	err := l.removePersistent(guid)
+	if err != nil {
+		return err
+	}
 	return os.Remove(l.path(guid))
 }
 
@@ -122,7 +184,8 @@ func (l Local) Read(guid string) (models.Incident, error) {
 func (l Local) ByDate(from, to time.Time) ([]models.Incident, error) {
 	incidents := make([]models.Incident, 0)
 	err := filepath.Walk(l.dir, func(path string, info os.FileInfo, err error) error {
-		if filepath.Base(path) == subscriberFilename {
+		if filepath.Base(path) == subscriberFilename ||
+			filepath.Base(path) == persistentFilename {
 			return nil
 		}
 		if err != nil {

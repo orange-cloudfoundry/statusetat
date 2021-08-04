@@ -113,7 +113,7 @@ $(document).ready(function () {
         });
     });
 
-    $('.scheduled.incident').each(function () {
+    $('.show-more-incident').each(function () {
         if ($('.markdown', this).height() < 100) {
             return;
         }

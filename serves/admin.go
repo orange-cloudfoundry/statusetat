@@ -1,16 +1,18 @@
 package serves
 
 import (
-	"github.com/orange-cloudfoundry/statusetat/notifiers"
 	"net/http"
 	"time"
 
+	"github.com/orange-cloudfoundry/statusetat/notifiers"
+
 	"github.com/gorilla/mux"
+
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
-var adminMenuItems = []string{"incident", "maintenance"}
+var adminMenuItems = []string{"incident", "maintenance", "persistent_incident"}
 
 type adminDefaultData struct {
 	BaseInfo   config.BaseInfo
@@ -69,6 +71,36 @@ func (a Serve) AdminIncidents(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func (a Serve) AdminPersistentIncidents(w http.ResponseWriter, req *http.Request) {
+	incidents, err := a.store.Persistents()
+	if err != nil {
+		HTMLError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	timezone := ""
+	if !a.IsDefaultLocation(req) {
+		timezone = a.Location(req).String()
+	}
+
+	err = a.xt.ExecuteTemplate(w, "admin/persistent_incident.gohtml", struct {
+		adminDefaultData
+		Incidents []models.Incident
+	}{
+		adminDefaultData: adminDefaultData{
+			BaseInfo:   a.baseInfo,
+			ActiveItem: "incident",
+			MenuItems:  adminMenuItems,
+			Timezone:   timezone,
+		},
+		Incidents: incidents,
+	})
+	if err != nil {
+		HTMLError(w, err, http.StatusInternalServerError)
+		return
+	}
+}
+
 func (a Serve) AdminAddEditIncident(w http.ResponseWriter, req *http.Request) {
 	a.AdminAddEditIncidentByType(w, req, "incident")
 }
@@ -99,6 +131,8 @@ func (a Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Reque
 		timezone = a.Location(req).String()
 	}
 
+	checkPersistent := req.URL.Query().Get("persistent") != ""
+
 	err = a.xt.ExecuteTemplate(w, "admin/add_edit_"+typ+".gohtml", struct {
 		adminDefaultData
 		Components      []string
@@ -106,6 +140,7 @@ func (a Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Reque
 		ComponentStates []models.ComponentState
 		Incident        models.Incident
 		MetadataFields  models.MetadataFields
+		CheckPersistent bool
 	}{
 		adminDefaultData: adminDefaultData{
 			BaseInfo:   a.baseInfo,
@@ -113,7 +148,8 @@ func (a Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Reque
 			MenuItems:  adminMenuItems,
 			Timezone:   timezone,
 		},
-		Components: components,
+		Components:      components,
+		CheckPersistent: checkPersistent,
 
 		IncidentStates:  models.AllIncidentState,
 		ComponentStates: models.AllComponentState,

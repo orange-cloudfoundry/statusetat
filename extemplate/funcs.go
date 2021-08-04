@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
+
 	"github.com/orange-cloudfoundry/statusetat/locations"
 	"github.com/orange-cloudfoundry/statusetat/markdown"
 	"github.com/orange-cloudfoundry/statusetat/models"
@@ -192,4 +193,8 @@ func dict(values ...interface{}) (map[string]interface{}, error) {
 		dict[key] = values[i+1]
 	}
 	return dict, nil
+}
+
+func stringReplace(s, old, new string) string {
+	return strings.Replace(s, old, new, -1)
 }

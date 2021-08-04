@@ -70,6 +70,18 @@ type FakeStore struct {
 	detectReturnsOnCall map[int]struct {
 		result1 bool
 	}
+	PersistentsStub        func() ([]models.Incident, error)
+	persistentsMutex       sync.RWMutex
+	persistentsArgsForCall []struct {
+	}
+	persistentsReturns struct {
+		result1 []models.Incident
+		result2 error
+	}
+	persistentsReturnsOnCall map[int]struct {
+		result1 []models.Incident
+		result2 error
+	}
 	PingStub        func() error
 	pingMutex       sync.RWMutex
 	pingArgsForCall []struct {
@@ -444,6 +456,61 @@ func (fake *FakeStore) DetectReturnsOnCall(i int, result1 bool) {
 	}{result1}
 }
 
+func (fake *FakeStore) Persistents() ([]models.Incident, error) {
+	fake.persistentsMutex.Lock()
+	ret, specificReturn := fake.persistentsReturnsOnCall[len(fake.persistentsArgsForCall)]
+	fake.persistentsArgsForCall = append(fake.persistentsArgsForCall, struct {
+	}{})
+	fake.recordInvocation("Persistents", []interface{}{})
+	fake.persistentsMutex.Unlock()
+	if fake.PersistentsStub != nil {
+		return fake.PersistentsStub()
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.persistentsReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeStore) PersistentsCallCount() int {
+	fake.persistentsMutex.RLock()
+	defer fake.persistentsMutex.RUnlock()
+	return len(fake.persistentsArgsForCall)
+}
+
+func (fake *FakeStore) PersistentsCalls(stub func() ([]models.Incident, error)) {
+	fake.persistentsMutex.Lock()
+	defer fake.persistentsMutex.Unlock()
+	fake.PersistentsStub = stub
+}
+
+func (fake *FakeStore) PersistentsReturns(result1 []models.Incident, result2 error) {
+	fake.persistentsMutex.Lock()
+	defer fake.persistentsMutex.Unlock()
+	fake.PersistentsStub = nil
+	fake.persistentsReturns = struct {
+		result1 []models.Incident
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeStore) PersistentsReturnsOnCall(i int, result1 []models.Incident, result2 error) {
+	fake.persistentsMutex.Lock()
+	defer fake.persistentsMutex.Unlock()
+	fake.PersistentsStub = nil
+	if fake.persistentsReturnsOnCall == nil {
+		fake.persistentsReturnsOnCall = make(map[int]struct {
+			result1 []models.Incident
+			result2 error
+		})
+	}
+	fake.persistentsReturnsOnCall[i] = struct {
+		result1 []models.Incident
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeStore) Ping() error {
 	fake.pingMutex.Lock()
 	ret, specificReturn := fake.pingReturnsOnCall[len(fake.pingArgsForCall)]
@@ -811,6 +878,8 @@ func (fake *FakeStore) Invocations() map[string][][]interface{} {
 	defer fake.deleteMutex.RUnlock()
 	fake.detectMutex.RLock()
 	defer fake.detectMutex.RUnlock()
+	fake.persistentsMutex.RLock()
+	defer fake.persistentsMutex.RUnlock()
 	fake.pingMutex.RLock()
 	defer fake.pingMutex.RUnlock()
 	fake.readMutex.RLock()

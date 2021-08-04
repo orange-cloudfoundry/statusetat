@@ -1,0 +1,27 @@
+<div class="incident persistent show-more-incident z-depth-1">
+    {{ $mainMsg := .MainMessage }}
+
+  <div class="incident-title">
+    <h5 class="black-text">{{ $mainMsg.Title | title | markdownNoParaph }}</h5>
+    <div class="components-badges">
+        {{ range .Components }}
+          <span class="badge grey lighten-4 grey-text" style="float: none;">{{ . }}</span>
+        {{ end }}
+    </div>
+  </div>
+  <div class="clearfix"></div>
+  <div class="incident-state-details">
+    <time class="right grey-text human tooltipped" data-tooltip="{{ .CreatedAt | timeFormat }}" datetime="{{ .CreatedAt | timeStdFormat }}">
+        {{ .CreatedAt | humanTime }}
+    </time>
+  </div>
+  <div class="incident-main-message">
+    <div class="show-more-button-wrapper">
+      <a href="#" class="waves-effect waves-light btn blue lighten-5 black-text btn-small">
+        <i class="material-icons">arrow_drop_down</i> Show more
+      </a>
+    </div>
+    <div class="markdown">{{ $mainMsg.Content | markdown }}</div>
+    <div class="fade"></div>
+  </div>
+</div>

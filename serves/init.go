@@ -12,10 +12,11 @@ import (
 	"github.com/gobuffalo/packr/v2"
 	"github.com/goji/httpauth"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/extemplate"
 	"github.com/orange-cloudfoundry/statusetat/storages"
-	log "github.com/sirupsen/logrus"
 )
 
 type HtmlTemplater interface {
@@ -83,6 +84,7 @@ func RegisterWithHtmlTemplater(
 	subRouter.HandleFunc("/markdown/preview", api.preview).Methods(http.MethodPost)
 	subRouter.HandleFunc("/incidents/{guid}", api.Incident).Methods(http.MethodGet)
 	subRouter.HandleFunc("/incidents", api.ByDate).Methods(http.MethodGet)
+	subRouter.HandleFunc("/persistent_incidents", api.Persistents).Methods(http.MethodGet)
 	subRouter.HandleFunc("/incidents/{incident_guid}/messages", api.ReadMessages).Methods(http.MethodGet)
 	subRouter.HandleFunc("/incidents/{incident_guid}/messages/{message_guid}", api.ReadMessage).Methods(http.MethodGet)
 
@@ -100,6 +102,7 @@ func RegisterWithHtmlTemplater(
 	subrouterAdmin.Use(bauthHandler)
 	subrouterAdmin.HandleFunc("/dashboard", api.AdminIncidents)
 	subrouterAdmin.HandleFunc("/incident", api.AdminIncidents)
+	subrouterAdmin.HandleFunc("/persistent_incident", api.AdminPersistentIncidents)
 	subrouterAdmin.HandleFunc("/maintenance", api.AdminMaintenance)
 	subrouterAdmin.HandleFunc("/incident/add", api.AdminAddEditIncident)
 	subrouterAdmin.HandleFunc("/incident/edit/{guid}", api.AdminAddEditIncident)

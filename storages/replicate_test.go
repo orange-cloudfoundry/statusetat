@@ -7,6 +7,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/storages"
 	"github.com/orange-cloudfoundry/statusetat/storages/storagesfakes"
@@ -174,6 +175,28 @@ var _ = Describe("Replicate", func() {
 			Expect(err).To(BeNil())
 
 			Expect(fakeStore2.ByDateCallCount()).To(Equal(1))
+			Expect(incs).NotTo(BeEmpty())
+			Expect(incs[0].GUID).To(Equal("guid-fake2"))
+		})
+	})
+
+	Context("Persistents", func() {
+		It("should take information from first responding without error store", func() {
+			fakeStore1.PersistentsStub = func() ([]models.Incident, error) {
+				return []models.Incident{}, fmt.Errorf("erroring")
+			}
+			fakeStore2.PersistentsStub = func() ([]models.Incident, error) {
+				return []models.Incident{
+					{
+						GUID: "guid-fake2",
+					},
+				}, nil
+			}
+
+			incs, err := store.Persistents()
+			Expect(err).To(BeNil())
+
+			Expect(fakeStore2.PersistentsCallCount()).To(Equal(1))
 			Expect(incs).NotTo(BeEmpty())
 			Expect(incs[0].GUID).To(Equal("guid-fake2"))
 		})

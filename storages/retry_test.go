@@ -7,6 +7,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/storages"
 	"github.com/orange-cloudfoundry/statusetat/storages/storagesfakes"
@@ -153,6 +154,27 @@ var _ = Describe("Retry", func() {
 			Expect(err).To(BeNil())
 
 			Expect(fakeStore.ByDateCallCount()).To(Equal(1))
+		})
+	})
+
+	Context("Persistents", func() {
+		It("should retry each time number time defined", func() {
+			fakeStore.PersistentsStub = func() ([]models.Incident, error) {
+				return []models.Incident{}, fmt.Errorf("erroring")
+			}
+			_, err := store.Persistents()
+			Expect(err).ToNot(BeNil())
+
+			Expect(fakeStore.PersistentsCallCount()).To(Equal(nbRetry))
+		})
+		It("should not retry each when next store succeed", func() {
+			fakeStore.PersistentsStub = func() ([]models.Incident, error) {
+				return []models.Incident{}, nil
+			}
+			_, err := store.Persistents()
+			Expect(err).To(BeNil())
+
+			Expect(fakeStore.PersistentsCallCount()).To(Equal(1))
 		})
 	})
 

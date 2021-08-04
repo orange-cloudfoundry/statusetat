@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 )
@@ -15,6 +16,7 @@ type IndexData struct {
 	GroupComponentState map[string]models.ComponentState
 	ComponentStatesData map[string][]*ComponentStateData
 	Timeline            map[string][]models.Incident
+	PersistentIncidents []models.Incident
 	TimelineDates       []string
 	Scheduled           []models.Incident
 	BaseInfo            config.BaseInfo
@@ -142,6 +144,13 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 	if !a.IsDefaultLocation(req) {
 		timezone = a.Location(req).String()
 	}
+
+	persistents, err := a.store.Persistents()
+	if err != nil {
+		HTMLError(w, err, http.StatusInternalServerError)
+		return
+	}
+
 	sort.Sort(sort.Reverse(timelineDates))
 	err = a.xt.ExecuteTemplate(w, "incidents.gohtml", IndexData{
 		BaseInfo:            a.baseInfo,
@@ -150,6 +159,7 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 		Timeline:            timeline,
 		TimelineDates:       timelineDates,
 		Scheduled:           scheduled,
+		PersistentIncidents: persistents,
 		Timezone:            timezone,
 		Theme:               a.theme,
 	})

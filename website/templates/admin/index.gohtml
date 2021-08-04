@@ -20,7 +20,8 @@
     <div class="divider"></div>
   </li>
     {{ range .MenuItems }}
-      <li class="{{if eq . $.ActiveItem }}active{{end}} white-text"><a href="/admin/{{.}}">{{. | title}}</a></li>
+      <li class="{{if eq . $.ActiveItem }}active{{end}} white-text">
+        <a href="/admin/{{.}}">{{(stringReplace . "_" " " ) | title}}</a></li>
     {{end}}
 </ul>
 
@@ -81,7 +82,7 @@
   <script type="text/javascript">
       $(document).ready(function () {
           loadTimezone();
-      })
+      });
   </script>
 {{ end }}
 </body>

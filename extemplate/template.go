@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/gobuffalo/packr/v2"
+
 	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/markdown"
 	"github.com/orange-cloudfoundry/statusetat/models"
@@ -52,6 +53,7 @@ var registeredFuncs = template.FuncMap{
 	"dict":                  dict,
 	"metadataValue":         metadataValue,
 	"timeAddDay":            timeAddDay,
+	"stringReplace":         stringReplace,
 }
 
 func AddFuncs(funcs template.FuncMap) {

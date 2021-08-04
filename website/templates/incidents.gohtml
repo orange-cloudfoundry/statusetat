@@ -46,11 +46,30 @@
         <div class="col s1"></div>
       </div>
     {{end}}
+    {{ with .PersistentIncidents }}
+
+      <div class="row">
+        <div class="col s1"></div>
+        <div class="col s10" id="list-persistent-incidents">
+          <h4>{{ if $.Theme.PersistentDisplayName }}{{$.Theme.PersistentDisplayName}}{{else}}Persistent Incident{{end}}</h4>
+            {{ with $.Theme.PrePersistent }}
+              <p>{{ . | markdown }}</p>
+            {{end}}
+            {{ range . }}
+                {{ template "persistent.gohtml" . }}
+            {{end}}
+            {{ with $.Theme.PostPersistent }}
+              <p>{{ . | markdown }}</p>
+            {{end}}
+        </div>
+        <div class="col s1"></div>
+      </div>
+    {{ end }}
     {{ with .Scheduled }}
 
       <div class="row">
         <div class="col s1"></div>
-        <div class="col s10">
+        <div class="col s10" id="list-scheduled-incidents">
           <h4>Scheduled Maintenance</h4>
             {{ with $.Theme.PreMaintenance }}
               <p>{{ . | markdown }}</p>
@@ -69,7 +88,7 @@
 
     <div class="row">
       <div class="col s1"></div>
-      <div class="col s10">
+      <div class="col s10" id="timeline-incidents">
         <h4>Latest Incidents</h4>
           {{ with .Theme.PreTimeline }}
             <p>{{ . | markdown }}</p>

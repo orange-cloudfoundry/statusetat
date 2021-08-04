@@ -193,6 +193,46 @@ var _ = Describe("Api", func() {
 		})
 
 	})
+
+	Context("Persistents", func() {
+
+		It("should give all persistent incidents", func() {
+			cpns := &models.Components{{
+				Name:  Component1.Name,
+				Group: Component1.Group,
+			}}
+			inc1 := models.Incident{
+				GUID:        "1",
+				CreatedAt:   time.Now().AddDate(0, 0, -2).UTC(),
+				UpdatedAt:   time.Now().AddDate(0, 0, -2).UTC(),
+				Components:  cpns,
+				IsScheduled: false,
+				Persistent:  true,
+			}
+			inc2 := models.Incident{
+				GUID:        "2",
+				CreatedAt:   time.Now().UTC(),
+				UpdatedAt:   time.Now().UTC(),
+				Components:  cpns,
+				IsScheduled: false,
+				Persistent:  true,
+			}
+
+			fakeStoreMem.PersistentsStub = func() ([]models.Incident, error) {
+				return []models.Incident{inc1, inc2}, nil
+			}
+
+			rr := CallRequest(NewRequestInt(http.MethodGet, "/v1/persistent_incidents", nil))
+			Expect(rr.CheckError()).ToNot(HaveOccurred())
+
+			finalIncidents, err := rr.UnmarshalToIncidents()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(finalIncidents).To(HaveLen(2))
+			Expect(finalIncidents[0].GUID).To(Equal("1"))
+			Expect(finalIncidents[1].GUID).To(Equal("2"))
+		})
+
+	})
 	Context("Incident", func() {
 		It("should give incident found", func() {
 			cpns := &models.Components{{

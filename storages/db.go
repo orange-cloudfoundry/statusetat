@@ -10,8 +10,9 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/orange-cloudfoundry/statusetat/models"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
 func init() {
@@ -156,6 +157,12 @@ func (s DB) Update(guid string, incident models.Incident) (models.Incident, erro
 			return updatedIncident, err
 		}
 	}
+	if !incident.Persistent {
+		err = s.db.Table("incidents").Where("guid = ?", guid).Update("persistent", false).Error
+		if err != nil {
+			return updatedIncident, err
+		}
+	}
 
 	return updatedIncident, err
 }
@@ -188,7 +195,17 @@ func (s DB) ByDate(from, to time.Time) ([]models.Incident, error) {
 	var incidents []models.Incident
 	err := s.db.Preload("Messages", func(db *gorm.DB) *gorm.DB {
 		return db.Order("messages.created_at DESC")
-	}).Preload("Metadata").Where("created_at BETWEEN ? AND ?", from, to).Find(&incidents).Error
+	}).Preload("Metadata").Where("created_at BETWEEN ? AND ? AND persistent = ?", from, to, false).Find(&incidents).Error
+	return incidents, err
+}
+
+func (s DB) Persistents() ([]models.Incident, error) {
+	var incidents []models.Incident
+	err := s.db.Preload("Messages", func(db *gorm.DB) *gorm.DB {
+		return db.Order("messages.created_at DESC")
+	}).Preload("Metadata").Where("persistent = ?", true).Find(&incidents).Error
+
+
 	return incidents, err
 }
 

@@ -108,6 +108,12 @@ theme:
   [ post_maintenance: <string> ]
   # Markdown content to put in footer
   [ footer: <string> ]
+  # Persistent name to display, default to Persistent Incident but you could set Known Issues for example
+  [ persistent_display_name: <string | default = "Persistent Incident"> ]
+  # Markdown content to show before persistent incident tasks box
+  [ pre_persistent: <string> ]
+  # Markdown content to show after persistent incident tasks box
+  [ post_persistent: <string> ]
 # list of targets store to use, this can be in form of:
 # mysql://user:password@host:3306?options
 # mariadb://user:password@host:3306?options

@@ -102,6 +102,10 @@ type Theme struct {
 	PreMaintenance  string `yaml:"pre_maintenance"`
 	PostMaintenance string `yaml:"post_maintenance"`
 
+	PersistentDisplayName string `yaml:"persistent_display_name"`
+	PrePersistent         string `yaml:"pre_persistent"`
+	PostPersistent        string `yaml:"post_persistent"`
+
 	Footer string `yaml:"footer"`
 }
 

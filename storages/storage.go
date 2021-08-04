@@ -19,6 +19,7 @@ type Store interface {
 	Delete(guid string) error
 	Read(guid string) (models.Incident, error)
 	ByDate(from, to time.Time) ([]models.Incident, error)
+	Persistents() ([]models.Incident, error)
 
 	Subscribe(email string) error
 	Unsubscribe(email string) error
