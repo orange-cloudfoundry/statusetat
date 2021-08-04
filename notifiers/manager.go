@@ -78,20 +78,15 @@ func Notify(store storages.Store) {
 		if err != nil {
 			log.Warningf("Could not retrieve list of subscribers: %s", err.Error())
 		}
-		incident := emitter.ToIncident(event)
+		notifyReq := emitter.ToNotifyRequest(event)
+		notifyReq.Subscribers = subscribers
 		for _, toNotif := range toNotifies {
 			n := toNotif.Notifier
-			if !toNotif.For.MatchComponents(*incident.Components) {
+			if !toNotif.For.MatchComponents(*notifyReq.Incident.Components) {
 				continue
 			}
 			entry := log.WithField("notifier", n.Name()).WithField("id", n.Id())
-			if snotif, ok := n.(NotifierSubscriber); ok {
-				err := snotif.NotifySubscriber(incident, subscribers)
-				if err != nil {
-					entry.Errorf("Could not send notify to subscribers: %s", err.Error())
-				}
-			}
-			err := n.Notify(incident)
+			err := n.Notify(notifyReq)
 			if err != nil {
 				entry.Errorf("Could not send notify: %s", err.Error())
 			}

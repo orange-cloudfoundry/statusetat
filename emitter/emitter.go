@@ -4,6 +4,7 @@ package emitter
 
 import (
 	"github.com/olebedev/emitter"
+
 	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
@@ -16,8 +17,8 @@ type emitterInterface interface {
 
 var e emitterInterface = emitter.New(uint(100))
 
-func Emit(incident models.Incident) {
-	e.Emit("incident", incident)
+func Emit(notifyRequest *models.NotifyRequest) {
+	e.Emit("incident", notifyRequest)
 }
 
 func On() <-chan emitter.Event {
@@ -32,8 +33,8 @@ func Listeners() []<-chan emitter.Event {
 	return e.Listeners("incident")
 }
 
-func ToIncident(evt emitter.Event) models.Incident {
-	return evt.Args[0].(models.Incident)
+func ToNotifyRequest(evt emitter.Event) *models.NotifyRequest {
+	return evt.Args[0].(*models.NotifyRequest)
 }
 
 // this is only made for testing purpose

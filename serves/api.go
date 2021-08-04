@@ -92,7 +92,7 @@ func (a Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	emitter.Emit(incident)
+	emitter.Emit(models.NewNotifyRequest(incident, false))
 	respond.NewResponse(w).Created(incident)
 }
 
@@ -264,7 +264,7 @@ func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if !incidentUpdate.NoNotify {
-		emitter.Emit(incident)
+		emitter.Emit(models.NewNotifyRequest(incident, false))
 	}
 	respond.NewResponse(w).Ok(incident)
 }
@@ -296,7 +296,7 @@ func (a Serve) Notify(w http.ResponseWriter, req *http.Request) {
 		JSONError(w, err, http.StatusPreconditionRequired)
 		return
 	}
-	emitter.Emit(incident)
+	emitter.Emit(models.NewNotifyRequest(incident, true))
 }
 
 func (a Serve) Delete(w http.ResponseWriter, req *http.Request) {
@@ -360,7 +360,7 @@ func (a Serve) AddMessage(w http.ResponseWriter, req *http.Request) {
 	}
 	incident.UpdatedAt = time.Now()
 
-	emitter.Emit(incident)
+	emitter.Emit(models.NewNotifyRequest(incident, false))
 	respond.NewResponse(w).Created(incident)
 }
 
@@ -401,7 +401,7 @@ func (a Serve) DeleteMessage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	emitter.Emit(incident)
+	emitter.Emit(models.NewNotifyRequest(incident, false))
 	respond.NewResponse(w).Ok(incident)
 }
 
@@ -493,7 +493,7 @@ func (a Serve) UpdateMessage(w http.ResponseWriter, req *http.Request) {
 
 	incident.UpdatedAt = time.Now()
 
-	emitter.Emit(incident)
+	emitter.Emit(models.NewNotifyRequest(incident, false))
 	respond.NewResponse(w).Ok(incident)
 }
 

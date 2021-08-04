@@ -101,12 +101,8 @@ func (n Plugin) Id() string {
 	return id
 }
 
-func (n Plugin) Notify(incident models.Incident) error {
-	return n.notifier.Notify(incident)
-}
-
-func (n Plugin) NotifySubscriber(incident models.Incident, subscribers []string) error {
-	return n.notifier.NotifySubscriber(incident, subscribers)
+func (n Plugin) Notify(notifyReq *models.NotifyRequest) error {
+	return n.notifier.Notify(notifyReq)
 }
 
 func (n Plugin) MetadataFields() []models.MetadataField {

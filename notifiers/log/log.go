@@ -1,10 +1,13 @@
 package log
 
 import (
+	"strings"
+
+	"github.com/sirupsen/logrus"
+
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
-	"github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -26,36 +29,30 @@ func (n Log) Id() string {
 	return "log"
 }
 
-func (n Log) Notify(incident models.Incident) error {
-	IncidentToEntry(incident).Info("notify")
+func (n Log) Notify(notifyReq *models.NotifyRequest) error {
+	RequestToEntry(notifyReq).Info("notify")
 	return nil
 }
 
-func (n Log) NotifySubscriber(incident models.Incident, subscriber []string) error {
-	if len(subscriber) == 0 {
-		return nil
-	}
-	if len(incident.Messages) > 1 && incident.State != models.Resolved {
-		return nil
-	}
+func RequestToEntry(notifyReq *models.NotifyRequest) *logrus.Entry {
 
-	for _, sub := range subscriber {
-		IncidentToEntry(incident).WithField("subscriber", sub).Info("notify subscribers")
-	}
-	return nil
-}
-
-func IncidentToEntry(incident models.Incident) *logrus.Entry {
+	incident := notifyReq.Incident
 	entryMap := map[string]interface{}{
-		"main_title":      incident.MainMessage().Title,
-		"last_title":      incident.LastMessage().Title,
-		"last_message":    incident.LastMessage().Content,
-		"created_at":      incident.CreatedAt,
-		"updated_at":      incident.UpdatedAt,
-		"component_state": models.TextState(incident.ComponentState),
-		"incident_state":  models.TextIncidentState(incident.State),
-		"is_scheduled":    incident.IsScheduled,
+		"main_title":         incident.MainMessage().Title,
+		"last_title":         incident.LastMessage().Title,
+		"last_message":       incident.LastMessage().Content,
+		"created_at":         incident.CreatedAt,
+		"updated_at":         incident.UpdatedAt,
+		"component_state":    models.TextState(incident.ComponentState),
+		"incident_state":     models.TextIncidentState(incident.State),
+		"is_scheduled":       incident.IsScheduled,
+		"triggerred_by_user": notifyReq.TriggerByUser,
+		"nb_subscribers":     len(notifyReq.Subscribers),
 	}
+	if logrus.IsLevelEnabled(logrus.DebugLevel) {
+		entryMap["subscribers"] = strings.Join(notifyReq.Subscribers, ", ")
+	}
+
 	if incident.IsScheduled {
 		entryMap["scheduled_end"] = incident.ScheduledEnd
 	}

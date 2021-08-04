@@ -29,8 +29,7 @@ type Notifier interface {
 	Name() (string, error)
 	Id() (string, error)
 	MetadataFields() ([]models.MetadataField, error)
-	Notify(incident models.Incident) error
-	NotifySubscriber(incident models.Incident, subscribers []string) error
+	Notify(notifyReq *models.NotifyRequest) error
 	PreCheck(incident models.Incident) error
 }
 

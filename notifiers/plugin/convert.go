@@ -2,12 +2,14 @@ package plugin
 
 import (
 	"fmt"
+	"reflect"
+	"time"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers/plugin/proto"
-	"google.golang.org/protobuf/types/known/timestamppb"
-	"reflect"
-	"time"
 )
 
 func IncidentToProto(incident models.Incident) *proto.Incident {
@@ -39,6 +41,22 @@ func ProtoToIncident(incident *proto.Incident) models.Incident {
 		IsScheduled:    incident.GetIsScheduled(),
 		ScheduledEnd:   localizedTimeToTime(incident.GetScheduledEnd()),
 		Origin:         incident.GetOrigin(),
+	}
+}
+
+func NotifyRequestToProto(notifyRequest *models.NotifyRequest) *proto.NotifyRequest {
+	return &proto.NotifyRequest{
+		Incident:      IncidentToProto(notifyRequest.Incident),
+		TriggerByUser: notifyRequest.TriggerByUser,
+		Subscribers:   notifyRequest.Subscribers,
+	}
+}
+
+func ProtoToNotifyRequest(notifyRequest *proto.NotifyRequest) *models.NotifyRequest {
+	return &models.NotifyRequest{
+		Incident:      ProtoToIncident(notifyRequest.Incident),
+		TriggerByUser: notifyRequest.GetTriggerByUser(),
+		Subscribers:   notifyRequest.GetSubscribers(),
 	}
 }
 

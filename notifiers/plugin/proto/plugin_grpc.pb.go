@@ -23,7 +23,6 @@ type NotifierClient interface {
 	Name(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NameResponse, error)
 	Id(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*IdResponse, error)
 	Notify(ctx context.Context, in *NotifyRequest, opts ...grpc.CallOption) (*ErrorResponse, error)
-	NotifySubscriber(ctx context.Context, in *NotifySubscriberRequest, opts ...grpc.CallOption) (*ErrorResponse, error)
 	MetadataFields(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListMetadataField, error)
 	PreCheck(ctx context.Context, in *NotifyRequest, opts ...grpc.CallOption) (*ErrorResponse, error)
 }
@@ -72,15 +71,6 @@ func (c *notifierClient) Notify(ctx context.Context, in *NotifyRequest, opts ...
 	return out, nil
 }
 
-func (c *notifierClient) NotifySubscriber(ctx context.Context, in *NotifySubscriberRequest, opts ...grpc.CallOption) (*ErrorResponse, error) {
-	out := new(ErrorResponse)
-	err := c.cc.Invoke(ctx, "/types.Notifier/NotifySubscriber", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *notifierClient) MetadataFields(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListMetadataField, error) {
 	out := new(ListMetadataField)
 	err := c.cc.Invoke(ctx, "/types.Notifier/MetadataFields", in, out, opts...)
@@ -107,7 +97,6 @@ type NotifierServer interface {
 	Name(context.Context, *emptypb.Empty) (*NameResponse, error)
 	Id(context.Context, *emptypb.Empty) (*IdResponse, error)
 	Notify(context.Context, *NotifyRequest) (*ErrorResponse, error)
-	NotifySubscriber(context.Context, *NotifySubscriberRequest) (*ErrorResponse, error)
 	MetadataFields(context.Context, *emptypb.Empty) (*ListMetadataField, error)
 	PreCheck(context.Context, *NotifyRequest) (*ErrorResponse, error)
 	mustEmbedUnimplementedNotifierServer()
@@ -128,9 +117,6 @@ func (UnimplementedNotifierServer) Id(context.Context, *emptypb.Empty) (*IdRespo
 }
 func (UnimplementedNotifierServer) Notify(context.Context, *NotifyRequest) (*ErrorResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Notify not implemented")
-}
-func (UnimplementedNotifierServer) NotifySubscriber(context.Context, *NotifySubscriberRequest) (*ErrorResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method NotifySubscriber not implemented")
 }
 func (UnimplementedNotifierServer) MetadataFields(context.Context, *emptypb.Empty) (*ListMetadataField, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MetadataFields not implemented")
@@ -223,24 +209,6 @@ func _Notifier_Notify_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Notifier_NotifySubscriber_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NotifySubscriberRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NotifierServer).NotifySubscriber(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/types.Notifier/NotifySubscriber",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotifierServer).NotifySubscriber(ctx, req.(*NotifySubscriberRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Notifier_MetadataFields_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -299,10 +267,6 @@ var Notifier_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Notify",
 			Handler:    _Notifier_Notify_Handler,
-		},
-		{
-			MethodName: "NotifySubscriber",
-			Handler:    _Notifier_NotifySubscriber_Handler,
 		},
 		{
 			MethodName: "MetadataFields",

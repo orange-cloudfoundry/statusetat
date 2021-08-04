@@ -7,6 +7,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/serves"
 )
@@ -542,11 +543,22 @@ var _ = Describe("Api", func() {
 			})
 		})
 		Context("Notify", func() {
-			It("should emit incident for notify", func() {
+			It("should emit incident for notify with triggerred by user", func() {
+				var notifyReq *models.NotifyRequest
+				fakeEmitter.EmitStub = func(topic string, args ...interface{}) chan struct{} {
+					if topic != "incident" {
+						return nil
+					}
+					notifyReq = args[0].(*models.NotifyRequest)
+					return nil
+				}
+
 				rr := CallRequest(NewRequestIntAdmin(http.MethodPut, "/v1/incidents/1/notify", nil))
 
+				Expect(notifyReq).ToNot(BeNil())
 				Expect(rr.CheckError()).ToNot(HaveOccurred())
 				Expect(fakeEmitter.EmitCallCount()).To(Equal(1))
+				Expect(notifyReq.TriggerByUser).To(BeTrue())
 			})
 		})
 	})

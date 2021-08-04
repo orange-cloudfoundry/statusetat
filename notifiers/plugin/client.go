@@ -51,24 +51,8 @@ func (m *GRPCClient) Id() (string, error) {
 	return resp.GetId(), nil
 }
 
-func (m *GRPCClient) Notify(incident models.Incident) error {
-	resp, err := m.client.Notify(context.Background(), &proto.NotifyRequest{
-		Incident: IncidentToProto(incident),
-	})
-	if err != nil {
-		return err
-	}
-	if resp.GetError() != nil {
-		return fmt.Errorf(resp.GetError().GetDetail())
-	}
-	return nil
-}
-
-func (m *GRPCClient) NotifySubscriber(incident models.Incident, subscribers []string) error {
-	resp, err := m.client.NotifySubscriber(context.Background(), &proto.NotifySubscriberRequest{
-		Incident:    IncidentToProto(incident),
-		Subscribers: subscribers,
-	})
+func (m *GRPCClient) Notify(notifyReq *models.NotifyRequest) error {
+	resp, err := m.client.Notify(context.Background(), NotifyRequestToProto(notifyReq))
 	if err != nil {
 		return err
 	}

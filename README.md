@@ -282,13 +282,11 @@ func (n LogNotifier) MetadataFields() ([]models.MetadataField, error) {
 	return []models.MetadataField{}, nil
 }
 
-func (n LogNotifier) Notify(incident models.Incident) error {
-	log.Info(incident)
-	return nil
-}
-
-func (n LogNotifier) NotifySubscriber(incident models.Incident, subscribers []string) error {
-	log.WithField("subscribers", strings.Join(subscribers, ", ")).Info(incident)
+func (n LogNotifier) Notify(notifyReq *models.NotifyRequest) error {
+	log.
+		WithField("subscribers", strings.Join(notifyReq.Subscribers, ", ")).
+		WithField("triggerred_by_user", notifyReq.TriggerByUser).
+		Info(notifyReq.Incident)
 	return nil
 }
 

@@ -54,27 +54,15 @@ type FakeNotifierAllInOne struct {
 	nameReturnsOnCall map[int]struct {
 		result1 string
 	}
-	NotifyStub        func(models.Incident) error
+	NotifyStub        func(*models.NotifyRequest) error
 	notifyMutex       sync.RWMutex
 	notifyArgsForCall []struct {
-		arg1 models.Incident
+		arg1 *models.NotifyRequest
 	}
 	notifyReturns struct {
 		result1 error
 	}
 	notifyReturnsOnCall map[int]struct {
-		result1 error
-	}
-	NotifySubscriberStub        func(models.Incident, []string) error
-	notifySubscriberMutex       sync.RWMutex
-	notifySubscriberArgsForCall []struct {
-		arg1 models.Incident
-		arg2 []string
-	}
-	notifySubscriberReturns struct {
-		result1 error
-	}
-	notifySubscriberReturnsOnCall map[int]struct {
 		result1 error
 	}
 	PreCheckStub        func(models.Incident) error
@@ -312,11 +300,11 @@ func (fake *FakeNotifierAllInOne) NameReturnsOnCall(i int, result1 string) {
 	}{result1}
 }
 
-func (fake *FakeNotifierAllInOne) Notify(arg1 models.Incident) error {
+func (fake *FakeNotifierAllInOne) Notify(arg1 *models.NotifyRequest) error {
 	fake.notifyMutex.Lock()
 	ret, specificReturn := fake.notifyReturnsOnCall[len(fake.notifyArgsForCall)]
 	fake.notifyArgsForCall = append(fake.notifyArgsForCall, struct {
-		arg1 models.Incident
+		arg1 *models.NotifyRequest
 	}{arg1})
 	fake.recordInvocation("Notify", []interface{}{arg1})
 	fake.notifyMutex.Unlock()
@@ -336,13 +324,13 @@ func (fake *FakeNotifierAllInOne) NotifyCallCount() int {
 	return len(fake.notifyArgsForCall)
 }
 
-func (fake *FakeNotifierAllInOne) NotifyCalls(stub func(models.Incident) error) {
+func (fake *FakeNotifierAllInOne) NotifyCalls(stub func(*models.NotifyRequest) error) {
 	fake.notifyMutex.Lock()
 	defer fake.notifyMutex.Unlock()
 	fake.NotifyStub = stub
 }
 
-func (fake *FakeNotifierAllInOne) NotifyArgsForCall(i int) models.Incident {
+func (fake *FakeNotifierAllInOne) NotifyArgsForCall(i int) *models.NotifyRequest {
 	fake.notifyMutex.RLock()
 	defer fake.notifyMutex.RUnlock()
 	argsForCall := fake.notifyArgsForCall[i]
@@ -368,72 +356,6 @@ func (fake *FakeNotifierAllInOne) NotifyReturnsOnCall(i int, result1 error) {
 		})
 	}
 	fake.notifyReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeNotifierAllInOne) NotifySubscriber(arg1 models.Incident, arg2 []string) error {
-	var arg2Copy []string
-	if arg2 != nil {
-		arg2Copy = make([]string, len(arg2))
-		copy(arg2Copy, arg2)
-	}
-	fake.notifySubscriberMutex.Lock()
-	ret, specificReturn := fake.notifySubscriberReturnsOnCall[len(fake.notifySubscriberArgsForCall)]
-	fake.notifySubscriberArgsForCall = append(fake.notifySubscriberArgsForCall, struct {
-		arg1 models.Incident
-		arg2 []string
-	}{arg1, arg2Copy})
-	fake.recordInvocation("NotifySubscriber", []interface{}{arg1, arg2Copy})
-	fake.notifySubscriberMutex.Unlock()
-	if fake.NotifySubscriberStub != nil {
-		return fake.NotifySubscriberStub(arg1, arg2)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	fakeReturns := fake.notifySubscriberReturns
-	return fakeReturns.result1
-}
-
-func (fake *FakeNotifierAllInOne) NotifySubscriberCallCount() int {
-	fake.notifySubscriberMutex.RLock()
-	defer fake.notifySubscriberMutex.RUnlock()
-	return len(fake.notifySubscriberArgsForCall)
-}
-
-func (fake *FakeNotifierAllInOne) NotifySubscriberCalls(stub func(models.Incident, []string) error) {
-	fake.notifySubscriberMutex.Lock()
-	defer fake.notifySubscriberMutex.Unlock()
-	fake.NotifySubscriberStub = stub
-}
-
-func (fake *FakeNotifierAllInOne) NotifySubscriberArgsForCall(i int) (models.Incident, []string) {
-	fake.notifySubscriberMutex.RLock()
-	defer fake.notifySubscriberMutex.RUnlock()
-	argsForCall := fake.notifySubscriberArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2
-}
-
-func (fake *FakeNotifierAllInOne) NotifySubscriberReturns(result1 error) {
-	fake.notifySubscriberMutex.Lock()
-	defer fake.notifySubscriberMutex.Unlock()
-	fake.NotifySubscriberStub = nil
-	fake.notifySubscriberReturns = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeNotifierAllInOne) NotifySubscriberReturnsOnCall(i int, result1 error) {
-	fake.notifySubscriberMutex.Lock()
-	defer fake.notifySubscriberMutex.Unlock()
-	fake.NotifySubscriberStub = nil
-	if fake.notifySubscriberReturnsOnCall == nil {
-		fake.notifySubscriberReturnsOnCall = make(map[int]struct {
-			result1 error
-		})
-	}
-	fake.notifySubscriberReturnsOnCall[i] = struct {
 		result1 error
 	}{result1}
 }
@@ -511,8 +433,6 @@ func (fake *FakeNotifierAllInOne) Invocations() map[string][][]interface{} {
 	defer fake.nameMutex.RUnlock()
 	fake.notifyMutex.RLock()
 	defer fake.notifyMutex.RUnlock()
-	fake.notifySubscriberMutex.RLock()
-	defer fake.notifySubscriberMutex.RUnlock()
 	fake.preCheckMutex.RLock()
 	defer fake.preCheckMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

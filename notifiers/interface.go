@@ -11,11 +11,7 @@ type Notifier interface {
 	Creator(params map[string]interface{}, baseInfo config.BaseInfo) (Notifier, error)
 	Name() string
 	Id() string
-	Notify(incident models.Incident) error
-}
-
-type NotifierSubscriber interface {
-	NotifySubscriber(incident models.Incident, subscribers []string) error
+	Notify(notifyRequest *models.NotifyRequest) error
 }
 
 type NotifierMetadataField interface {
@@ -29,7 +25,6 @@ type NotifierPreCheck interface {
 // special interface for creating a moke
 type NotifierAllInOne interface {
 	Notifier
-	NotifierSubscriber
 	NotifierMetadataField
 	NotifierPreCheck
 }

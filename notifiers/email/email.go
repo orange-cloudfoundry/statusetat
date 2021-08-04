@@ -10,11 +10,12 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/mitchellh/mapstructure"
+	"gopkg.in/gomail.v2"
+
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/extemplate"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
-	"gopkg.in/gomail.v2"
 )
 
 func init() {
@@ -183,15 +184,19 @@ func (n Email) Id() string {
 	return n.id
 }
 
-func (n Email) Notify(incident models.Incident) error {
+func (n Email) Notify(notifyReq *models.NotifyRequest) error {
+	incident := notifyReq.Incident
 	if len(incident.Messages) > 1 && incident.State != models.Resolved {
 		return nil
 	}
-	return n.NotifySubscriber(incident, n.opts.Subscribers)
+	subscribers := make([]string, 0)
+	subscribers = append(subscribers, notifyReq.Subscribers...)
+	subscribers = append(subscribers, n.opts.Subscribers...)
+	return n.notifySubscriber(incident, subscribers)
 }
 
-func (n Email) NotifySubscriber(incident models.Incident, subscriber []string) error {
-	if len(subscriber) == 0 {
+func (n Email) notifySubscriber(incident models.Incident, subscribers []string) error {
+	if len(subscribers) == 0 {
 		return nil
 	}
 	if len(incident.Messages) > 1 && incident.State != models.Resolved {
@@ -202,7 +207,7 @@ func (n Email) NotifySubscriber(incident models.Incident, subscriber []string) e
 		return err
 	}
 	var result error
-	for _, sub := range subscriber {
+	for _, sub := range subscribers {
 		finalText := text + fmt.Sprintf(`<br/><br/>
 <hr/>
 <a href="%s/v1/unsubscribe?email=%s">Click here for unsubscribe to email</a>`, n.baseUrl, sub)

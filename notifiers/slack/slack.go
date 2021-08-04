@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/mapstructure"
+
 	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
@@ -134,11 +135,12 @@ func (n Slack) colorStateIncident(state models.IncidentState) string {
 	return "#4CAF50"
 }
 
-func (n Slack) Notify(incident models.Incident) error {
+func (n Slack) Notify(notifyReq *models.NotifyRequest) error {
+	incident := notifyReq.Incident
 	if incident.IsScheduled {
 		return n.notifyScheduled(incident)
 	}
-	return n.notifyIncident(incident)
+	return n.notifyIncident(incident, notifyReq.TriggerByUser)
 }
 
 func (n Slack) notifyScheduled(incident models.Incident) error {
@@ -233,8 +235,8 @@ func (n Slack) notifyScheduled(incident models.Incident) error {
 	return nil
 }
 
-func (n Slack) notifyIncident(incident models.Incident) error {
-	if len(incident.Messages) > 1 && incident.State != models.Resolved {
+func (n Slack) notifyIncident(incident models.Incident, triggered bool) error {
+	if len(incident.Messages) > 1 && incident.State != models.Resolved && !triggered {
 		return nil
 	}
 	msg := incident.MainMessage()
@@ -252,6 +254,13 @@ func (n Slack) notifyIncident(incident models.Incident) error {
 	}
 	pretext = n.opts.PretextIncident + pretext
 	title := common.Title(msg.Title) + " - " + common.Title(models.TextIncidentState(incident.State))
+
+	if len(incident.Messages) > 1 && incident.State != models.Resolved {
+		msg = incident.LastMessage()
+		pretext = fmt.Sprintf("Incident firing was updated, follow it at [%s](%s).", n.baseUrl, n.baseUrl)
+		title = common.Title(incident.LastMessage().Title) + " - " + common.Title(models.TextIncidentState(incident.State))
+
+	}
 
 	fields := []SlackField{
 		{

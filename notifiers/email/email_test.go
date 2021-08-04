@@ -6,12 +6,13 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"gopkg.in/gomail.v2"
+
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
 	"github.com/orange-cloudfoundry/statusetat/notifiers/email"
 	"github.com/orange-cloudfoundry/statusetat/notifiers/email/emailfakes"
-	"gopkg.in/gomail.v2"
 )
 
 var _ = Describe("Email", func() {
@@ -66,7 +67,7 @@ var _ = Describe("Email", func() {
 					return nil
 				}
 
-				err := notifier.(notifiers.NotifierSubscriber).NotifySubscriber(models.Incident{
+				notifyReq := models.NewNotifyRequest(models.Incident{
 					GUID: "aguid",
 					Messages: []models.Message{
 						{
@@ -77,8 +78,12 @@ var _ = Describe("Email", func() {
 					},
 					IsScheduled: true,
 					State:       models.Idle,
-				}, []string{subscriber})
+				}, false)
+				notifyReq.Subscribers = []string{subscriber}
+
+				err := notifier.Notify(notifyReq)
 				Expect(err).ToNot(HaveOccurred())
+				Expect(fakeDialer.DialAndSendCallCount()).To(Equal(1))
 			})
 
 			It("should wrote on slack a scheduled task started message if state is unresolved", func() {
@@ -101,7 +106,7 @@ var _ = Describe("Email", func() {
 					return nil
 				}
 
-				err := notifier.(notifiers.NotifierSubscriber).NotifySubscriber(models.Incident{
+				notifyReq := models.NewNotifyRequest(models.Incident{
 					GUID: "aguid",
 					Messages: []models.Message{
 						{
@@ -112,8 +117,12 @@ var _ = Describe("Email", func() {
 					},
 					IsScheduled: true,
 					State:       models.Unresolved,
-				}, []string{subscriber})
+				}, false)
+				notifyReq.Subscribers = []string{subscriber}
+
+				err := notifier.Notify(notifyReq)
 				Expect(err).ToNot(HaveOccurred())
+				Expect(fakeDialer.DialAndSendCallCount()).To(Equal(1))
 			})
 
 			It("should wrote on slack a scheduled task finished message if state is resolved", func() {
@@ -136,7 +145,7 @@ var _ = Describe("Email", func() {
 					return nil
 				}
 
-				err := notifier.(notifiers.NotifierSubscriber).NotifySubscriber(models.Incident{
+				notifyReq := models.NewNotifyRequest(models.Incident{
 					GUID: "aguid",
 					Messages: []models.Message{
 						{
@@ -147,7 +156,10 @@ var _ = Describe("Email", func() {
 					},
 					IsScheduled: true,
 					State:       models.Resolved,
-				}, []string{subscriber})
+				}, false)
+				notifyReq.Subscribers = []string{subscriber}
+
+				err := notifier.Notify(notifyReq)
 				Expect(err).ToNot(HaveOccurred())
 			})
 
@@ -172,7 +184,7 @@ var _ = Describe("Email", func() {
 					return nil
 				}
 
-				err := notifier.(notifiers.NotifierSubscriber).NotifySubscriber(models.Incident{
+				notifyReq := models.NewNotifyRequest(models.Incident{
 					GUID: "aguid",
 					Messages: []models.Message{
 						{
@@ -182,13 +194,18 @@ var _ = Describe("Email", func() {
 						},
 					},
 					IsScheduled: false,
-				}, []string{subscriber})
+				}, false)
+				notifyReq.Subscribers = []string{subscriber}
+
+				err := notifier.Notify(notifyReq)
 				Expect(err).ToNot(HaveOccurred())
+				Expect(fakeDialer.DialAndSendCallCount()).To(Equal(1))
 			})
 		})
 		Context("have many subscribers", func() {
 			It("should send to all subscribers", func() {
-				err := notifier.(notifiers.NotifierSubscriber).NotifySubscriber(models.Incident{
+
+				notifyReq := models.NewNotifyRequest(models.Incident{
 					GUID: "aguid",
 					Messages: []models.Message{
 						{
@@ -198,7 +215,10 @@ var _ = Describe("Email", func() {
 						},
 					},
 					IsScheduled: false,
-				}, []string{"user@user.com", "user2@user.com", "user3@user.com"})
+				}, false)
+				notifyReq.Subscribers = []string{"user@user.com", "user2@user.com", "user3@user.com"}
+
+				err := notifier.Notify(notifyReq)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(fakeDialer.DialAndSendCallCount()).To(Equal(3))
 			})

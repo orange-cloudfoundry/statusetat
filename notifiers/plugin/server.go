@@ -52,19 +52,7 @@ func (s GRPCServer) Id(ctx context.Context, request *emptypb.Empty) (*proto.IdRe
 }
 
 func (s GRPCServer) Notify(ctx context.Context, request *proto.NotifyRequest) (*proto.ErrorResponse, error) {
-	err := s.Impl.Notify(ProtoToIncident(request.Incident))
-	if err != nil {
-		return &proto.ErrorResponse{
-			Error: &proto.Error{
-				Detail: err.Error(),
-			},
-		}, nil
-	}
-	return &proto.ErrorResponse{}, nil
-}
-
-func (s GRPCServer) NotifySubscriber(ctx context.Context, request *proto.NotifySubscriberRequest) (*proto.ErrorResponse, error) {
-	err := s.Impl.NotifySubscriber(ProtoToIncident(request.Incident), request.GetSubscribers())
+	err := s.Impl.Notify(ProtoToNotifyRequest(request))
 	if err != nil {
 		return &proto.ErrorResponse{
 			Error: &proto.Error{

@@ -139,7 +139,8 @@ func (n GrafanaAnnotation) incidentTag(incident models.Incident) string {
 	return "incident-guid-" + incident.GUID
 }
 
-func (n GrafanaAnnotation) Notify(incident models.Incident) error {
+func (n GrafanaAnnotation) Notify(notifyReq *models.NotifyRequest) error {
+	incident := notifyReq.Incident
 	if incident.State == models.Idle {
 		return nil
 	}

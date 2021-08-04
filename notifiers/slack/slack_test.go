@@ -6,12 +6,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/orange-cloudfoundry/statusetat/notifiers"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
+
+	"github.com/orange-cloudfoundry/statusetat/config"
+	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/notifiers"
 
 	"github.com/orange-cloudfoundry/statusetat/notifiers/slack"
 )
@@ -55,7 +56,8 @@ var _ = Describe("Slack", func() {
 					err := json.Unmarshal(b, &slackReq)
 					Expect(err).To(BeNil())
 				})
-				notifier.Notify(models.Incident{
+
+				notifyReq := models.NewNotifyRequest(models.Incident{
 					GUID: "aguid",
 					Messages: []models.Message{
 						{
@@ -65,8 +67,11 @@ var _ = Describe("Slack", func() {
 						},
 					},
 					IsScheduled: true,
-				})
+				}, false)
 
+				err := notifier.Notify(notifyReq)
+
+				Expect(err).ToNot(HaveOccurred())
 				Expect(slackReq.Channel).To(Equal("my channel"))
 				Expect(slackReq.Username).To(ContainSubstring("Scheduled maintenance"))
 				Expect(slackReq.Attachments).To(HaveLen(1))
@@ -84,7 +89,8 @@ var _ = Describe("Slack", func() {
 					err := json.Unmarshal(b, &slackReq)
 					Expect(err).To(BeNil())
 				})
-				notifier.Notify(models.Incident{
+
+				notifyReq := models.NewNotifyRequest(models.Incident{
 					GUID: "aguid",
 					Messages: []models.Message{
 						{
@@ -94,8 +100,11 @@ var _ = Describe("Slack", func() {
 						},
 					},
 					IsScheduled: false,
-				})
+				}, false)
 
+				err := notifier.Notify(notifyReq)
+
+				Expect(err).ToNot(HaveOccurred())
 				Expect(slackReq.Channel).To(Equal("my channel"))
 				Expect(slackReq.Username).To(ContainSubstring("Incident"))
 				Expect(slackReq.Attachments).To(HaveLen(1))
@@ -103,6 +112,81 @@ var _ = Describe("Slack", func() {
 				Expect(slackReq.Attachments[0].Text).To(Equal("content"))
 				Expect(slackReq.Attachments[0].Fields).To(HaveLen(3))
 
+			})
+			Context("multiple messages", func() {
+				Context("not triggerred by user", func() {
+					It("should not wrote on slack update", func() {
+						var slackReq slack.SlackRequest
+						server.RouteToHandler("POST", "/", func(writer http.ResponseWriter, request *http.Request) {
+							b, _ := ioutil.ReadAll(request.Body)
+							err := json.Unmarshal(b, &slackReq)
+							Expect(err).To(BeNil())
+						})
+
+						notifyReq := models.NewNotifyRequest(models.Incident{
+							GUID: "aguid",
+							Messages: []models.Message{
+								{
+									CreatedAt: time.Time{},
+									Title:     "A title",
+									Content:   "content",
+								},
+								{
+									CreatedAt: time.Time{},
+									Title:     "A second title",
+									Content:   "another content",
+								},
+							},
+							IsScheduled: false,
+						}, false)
+
+						err := notifier.Notify(notifyReq)
+
+						Expect(err).ToNot(HaveOccurred())
+						Expect(slackReq.Channel).To(Equal(""))
+						Expect(slackReq.Username).To(ContainSubstring(""))
+						Expect(slackReq.Attachments).To(HaveLen(0))
+
+					})
+				})
+				Context("triggerred by user", func() {
+					It("should wrote on slack update", func() {
+						var slackReq slack.SlackRequest
+						server.RouteToHandler("POST", "/", func(writer http.ResponseWriter, request *http.Request) {
+							b, _ := ioutil.ReadAll(request.Body)
+							err := json.Unmarshal(b, &slackReq)
+							Expect(err).To(BeNil())
+						})
+
+						notifyReq := models.NewNotifyRequest(models.Incident{
+							GUID: "aguid",
+							Messages: []models.Message{
+								{
+									CreatedAt: time.Time{},
+									Title:     "A second title",
+									Content:   "another content",
+								},
+								{
+									CreatedAt: time.Time{},
+									Title:     "A title",
+									Content:   "content",
+								},
+							},
+							IsScheduled: false,
+						}, true)
+
+						err := notifier.Notify(notifyReq)
+
+						Expect(err).ToNot(HaveOccurred())
+						Expect(slackReq.Channel).To(Equal("my channel"))
+						Expect(slackReq.Username).To(ContainSubstring("Incident"))
+						Expect(slackReq.Attachments).To(HaveLen(1))
+						Expect(slackReq.Attachments[0].Title).To(ContainSubstring("A second title"))
+						Expect(slackReq.Attachments[0].Text).To(Equal("another content"))
+						Expect(slackReq.Attachments[0].Fields).To(HaveLen(3))
+
+					})
+				})
 			})
 		})
 	})
