@@ -205,7 +205,6 @@ func (s DB) Persistents() ([]models.Incident, error) {
 		return db.Order("messages.created_at DESC")
 	}).Preload("Metadata").Where("persistent = ?", true).Find(&incidents).Error
 
-
 	return incidents, err
 }
 
