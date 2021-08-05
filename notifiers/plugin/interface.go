@@ -27,6 +27,7 @@ type Base struct {
 type Notifier interface {
 	Init(baseInfo config.BaseInfo, params map[string]interface{}) error
 	Name() (string, error)
+	Description() (string, error)
 	Id() (string, error)
 	MetadataFields() ([]models.MetadataField, error)
 	Notify(notifyReq *models.NotifyRequest) error

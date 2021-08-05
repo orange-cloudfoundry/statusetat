@@ -10,6 +10,7 @@ import (
 type Notifier interface {
 	Creator(params map[string]interface{}, baseInfo config.BaseInfo) (Notifier, error)
 	Name() string
+	Description() string
 	Id() string
 	Notify(notifyRequest *models.NotifyRequest) error
 }

@@ -53,11 +53,11 @@ func AddNotifier(name string, params map[string]interface{}, forComp config.ForC
 	return fmt.Errorf("Could not find notifier with name '%s' .", name)
 }
 
-func NotifiersMetadataFields() models.MetadataFields {
+func MetadataFields() models.MetadataFields {
 	return metadataFields
 }
 
-func NotifiersPreCheckers(components models.Components) []NotifierPreCheck {
+func PreCheckers(components models.Components) []NotifierPreCheck {
 	notifiers := make([]NotifierPreCheck, 0)
 	for _, tn := range toNotifies {
 		preChecker, ok := tn.Notifier.(NotifierPreCheck)
@@ -67,6 +67,19 @@ func NotifiersPreCheckers(components models.Components) []NotifierPreCheck {
 		notifiers = append(notifiers, preChecker)
 	}
 	return notifiers
+}
+
+func ListAll() map[string][]Notifier {
+	notifierMap := make(map[string][]Notifier)
+	for _, toNotif := range toNotifies {
+		notifier := toNotif.Notifier
+		if ls, ok := notifierMap[notifier.Name()]; ok {
+			notifierMap[notifier.Name()] = append(ls, notifier)
+			continue
+		}
+		notifierMap[notifier.Name()] = []Notifier{notifier}
+	}
+	return notifierMap
 }
 
 func Notify(store storages.Store) {

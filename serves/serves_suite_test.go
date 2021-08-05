@@ -15,6 +15,7 @@ import (
 	"github.com/gorilla/mux"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/emitter"
 	"github.com/orange-cloudfoundry/statusetat/emitter/emitterfakes"
@@ -93,7 +94,18 @@ var _ = BeforeEach(func() {
 	fakeStoreMem.UnsubscribeStub = dbStore.Unsubscribe
 	fakeStoreMem.SubscribersStub = dbStore.Subscribers
 
-	err = serves.RegisterWithHtmlTemplater(fakeStoreMem, router, BaseInfo, UserInfo, Components, Theme, fakeHtmlTemplater)
+	err = serves.RegisterWithHtmlTemplater(fakeStoreMem, router, UserInfo, fakeHtmlTemplater, config.Config{
+		Targets:    nil,
+		Listen:     "",
+		Log:        config.Log{},
+		Components: Components,
+		BaseInfo:   &BaseInfo,
+		Username:   "",
+		Password:   "",
+		CookieKey:  "",
+		Notifiers:  []config.Notifier{},
+		Theme:      &Theme,
+	})
 	Expect(err).ToNot(HaveOccurred())
 	emitter.SetEmitter(fakeEmitter)
 })

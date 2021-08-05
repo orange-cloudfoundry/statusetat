@@ -114,6 +114,10 @@ message NameResponse {
   string name = 1;
 }
 
+message DescriptionResponse {
+  string description = 1;
+}
+
 message IdResponse {
   string id = 1;
 }
@@ -121,6 +125,7 @@ message IdResponse {
 service Notifier {
   rpc Init(InitRequest) returns (google.protobuf.Empty);
   rpc Name(google.protobuf.Empty) returns (NameResponse);
+  rpc Description(google.protobuf.Empty) returns (DescriptionResponse);
   rpc Id(google.protobuf.Empty) returns (IdResponse);
   rpc Notify(NotifyRequest) returns (ErrorResponse);
   rpc MetadataFields(google.protobuf.Empty) returns (ListMetadataField);

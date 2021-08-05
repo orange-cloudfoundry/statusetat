@@ -25,6 +25,11 @@ func (n Log) Name() string {
 	return "log"
 }
 
+func (n Log) Description() string {
+	return `Show inside logs all information about notification which has been triggerred. 
+Even manual trigger by admin can be seen.`
+}
+
 func (n Log) Id() string {
 	return "log"
 }

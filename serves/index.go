@@ -69,7 +69,7 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 
 	componentStatesByGroup := make(map[string][]*ComponentStateData)
 	componentStateMap := make(map[string]*ComponentStateData)
-	for _, component := range a.components {
+	for _, component := range a.config.Components {
 		componentState := &ComponentStateData{
 			Name:        component.Name,
 			Description: component.Description,
@@ -86,7 +86,7 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 	}
 
 	compStateGroup := make(map[string]models.ComponentState)
-	for k := range a.components.Regroups() {
+	for k := range a.config.Components.Regroups() {
 		compStateGroup[k] = models.Operational
 	}
 
@@ -153,7 +153,7 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 
 	sort.Sort(sort.Reverse(timelineDates))
 	err = a.xt.ExecuteTemplate(w, "incidents.gohtml", IndexData{
-		BaseInfo:            a.baseInfo,
+		BaseInfo:            a.BaseInfo(),
 		GroupComponentState: compStateGroup,
 		ComponentStatesData: componentStatesByGroup,
 		Timeline:            timeline,
@@ -161,7 +161,7 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 		Scheduled:           scheduled,
 		PersistentIncidents: persistents,
 		Timezone:            timezone,
-		Theme:               a.theme,
+		Theme:               *a.config.Theme,
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -187,10 +187,10 @@ func (a Serve) ShowIncident(w http.ResponseWriter, req *http.Request) {
 		Timezone string
 		Theme    config.Theme
 	}{
-		BaseInfo: a.baseInfo,
+		BaseInfo: a.BaseInfo(),
 		Incident: incident,
 		Timezone: timezone,
-		Theme:    a.theme,
+		Theme:    *a.config.Theme,
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -253,11 +253,11 @@ func (a Serve) History(w http.ResponseWriter, req *http.Request) {
 		After  time.Time
 	}{
 		IndexData: IndexData{
-			BaseInfo:      a.baseInfo,
+			BaseInfo:      a.BaseInfo(),
 			Timeline:      timeline,
 			TimelineDates: timelineDates,
 			Timezone:      timezone,
-			Theme:         a.theme,
+			Theme:         *a.config.Theme,
 		},
 		After:  after,
 		Before: before,

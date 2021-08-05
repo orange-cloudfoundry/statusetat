@@ -5,6 +5,7 @@ import (
 	"time"
 
 	ics "github.com/arran4/golang-ical"
+
 	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
@@ -33,7 +34,7 @@ func (a Serve) Ical(w http.ResponseWriter, req *http.Request) {
 		event.SetSummary(mainMsg.Title)
 		event.SetLocation(sch.Components.String())
 		event.SetDescription(mainMsg.Content)
-		event.SetURL(a.baseInfo.BaseURL)
+		event.SetURL(a.BaseURL())
 	}
 
 	w.Header().Add("Content-Type", "text/calendar")

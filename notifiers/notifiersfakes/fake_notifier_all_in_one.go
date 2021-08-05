@@ -24,6 +24,16 @@ type FakeNotifierAllInOne struct {
 		result1 notifiers.Notifier
 		result2 error
 	}
+	DescriptionStub        func() string
+	descriptionMutex       sync.RWMutex
+	descriptionArgsForCall []struct {
+	}
+	descriptionReturns struct {
+		result1 string
+	}
+	descriptionReturnsOnCall map[int]struct {
+		result1 string
+	}
 	IdStub        func() string
 	idMutex       sync.RWMutex
 	idArgsForCall []struct {
@@ -142,6 +152,58 @@ func (fake *FakeNotifierAllInOne) CreatorReturnsOnCall(i int, result1 notifiers.
 		result1 notifiers.Notifier
 		result2 error
 	}{result1, result2}
+}
+
+func (fake *FakeNotifierAllInOne) Description() string {
+	fake.descriptionMutex.Lock()
+	ret, specificReturn := fake.descriptionReturnsOnCall[len(fake.descriptionArgsForCall)]
+	fake.descriptionArgsForCall = append(fake.descriptionArgsForCall, struct {
+	}{})
+	fake.recordInvocation("Description", []interface{}{})
+	fake.descriptionMutex.Unlock()
+	if fake.DescriptionStub != nil {
+		return fake.DescriptionStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.descriptionReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeNotifierAllInOne) DescriptionCallCount() int {
+	fake.descriptionMutex.RLock()
+	defer fake.descriptionMutex.RUnlock()
+	return len(fake.descriptionArgsForCall)
+}
+
+func (fake *FakeNotifierAllInOne) DescriptionCalls(stub func() string) {
+	fake.descriptionMutex.Lock()
+	defer fake.descriptionMutex.Unlock()
+	fake.DescriptionStub = stub
+}
+
+func (fake *FakeNotifierAllInOne) DescriptionReturns(result1 string) {
+	fake.descriptionMutex.Lock()
+	defer fake.descriptionMutex.Unlock()
+	fake.DescriptionStub = nil
+	fake.descriptionReturns = struct {
+		result1 string
+	}{result1}
+}
+
+func (fake *FakeNotifierAllInOne) DescriptionReturnsOnCall(i int, result1 string) {
+	fake.descriptionMutex.Lock()
+	defer fake.descriptionMutex.Unlock()
+	fake.DescriptionStub = nil
+	if fake.descriptionReturnsOnCall == nil {
+		fake.descriptionReturnsOnCall = make(map[int]struct {
+			result1 string
+		})
+	}
+	fake.descriptionReturnsOnCall[i] = struct {
+		result1 string
+	}{result1}
 }
 
 func (fake *FakeNotifierAllInOne) Id() string {
@@ -425,6 +487,8 @@ func (fake *FakeNotifierAllInOne) Invocations() map[string][][]interface{} {
 	defer fake.invocationsMutex.RUnlock()
 	fake.creatorMutex.RLock()
 	defer fake.creatorMutex.RUnlock()
+	fake.descriptionMutex.RLock()
+	defer fake.descriptionMutex.RUnlock()
 	fake.idMutex.RLock()
 	defer fake.idMutex.RUnlock()
 	fake.metadataFieldsMutex.RLock()

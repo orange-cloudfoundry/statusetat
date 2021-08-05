@@ -65,7 +65,7 @@ func (a Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
 
 	loc := a.Location(req)
 
-	incident.Origin = a.baseInfo.BaseURL
+	incident.Origin = a.BaseURL()
 	if incident.CreatedAt.IsZero() {
 		incident.CreatedAt = time.Now().In(loc)
 	}
@@ -257,7 +257,7 @@ func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	incident.Origin = a.baseInfo.BaseURL
+	incident.Origin = a.BaseURL()
 
 	incident.UpdatedAt = time.Now()
 
@@ -285,7 +285,7 @@ func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
 
 func (a Serve) runPreCheck(incident models.Incident) error {
 	var result error
-	for _, preChecker := range notifiers.NotifiersPreCheckers(*incident.Components) {
+	for _, preChecker := range notifiers.PreCheckers(*incident.Components) {
 		err := preChecker.PreCheck(incident)
 		if err != nil {
 			result = multierror.Append(result, err)
@@ -512,7 +512,7 @@ func (a Serve) UpdateMessage(w http.ResponseWriter, req *http.Request) {
 }
 
 func (a Serve) ShowComponents(w http.ResponseWriter, req *http.Request) {
-	respond.NewResponse(w).Ok(a.components.Inline())
+	respond.NewResponse(w).Ok(a.config.Components.Inline())
 }
 
 func (a Serve) ShowFlagIncidentStates(w http.ResponseWriter, req *http.Request) {

@@ -54,6 +54,7 @@ var registeredFuncs = template.FuncMap{
 	"metadataValue":         metadataValue,
 	"timeAddDay":            timeAddDay,
 	"stringReplace":         stringReplace,
+	"sanitizeUrl":           sanitizeUrl,
 }
 
 func AddFuncs(funcs template.FuncMap) {

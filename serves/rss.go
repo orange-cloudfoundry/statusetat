@@ -50,8 +50,8 @@ func (a Serve) feed(req *http.Request) (*feeds.Feed, error) {
 		incidents[i] = incident
 	}
 	feed := &feeds.Feed{
-		Title:       a.baseInfo.Title,
-		Link:        &feeds.Link{Href: a.baseInfo.BaseURL},
+		Title:       a.BaseInfo().Title,
+		Link:        &feeds.Link{Href: a.BaseInfo().BaseURL},
 		Description: "Get the status",
 		Created:     time.Now().In(loc),
 	}
@@ -73,7 +73,7 @@ func (a Serve) feed(req *http.Request) (*feeds.Feed, error) {
 		}
 		feed.Items[i] = &feeds.Item{
 			Title:       mainMsg.Title,
-			Link:        &feeds.Link{Href: a.baseInfo.BaseURL + "/" + incident.GUID},
+			Link:        &feeds.Link{Href: a.BaseURL() + "/" + incident.GUID},
 			Description: mainMsg.Content,
 			Created:     incident.CreatedAt,
 			Content:     content,

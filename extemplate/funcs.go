@@ -198,3 +198,10 @@ func dict(values ...interface{}) (map[string]interface{}, error) {
 func stringReplace(s, old, new string) string {
 	return strings.Replace(s, old, new, -1)
 }
+
+func sanitizeUrl(u *url.URL) *url.URL {
+	newUrl := &url.URL{}
+	*newUrl = *u
+	newUrl.User = nil
+	return newUrl
+}

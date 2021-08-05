@@ -79,6 +79,11 @@ func (n GrafanaAnnotation) Name() string {
 	return "grafana_annotation"
 }
 
+func (n GrafanaAnnotation) Description() string {
+	return `Sending notifications for incident and scheduled task to a grafana panel set. 
+If admin trigger manually an notification this notifier **will not** re-notify grafana.`
+}
+
 func (n GrafanaAnnotation) Id() string {
 	return n.id
 }

@@ -121,6 +121,11 @@ func (n Slack) Name() string {
 	return "slack"
 }
 
+func (n Slack) Description() string {
+	return `Sending notifications for incident and scheduled task to a slack channel defined. 
+Even manual trigger by admin can be seen if there is new messages.`
+}
+
 func (n Slack) Id() string {
 	return n.id
 }

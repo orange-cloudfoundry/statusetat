@@ -43,6 +43,14 @@ func (s GRPCServer) Name(ctx context.Context, request *emptypb.Empty) (*proto.Na
 	return &proto.NameResponse{Name: name}, nil
 }
 
+func (s GRPCServer) Description(ctx context.Context, empty *emptypb.Empty) (*proto.DescriptionResponse, error) {
+	desc, err := s.Impl.Description()
+	if err != nil {
+		return nil, err
+	}
+	return &proto.DescriptionResponse{Description: desc}, nil
+}
+
 func (s GRPCServer) Id(ctx context.Context, request *emptypb.Empty) (*proto.IdResponse, error) {
 	id, err := s.Impl.Id()
 	if err != nil {

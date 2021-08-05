@@ -26,19 +26,15 @@ type HtmlTemplater interface {
 type Serve struct {
 	store          storages.Store
 	xt             HtmlTemplater
-	baseInfo       config.BaseInfo
-	components     config.Components
-	theme          config.Theme
+	config         config.Config
 	adminMenuItems []menuItem
 }
 
 func Register(
 	store storages.Store,
 	router *mux.Router,
-	baseInfo config.BaseInfo,
 	userInfo *url.Userinfo,
-	components config.Components,
-	theme config.Theme,
+	config config.Config,
 ) error {
 	xt := extemplate.New()
 	box := packr.New("templates", "../website/templates")
@@ -46,24 +42,20 @@ func Register(
 	if err != nil {
 		return err
 	}
-	return RegisterWithHtmlTemplater(store, router, baseInfo, userInfo, components, theme, xt)
+	return RegisterWithHtmlTemplater(store, router, userInfo, xt, config)
 }
 
 func RegisterWithHtmlTemplater(
 	store storages.Store,
 	router *mux.Router,
-	baseInfo config.BaseInfo,
 	userInfo *url.Userinfo,
-	components config.Components,
-	theme config.Theme,
 	htmlTemplater HtmlTemplater,
+	config config.Config,
 ) error {
 
 	api := &Serve{
-		store:      store,
-		baseInfo:   baseInfo,
-		components: components,
-		theme:      theme,
+		store:  store,
+		config: config,
 		adminMenuItems: []menuItem{
 			{
 				ID:          "incident",
@@ -75,7 +67,11 @@ func RegisterWithHtmlTemplater(
 			},
 			{
 				ID:          "persistent_incident",
-				DisplayName: theme.PersistentDisplayName,
+				DisplayName: config.Theme.PersistentDisplayName,
+			},
+			{
+				ID:          "info",
+				DisplayName: "info",
 			},
 		},
 	}
@@ -119,6 +115,7 @@ func RegisterWithHtmlTemplater(
 	subrouterAdmin.HandleFunc("/incident", api.AdminIncidents)
 	subrouterAdmin.HandleFunc("/persistent_incident", api.AdminPersistentIncidents)
 	subrouterAdmin.HandleFunc("/maintenance", api.AdminMaintenance)
+	subrouterAdmin.HandleFunc("/info", api.AdminInfo)
 	subrouterAdmin.HandleFunc("/incident/add", api.AdminAddEditIncident)
 	subrouterAdmin.HandleFunc("/incident/edit/{guid}", api.AdminAddEditIncident)
 	subrouterAdmin.HandleFunc("/maintenance/add", api.AdminAddEditMaintenance)

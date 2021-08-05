@@ -89,6 +89,18 @@ func (n Plugin) Name() string {
 	return name
 }
 
+func (n Plugin) Description() string {
+	if n.notifier == nil {
+		return "plugin"
+	}
+	name, err := n.notifier.Description()
+	if err != nil {
+		logrus.Errorf("Error from plugin: %s", err.Error())
+		return "no description"
+	}
+	return name
+}
+
 func (n Plugin) Id() string {
 	if n.notifier == nil {
 		return "plugin"

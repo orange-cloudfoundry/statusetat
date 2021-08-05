@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
@@ -70,4 +71,12 @@ func (a Serve) incidentsByParamsDate(from, to time.Time, allType bool) ([]models
 
 func (a Serve) timelineFormat(t time.Time) string {
 	return t.Format("Jan 02, 2006")
+}
+
+func (a Serve) BaseInfo() config.BaseInfo {
+	return *a.config.BaseInfo
+}
+
+func (a Serve) BaseURL() string {
+	return a.config.BaseInfo.BaseURL
 }

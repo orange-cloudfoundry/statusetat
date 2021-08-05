@@ -75,9 +75,7 @@ func main() {
 		Debug:              log.IsLevelEnabled(log.DebugLevel),
 	}).Handler)
 	router.Use(serves.NewLocationHandler(c.CookieKey).Handler)
-	err = serves.Register(store, router, *c.BaseInfo,
-		url.UserPassword(c.Username, c.Password), c.Components, *c.Theme,
-	)
+	err = serves.Register(store, router, url.UserPassword(c.Username, c.Password), c)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

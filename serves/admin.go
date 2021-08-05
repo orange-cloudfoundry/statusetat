@@ -2,6 +2,7 @@ package serves
 
 import (
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
@@ -55,7 +56,7 @@ func (a Serve) AdminIncidents(w http.ResponseWriter, req *http.Request) {
 		To             time.Time
 	}{
 		adminDefaultData: adminDefaultData{
-			BaseInfo:   a.baseInfo,
+			BaseInfo:   a.BaseInfo(),
 			ActiveItem: "incident",
 			MenuItems:  a.adminMenuItems,
 			Timezone:   timezone,
@@ -92,13 +93,13 @@ func (a Serve) AdminPersistentIncidents(w http.ResponseWriter, req *http.Request
 		PersistentDisplayName string
 	}{
 		adminDefaultData: adminDefaultData{
-			BaseInfo:   a.baseInfo,
+			BaseInfo:   a.BaseInfo(),
 			ActiveItem: "persistent_incident",
 			MenuItems:  a.adminMenuItems,
 			Timezone:   timezone,
 		},
 		Incidents:             incidents,
-		PersistentDisplayName: a.theme.PersistentDisplayName,
+		PersistentDisplayName: a.config.Theme.PersistentDisplayName,
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -126,8 +127,8 @@ func (a Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Reque
 		incident.CreatedAt = time.Now().In(a.Location(req))
 		incident.ScheduledEnd = incident.CreatedAt.Add(2 * time.Hour)
 	}
-	components := make([]string, len(a.components))
-	for i, c := range a.components {
+	components := make([]string, len(a.config.Components))
+	for i, c := range a.config.Components {
 		components[i] = c.String()
 	}
 
@@ -149,7 +150,7 @@ func (a Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Reque
 		PersistentDisplayName string
 	}{
 		adminDefaultData: adminDefaultData{
-			BaseInfo:   a.baseInfo,
+			BaseInfo:   a.BaseInfo(),
 			ActiveItem: typ,
 			MenuItems:  a.adminMenuItems,
 			Timezone:   timezone,
@@ -160,8 +161,8 @@ func (a Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Reque
 		IncidentStates:        models.AllIncidentState,
 		ComponentStates:       models.AllComponentState,
 		Incident:              incident,
-		MetadataFields:        notifiers.NotifiersMetadataFields(),
-		PersistentDisplayName: a.theme.PersistentDisplayName,
+		MetadataFields:        notifiers.MetadataFields(),
+		PersistentDisplayName: a.config.Theme.PersistentDisplayName,
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -201,18 +202,51 @@ func (a Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
 		To             time.Time
 	}{
 		adminDefaultData: adminDefaultData{
-			BaseInfo:   a.baseInfo,
+			BaseInfo:   a.BaseInfo(),
 			ActiveItem: "maintenance",
 			MenuItems:  a.adminMenuItems,
 			Timezone:   timezone,
 		},
 		Maintenance:    maintenance,
 		IncidentStates: models.AllIncidentState,
-		MetadataFields: notifiers.NotifiersMetadataFields(),
+		MetadataFields: notifiers.MetadataFields(),
 		After:          after,
 		Before:         before,
 		From:           from,
 		To:             to,
+	})
+	if err != nil {
+		HTMLError(w, err, http.StatusInternalServerError)
+		return
+	}
+}
+
+func (a Serve) AdminInfo(w http.ResponseWriter, req *http.Request) {
+	timezone := ""
+	if !a.IsDefaultLocation(req) {
+		timezone = a.Location(req).String()
+	}
+
+	storages := make([]*url.URL, len(a.config.Targets))
+	for i, t := range a.config.Targets {
+		storages[i] = t.URL
+	}
+
+	err := a.xt.ExecuteTemplate(w, "admin/info.gohtml", struct {
+		adminDefaultData
+		Notifiers map[string][]notifiers.Notifier
+		Config    config.Config
+		Storages  []*url.URL
+	}{
+		adminDefaultData: adminDefaultData{
+			BaseInfo:   a.BaseInfo(),
+			ActiveItem: "info",
+			MenuItems:  a.adminMenuItems,
+			Timezone:   timezone,
+		},
+		Notifiers: notifiers.ListAll(),
+		Config:    a.config,
+		Storages:  storages,
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)

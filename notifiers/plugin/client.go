@@ -43,6 +43,14 @@ func (m *GRPCClient) Name() (string, error) {
 	return resp.GetName(), nil
 }
 
+func (m *GRPCClient) Description() (string, error) {
+	resp, err := m.client.Description(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return "", err
+	}
+	return resp.GetDescription(), nil
+}
+
 func (m *GRPCClient) Id() (string, error) {
 	resp, err := m.client.Id(context.Background(), &emptypb.Empty{})
 	if err != nil {

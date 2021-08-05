@@ -180,6 +180,11 @@ func (n Email) Name() string {
 	return "email"
 }
 
+func (n Email) Description() string {
+	return `Sending notifications for incident and scheduled task only to subscribers which subscribed by email or/and set in config. 
+If admin trigger manually an notification this notifier **will not** re-notify subscribed users.`
+}
+
 func (n Email) Id() string {
 	return n.id
 }
