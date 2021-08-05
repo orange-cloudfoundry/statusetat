@@ -541,6 +541,19 @@ func (a Serve) ShowFlagIncidentStates(w http.ResponseWriter, req *http.Request) 
 	respond.NewResponse(w).Ok(states)
 }
 
+func (a Serve) ListSubscribers(w http.ResponseWriter, req *http.Request) {
+	subs, err := a.store.Subscribers()
+	if err != nil {
+		if os.IsNotExist(err) {
+			JSONError(w, err, http.StatusNotFound)
+			return
+		}
+		JSONError(w, err, http.StatusInternalServerError)
+		return
+	}
+	respond.NewResponse(w).Ok(subs)
+}
+
 func (a Serve) ShowFlagComponentStates(w http.ResponseWriter, req *http.Request) {
 	type stateDetail struct {
 		Value       models.ComponentState `json:"value"`

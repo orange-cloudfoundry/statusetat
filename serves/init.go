@@ -101,6 +101,7 @@ func RegisterWithHtmlTemplater(
 
 	pass, _ := userInfo.Password()
 	bauthHandler := httpauth.SimpleBasicAuth(userInfo.Username(), pass)
+	subRouter.Handle("/subscribers", bauthHandler(http.HandlerFunc(api.ListSubscribers))).Methods(http.MethodGet)
 	subRouter.Handle("/incidents", bauthHandler(http.HandlerFunc(api.CreateIncident))).Methods(http.MethodPost)
 	subRouter.Handle("/incidents/{guid}", bauthHandler(http.HandlerFunc(api.Update))).Methods(http.MethodPut)
 	subRouter.Handle("/incidents/{guid}", bauthHandler(http.HandlerFunc(api.Delete))).Methods(http.MethodDelete)
