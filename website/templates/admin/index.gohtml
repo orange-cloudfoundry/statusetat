@@ -20,8 +20,8 @@
     <div class="divider"></div>
   </li>
     {{ range .MenuItems }}
-      <li class="{{if eq . $.ActiveItem }}active{{end}} white-text">
-        <a href="/admin/{{.}}">{{(stringReplace . "_" " " ) | title}}</a></li>
+      <li class="{{if eq .ID $.ActiveItem }}active{{end}} white-text">
+        <a href="/admin/{{.ID}}">{{ .DisplayName | title}}</a></li>
     {{end}}
 </ul>
 

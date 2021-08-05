@@ -50,8 +50,8 @@
 
       <div class="row">
         <div class="col s1"></div>
-        <div class="col s10" id="list-persistent-incidents">
-          <h4>{{ if $.Theme.PersistentDisplayName }}{{$.Theme.PersistentDisplayName}}{{else}}Persistent Incident{{end}}</h4>
+        <div class="col s10">
+          <h4 id="list-persistent-incidents">{{$.Theme.PersistentDisplayName}}</h4>
             {{ with $.Theme.PrePersistent }}
               <p>{{ . | markdown }}</p>
             {{end}}
@@ -69,8 +69,8 @@
 
       <div class="row">
         <div class="col s1"></div>
-        <div class="col s10" id="list-scheduled-incidents">
-          <h4>Scheduled Maintenance</h4>
+        <div class="col s10" >
+          <h4 id="list-scheduled-incidents">Scheduled Maintenance</h4>
             {{ with $.Theme.PreMaintenance }}
               <p>{{ . | markdown }}</p>
             {{end}}

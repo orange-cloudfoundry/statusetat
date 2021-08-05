@@ -68,7 +68,7 @@
           <div class="col s12">
             <label>
               <input type="checkbox" class="filled-in" {{ if or .Incident.Persistent .CheckPersistent }}checked="checked"{{end}} name="persistent"/>
-              <span>Is a persistent incident ?</span>
+              <span>Is a {{ .PersistentDisplayName }} ?</span>
             </label>
           </div>
         </div>

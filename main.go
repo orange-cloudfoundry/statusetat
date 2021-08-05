@@ -1,13 +1,21 @@
 package main
 
 import (
-	"gopkg.in/alecthomas/kingpin.v2"
 	"net/http"
 	"net/url"
 	"strings"
 
+	"gopkg.in/alecthomas/kingpin.v2"
+
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/common/version"
+	"github.com/rs/cors"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/locations"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
@@ -18,12 +26,6 @@ import (
 	_ "github.com/orange-cloudfoundry/statusetat/notifiers/slack"
 	"github.com/orange-cloudfoundry/statusetat/serves"
 	"github.com/orange-cloudfoundry/statusetat/storages"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/version"
-	"github.com/rs/cors"
-	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -74,7 +76,7 @@ func main() {
 	}).Handler)
 	router.Use(serves.NewLocationHandler(c.CookieKey).Handler)
 	err = serves.Register(store, router, *c.BaseInfo,
-		url.UserPassword(c.Username, c.Password), c.Components, c.Theme,
+		url.UserPassword(c.Username, c.Password), c.Components, *c.Theme,
 	)
 	if err != nil {
 		log.Fatal(err.Error())

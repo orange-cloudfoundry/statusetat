@@ -12,11 +12,14 @@ import (
 	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
-var adminMenuItems = []string{"incident", "maintenance", "persistent_incident"}
+type menuItem struct {
+	ID          string
+	DisplayName string
+}
 
 type adminDefaultData struct {
 	BaseInfo   config.BaseInfo
-	MenuItems  []string
+	MenuItems  []menuItem
 	ActiveItem string
 	Timezone   string
 }
@@ -54,7 +57,7 @@ func (a Serve) AdminIncidents(w http.ResponseWriter, req *http.Request) {
 		adminDefaultData: adminDefaultData{
 			BaseInfo:   a.baseInfo,
 			ActiveItem: "incident",
-			MenuItems:  adminMenuItems,
+			MenuItems:  a.adminMenuItems,
 			Timezone:   timezone,
 		},
 		Incidents:      incidents,
@@ -85,15 +88,17 @@ func (a Serve) AdminPersistentIncidents(w http.ResponseWriter, req *http.Request
 
 	err = a.xt.ExecuteTemplate(w, "admin/persistent_incident.gohtml", struct {
 		adminDefaultData
-		Incidents []models.Incident
+		Incidents             []models.Incident
+		PersistentDisplayName string
 	}{
 		adminDefaultData: adminDefaultData{
 			BaseInfo:   a.baseInfo,
-			ActiveItem: "incident",
-			MenuItems:  adminMenuItems,
+			ActiveItem: "persistent_incident",
+			MenuItems:  a.adminMenuItems,
 			Timezone:   timezone,
 		},
-		Incidents: incidents,
+		Incidents:             incidents,
+		PersistentDisplayName: a.theme.PersistentDisplayName,
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -135,26 +140,28 @@ func (a Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Reque
 
 	err = a.xt.ExecuteTemplate(w, "admin/add_edit_"+typ+".gohtml", struct {
 		adminDefaultData
-		Components      []string
-		IncidentStates  []models.IncidentState
-		ComponentStates []models.ComponentState
-		Incident        models.Incident
-		MetadataFields  models.MetadataFields
-		CheckPersistent bool
+		Components            []string
+		IncidentStates        []models.IncidentState
+		ComponentStates       []models.ComponentState
+		Incident              models.Incident
+		MetadataFields        models.MetadataFields
+		CheckPersistent       bool
+		PersistentDisplayName string
 	}{
 		adminDefaultData: adminDefaultData{
 			BaseInfo:   a.baseInfo,
 			ActiveItem: typ,
-			MenuItems:  adminMenuItems,
+			MenuItems:  a.adminMenuItems,
 			Timezone:   timezone,
 		},
 		Components:      components,
 		CheckPersistent: checkPersistent,
 
-		IncidentStates:  models.AllIncidentState,
-		ComponentStates: models.AllComponentState,
-		Incident:        incident,
-		MetadataFields:  notifiers.NotifiersMetadataFields(),
+		IncidentStates:        models.AllIncidentState,
+		ComponentStates:       models.AllComponentState,
+		Incident:              incident,
+		MetadataFields:        notifiers.NotifiersMetadataFields(),
+		PersistentDisplayName: a.theme.PersistentDisplayName,
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -196,7 +203,7 @@ func (a Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
 		adminDefaultData: adminDefaultData{
 			BaseInfo:   a.baseInfo,
 			ActiveItem: "maintenance",
-			MenuItems:  adminMenuItems,
+			MenuItems:  a.adminMenuItems,
 			Timezone:   timezone,
 		},
 		Maintenance:    maintenance,

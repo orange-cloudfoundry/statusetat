@@ -24,11 +24,12 @@ type HtmlTemplater interface {
 }
 
 type Serve struct {
-	store      storages.Store
-	xt         HtmlTemplater
-	baseInfo   config.BaseInfo
-	components config.Components
-	theme      config.Theme
+	store          storages.Store
+	xt             HtmlTemplater
+	baseInfo       config.BaseInfo
+	components     config.Components
+	theme          config.Theme
+	adminMenuItems []menuItem
 }
 
 func Register(
@@ -63,6 +64,20 @@ func RegisterWithHtmlTemplater(
 		baseInfo:   baseInfo,
 		components: components,
 		theme:      theme,
+		adminMenuItems: []menuItem{
+			{
+				ID:          "incident",
+				DisplayName: "incident",
+			},
+			{
+				ID:          "maintenance",
+				DisplayName: "maintenance",
+			},
+			{
+				ID:          "persistent_incident",
+				DisplayName: theme.PersistentDisplayName,
+			},
+		},
 	}
 	api.xt = htmlTemplater
 

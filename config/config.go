@@ -121,7 +121,7 @@ type Config struct {
 	CookieKey string     `yaml:"cookie_key"`
 	Notifiers []Notifier `yaml:"notifiers"`
 
-	Theme Theme `yaml:"theme"`
+	Theme *Theme `yaml:"theme"`
 }
 
 type Component struct {
@@ -219,6 +219,13 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if c.BaseInfo.TimeZone == "" {
 		c.BaseInfo.TimeZone = "UTC"
 	}
+	if c.Theme == nil {
+		c.Theme = &Theme{}
+	}
+	if c.Theme.PersistentDisplayName == "" {
+		c.Theme.PersistentDisplayName = "persistent incident"
+	}
+
 	return nil
 }
 
