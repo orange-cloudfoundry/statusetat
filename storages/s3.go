@@ -277,7 +277,7 @@ func (s S3) Persistents() ([]models.Incident, error) {
 	})
 	if err != nil {
 		if aerr, ok := err.(awserr.RequestFailure); ok && aerr.StatusCode() == 404 {
-			return []models.Incident{}, os.ErrNotExist
+			return []models.Incident{}, nil
 		}
 		return []models.Incident{}, err
 	}
