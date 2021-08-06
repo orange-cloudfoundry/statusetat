@@ -14,6 +14,7 @@ require (
 	github.com/gobuffalo/logger v1.0.4 // indirect
 	github.com/gobuffalo/packr/v2 v2.8.1
 	github.com/goji/httpauth v0.0.0-20160601135302-2da839ab0f4d
+	github.com/google/uuid v1.3.0
 	github.com/gorilla/feeds v1.1.1
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
@@ -43,7 +44,6 @@ require (
 	github.com/prometheus/common v0.30.0
 	github.com/prometheus/procfs v0.7.2 // indirect
 	github.com/rs/cors v1.8.0
-	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/tdewolff/minify/v2 v2.9.21
 	github.com/yuin/goldmark v1.4.0

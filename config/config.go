@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -176,12 +176,12 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 
 	if c.Username == "" {
-		c.Username = uuid.NewV4().String()
+		c.Username = uuid.NewString()
 		log.Infof("Generated username (set username in config): %s", c.Username)
 	}
 
 	if c.Password == "" {
-		c.Password = uuid.NewV4().String()
+		c.Password = uuid.NewString()
 		log.Infof("Generated password (set password in config): %s", c.Password)
 	}
 	if c.BaseInfo == nil {
@@ -214,7 +214,7 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		c.BaseInfo.Contact = c.BaseInfo.Support
 	}
 	if c.CookieKey == "" {
-		c.CookieKey = uuid.NewV4().String()
+		c.CookieKey = uuid.NewString()
 	}
 	if c.BaseInfo.TimeZone == "" {
 		c.BaseInfo.TimeZone = "UTC"

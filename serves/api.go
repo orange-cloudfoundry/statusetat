@@ -8,10 +8,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/hashicorp/go-multierror"
 	"github.com/nicklaw5/go-respond"
-	"github.com/satori/go.uuid"
 
 	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/emitter"
@@ -20,7 +20,7 @@ import (
 )
 
 func (a Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
-	guid := uuid.NewV4()
+	guid := uuid.NewString()
 
 	b, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -77,8 +77,8 @@ func (a Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	incident.GUID = guid.String()
-	incident.Messages = a.messagesGuid(guid.String(), incident.Messages, loc)
+	incident.GUID = guid
+	incident.Messages = a.messagesGuid(guid, incident.Messages, loc)
 
 	err = a.runPreCheck(incident)
 	if err != nil {
@@ -107,8 +107,7 @@ func (a Serve) messagesGuid(incidentGuid string, messages []models.Message, loc 
 		if msg.CreatedAt.IsZero() {
 			msg.CreatedAt = time.Now().In(loc)
 		}
-		guid := uuid.NewV4()
-		msg.GUID = guid.String()
+		msg.GUID = uuid.NewString()
 		messages[i] = msg
 	}
 	return messages
@@ -359,7 +358,7 @@ func (a Serve) AddMessage(w http.ResponseWriter, req *http.Request) {
 		message.CreatedAt = time.Now().In(a.Location(req))
 	}
 
-	message.GUID = uuid.NewV4().String()
+	message.GUID = uuid.NewString()
 
 	incident.Messages = append(incident.Messages, message)
 
