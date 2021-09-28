@@ -97,6 +97,14 @@ func (s S3) removePersistent(guid string) error {
 	return s.storePersistents(incidents)
 }
 
+func (s S3) readPersistent(guid string) (models.Incident, error) {
+	incidents, err := s.Persistents()
+	if err != nil {
+		return models.Incident{}, err
+	}
+	return models.Incidents(incidents).Find(guid), nil
+}
+
 func (s S3) Subscribe(email string) error {
 	subs, _ := s.retrieveSubscribers()
 	if common.InStrSlice(email, subs) {
@@ -143,7 +151,11 @@ func (s *S3) Update(guid string, incident models.Incident) (models.Incident, err
 }
 
 func (s *S3) Delete(guid string) error {
-	_, err := s.sess.svc.DeleteObject(&s3.DeleteObjectInput{
+	err := s.removePersistent(guid)
+	if err != nil {
+		return err
+	}
+	_, err = s.sess.svc.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: &s.sess.bucket,
 		Key:    aws.String(guid),
 	})
@@ -151,18 +163,25 @@ func (s *S3) Delete(guid string) error {
 }
 
 func (s *S3) Read(guid string) (models.Incident, error) {
+	var incident models.Incident
 	obj, err := s.sess.svc.GetObject(&s3.GetObjectInput{
 		Bucket: &s.sess.bucket,
 		Key:    aws.String(guid),
 	})
 	if err != nil {
 		if aerr, ok := err.(awserr.RequestFailure); ok && aerr.StatusCode() == 404 {
+			incident, err := s.readPersistent(guid)
+			if err != nil {
+				return models.Incident{}, os.ErrNotExist
+			}
+			if incident.GUID == guid {
+				return incident, nil
+			}
 			return models.Incident{}, os.ErrNotExist
 		}
 		return models.Incident{}, err
 	}
 	defer obj.Body.Close()
-	var incident models.Incident
 	err = json.NewDecoder(obj.Body).Decode(&incident)
 	if err != nil {
 		return models.Incident{}, err

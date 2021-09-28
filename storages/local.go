@@ -99,6 +99,14 @@ func (l Local) removePersistent(guid string) error {
 	return l.storePersistents(incidents)
 }
 
+func (l Local) readPersistent(guid string) (models.Incident, error) {
+	incidents, err := l.Persistents()
+	if err != nil {
+		return models.Incident{}, err
+	}
+	return models.Incidents(incidents).Find(guid), nil
+}
+
 func (l Local) storePersistents(incidents []models.Incident) error {
 	sort.Sort(models.Incidents(incidents))
 	b, _ := json.Marshal(incidents)
@@ -167,7 +175,13 @@ func (l Local) path(fileName string) string {
 }
 
 func (l Local) Read(guid string) (models.Incident, error) {
-	var incident models.Incident
+	incident, err := l.readPersistent(guid)
+	if err != nil {
+		return models.Incident{}, err
+	}
+	if incident.GUID == guid {
+		return incident, nil
+	}
 
 	b, err := ioutil.ReadFile(l.path(guid))
 	if err != nil {
