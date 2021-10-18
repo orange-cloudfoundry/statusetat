@@ -24,7 +24,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.2
 	github.com/nicklaw5/go-respond v1.6.0
 	github.com/olebedev/emitter v0.0.0-20190110104742-e8d1457e6aee
-	github.com/onsi/ginkgo v1.14.2
+	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.10.3
 	github.com/prometheus/client_golang v1.11.0
 	github.com/prometheus/common v0.31.1
@@ -50,6 +50,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
+	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/gobuffalo/logger v1.0.4 // indirect
 	github.com/gobuffalo/packd v1.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
@@ -69,7 +70,7 @@ require (
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
-	github.com/nxadm/tail v1.4.4 // indirect
+	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
