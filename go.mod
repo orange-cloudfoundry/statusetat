@@ -7,7 +7,7 @@ require (
 	github.com/arran4/golang-ical v0.0.0-20210825232153-efac1f4cb8ac
 	github.com/aws/aws-sdk-go v1.42.9
 	github.com/dustin/go-humanize v1.0.0
-	github.com/gobuffalo/packr/v2 v2.8.2
+	github.com/gobuffalo/packr/v2 v2.8.3
 	github.com/goji/httpauth v0.0.0-20160601135302-2da839ab0f4d
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/feeds v1.1.1
