@@ -129,7 +129,7 @@ github.com/gobuffalo/logger
 ## explicit; go 1.13
 github.com/gobuffalo/packd
 github.com/gobuffalo/packd/internal/takeon/github.com/markbates/errx
-# github.com/gobuffalo/packr/v2 v2.8.2
+# github.com/gobuffalo/packr/v2 v2.8.3
 ## explicit; go 1.16
 github.com/gobuffalo/packr/v2
 github.com/gobuffalo/packr/v2/file
