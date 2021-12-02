@@ -242,7 +242,7 @@ github.com/maxbrunsfeld/counterfeiter/v6/generator
 # github.com/mitchellh/go-testing-interface v1.14.1
 ## explicit; go 1.14
 github.com/mitchellh/go-testing-interface
-# github.com/mitchellh/mapstructure v1.4.2
+# github.com/mitchellh/mapstructure v1.4.3
 ## explicit; go 1.14
 github.com/mitchellh/mapstructure
 # github.com/nicklaw5/go-respond v1.6.0
