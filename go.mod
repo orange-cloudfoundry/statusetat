@@ -3,7 +3,7 @@ module github.com/orange-cloudfoundry/statusetat
 go 1.17
 
 require (
-	github.com/alecthomas/chroma v0.9.4
+	github.com/alecthomas/chroma v0.10.0
 	github.com/arran4/golang-ical v0.0.0-20210825232153-efac1f4cb8ac
 	github.com/aws/aws-sdk-go v1.42.32
 	github.com/dustin/go-humanize v1.0.0
