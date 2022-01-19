@@ -329,7 +329,7 @@ github.com/rs/cors
 # github.com/sirupsen/logrus v1.8.1
 ## explicit; go 1.13
 github.com/sirupsen/logrus
-# github.com/tdewolff/minify/v2 v2.9.28
+# github.com/tdewolff/minify/v2 v2.9.29
 ## explicit; go 1.13
 github.com/tdewolff/minify/v2
 github.com/tdewolff/minify/v2/css
