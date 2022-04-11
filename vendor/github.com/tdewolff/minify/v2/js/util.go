@@ -275,7 +275,7 @@ func exprPrec(i js.IExpr) js.OpPrec {
 	case *js.GroupExpr:
 		return exprPrec(expr.X)
 	}
-	return js.OpExpr // does not happen
+	return js.OpExpr // CommaExpr
 }
 
 // TODO: use in more cases
@@ -289,6 +289,14 @@ func groupExpr(i js.IExpr, prec js.OpPrec) js.IExpr {
 
 // TODO: use in more cases
 func condExpr(cond, x, y js.IExpr) js.IExpr {
+	if comma, ok := cond.(*js.CommaExpr); ok {
+		comma.List[len(comma.List)-1] = &js.CondExpr{
+			Cond: groupExpr(comma.List[len(comma.List)-1], js.OpCoalesce),
+			X:    groupExpr(x, js.OpAssign),
+			Y:    groupExpr(y, js.OpAssign),
+		}
+		return comma
+	}
 	return &js.CondExpr{
 		Cond: groupExpr(cond, js.OpCoalesce),
 		X:    groupExpr(x, js.OpAssign),
@@ -309,7 +317,7 @@ func commaExpr(x, y js.IExpr) js.IExpr {
 	return comma
 }
 
-func (m *jsMinifier) isEmptyStmt(stmt js.IStmt) bool {
+func isEmptyStmt(stmt js.IStmt) bool {
 	if stmt == nil {
 		return true
 	} else if _, ok := stmt.(*js.EmptyStmt); ok {
@@ -323,7 +331,7 @@ func (m *jsMinifier) isEmptyStmt(stmt js.IStmt) bool {
 		return true
 	} else if block, ok := stmt.(*js.BlockStmt); ok {
 		for _, item := range block.List {
-			if ok := m.isEmptyStmt(item); !ok {
+			if ok := isEmptyStmt(item); !ok {
 				return false
 			}
 		}
@@ -358,32 +366,32 @@ func isFlowStmt(stmt js.IStmt) bool {
 
 func lastStmt(stmt js.IStmt) js.IStmt {
 	if block, ok := stmt.(*js.BlockStmt); ok && 0 < len(block.List) {
-		return block.List[len(block.List)-1]
+		return lastStmt(block.List[len(block.List)-1])
 	}
 	return stmt
 }
 
-func (m *jsMinifier) isTrue(i js.IExpr) bool {
+func isTrue(i js.IExpr) bool {
 	if lit, ok := i.(*js.LiteralExpr); ok && lit.TokenType == js.TrueToken {
 		return true
 	} else if unary, ok := i.(*js.UnaryExpr); ok && unary.Op == js.NotToken {
-		ret, _ := m.isFalsy(unary.X)
+		ret, _ := isFalsy(unary.X)
 		return ret
 	}
 	return false
 }
 
-func (m *jsMinifier) isFalse(i js.IExpr) bool {
+func isFalse(i js.IExpr) bool {
 	if lit, ok := i.(*js.LiteralExpr); ok {
 		return lit.TokenType == js.FalseToken
 	} else if unary, ok := i.(*js.UnaryExpr); ok && unary.Op == js.NotToken {
-		ret, _ := m.isTruthy(unary.X)
+		ret, _ := isTruthy(unary.X)
 		return ret
 	}
 	return false
 }
 
-func (m *jsMinifier) toNullishExpr(condExpr *js.CondExpr) (js.IExpr, js.IExpr, bool) {
+func toNullishExpr(condExpr *js.CondExpr) (js.IExpr, js.IExpr, bool) {
 	// convert conditional expression to nullish:  a!=null?a:b  =>  a??b
 	if binaryExpr, ok := condExpr.Cond.(*js.BinaryExpr); ok && (binaryExpr.Op == js.EqEqToken || binaryExpr.Op == js.NotEqToken) {
 		var left, right js.IExpr
@@ -394,36 +402,36 @@ func (m *jsMinifier) toNullishExpr(condExpr *js.CondExpr) (js.IExpr, js.IExpr, b
 			left = condExpr.X
 			right = condExpr.Y
 		}
-		if lit, ok := binaryExpr.X.(*js.LiteralExpr); ((ok && lit.TokenType == js.NullToken) || m.isUndefined(binaryExpr.X)) && m.isEqualExpr(binaryExpr.Y, left) {
+		if lit, ok := binaryExpr.X.(*js.LiteralExpr); ((ok && lit.TokenType == js.NullToken) || isUndefined(binaryExpr.X)) && isEqualExpr(binaryExpr.Y, left) {
 			return left, right, true
-		} else if lit, ok := binaryExpr.Y.(*js.LiteralExpr); ((ok && lit.TokenType == js.NullToken) || m.isUndefined(binaryExpr.Y)) && m.isEqualExpr(binaryExpr.X, left) {
+		} else if lit, ok := binaryExpr.Y.(*js.LiteralExpr); ((ok && lit.TokenType == js.NullToken) || isUndefined(binaryExpr.Y)) && isEqualExpr(binaryExpr.X, left) {
 			return left, right, true
 		}
 	}
 	return nil, nil, false
 }
 
-func (m *jsMinifier) isUndefined(i js.IExpr) bool {
+func isUndefined(i js.IExpr) bool {
 	if v, ok := i.(*js.Var); ok {
 		if bytes.Equal(v.Name(), undefinedBytes) { // TODO: only if not defined
 			return true
 		}
 	} else if unary, ok := i.(*js.UnaryExpr); ok && unary.Op == js.VoidToken {
-		return true
+		return !hasSideEffects(unary.X)
 	}
 	return false
 }
 
 // returns whether truthy and whether it could be coerced to a boolean (i.e. when returns (false,true) this means it is falsy)
-func (m *jsMinifier) isTruthy(i js.IExpr) (bool, bool) {
-	if falsy, ok := m.isFalsy(i); ok {
+func isTruthy(i js.IExpr) (bool, bool) {
+	if falsy, ok := isFalsy(i); ok {
 		return !falsy, true
 	}
 	return false, false
 }
 
 // returns whether falsy and whether it could be coerced to a boolean (i.e. when returns (false,true) this means it is truthy)
-func (m *jsMinifier) isFalsy(i js.IExpr) (bool, bool) {
+func isFalsy(i js.IExpr) (bool, bool) {
 	negated := false
 	group, isGroup := i.(*js.GroupExpr)
 	unary, isUnary := i.(*js.UnaryExpr)
@@ -454,7 +462,7 @@ func (m *jsMinifier) isFalsy(i js.IExpr) (bool, bool) {
 			}
 			return !negated, true // falsy
 		}
-	} else if m.isUndefined(i) {
+	} else if isUndefined(i) {
 		return !negated, true // falsy
 	} else if v, ok := i.(*js.Var); ok && bytes.Equal(v.Name(), nanBytes) {
 		return !negated, true // falsy
@@ -462,7 +470,7 @@ func (m *jsMinifier) isFalsy(i js.IExpr) (bool, bool) {
 	return false, false // unknown
 }
 
-func (m *jsMinifier) isEqualExpr(a, b js.IExpr) bool {
+func isEqualExpr(a, b js.IExpr) bool {
 	if group, ok := a.(*js.GroupExpr); ok {
 		a = group.X
 	}
@@ -478,11 +486,72 @@ func (m *jsMinifier) isEqualExpr(a, b js.IExpr) bool {
 	return false
 }
 
+func hasSideEffects(i js.IExpr) bool {
+	// assume that variable usage and that the index operator themselves have no side effects
+	switch expr := i.(type) {
+	case *js.Var, *js.LiteralExpr, *js.FuncDecl, *js.ClassDecl, *js.ArrowFunc, *js.NewTargetExpr, *js.ImportMetaExpr:
+		return false
+	case *js.NewExpr, *js.CallExpr, *js.YieldExpr:
+		return true
+	case *js.GroupExpr:
+		return hasSideEffects(expr.X)
+	case *js.DotExpr:
+		return hasSideEffects(expr.X)
+	case *js.IndexExpr:
+		return hasSideEffects(expr.X) || hasSideEffects(expr.Y)
+	case *js.OptChainExpr:
+		return hasSideEffects(expr.X) || hasSideEffects(expr.Y)
+	case *js.CondExpr:
+		return hasSideEffects(expr.Cond) || hasSideEffects(expr.X) || hasSideEffects(expr.Y)
+	case *js.CommaExpr:
+		for _, item := range expr.List {
+			if hasSideEffects(item) {
+				return true
+			}
+		}
+	case *js.ArrayExpr:
+		for _, item := range expr.List {
+			if hasSideEffects(item.Value) {
+				return true
+			}
+		}
+		return false
+	case *js.ObjectExpr:
+		for _, item := range expr.List {
+			if hasSideEffects(item.Value) || item.Init != nil && hasSideEffects(item.Init) || item.Name != nil && item.Name.IsComputed() && hasSideEffects(item.Name.Computed) {
+				return true
+			}
+		}
+		return false
+	case *js.TemplateExpr:
+		if hasSideEffects(expr.Tag) {
+			return true
+		}
+		for _, item := range expr.List {
+			if hasSideEffects(item.Expr) {
+				return true
+			}
+		}
+		return false
+	case *js.UnaryExpr:
+		if expr.Op == js.DeleteToken || expr.Op == js.PreIncrToken || expr.Op == js.PreDecrToken || expr.Op == js.PostIncrToken || expr.Op == js.PostDecrToken {
+			return true
+		}
+		return hasSideEffects(expr.X)
+	case *js.BinaryExpr:
+		return binaryOpPrecMap[expr.Op] == js.OpAssign
+	}
+	return true
+}
+
 func isBooleanExpr(expr js.IExpr) bool {
 	if unaryExpr, ok := expr.(*js.UnaryExpr); ok {
 		return unaryExpr.Op == js.NotToken
 	} else if binaryExpr, ok := expr.(*js.BinaryExpr); ok {
 		op := binaryOpPrecMap[binaryExpr.Op]
+		if op == js.OpAnd || op == js.OpOr {
+			return isBooleanExpr(binaryExpr.X) && isBooleanExpr(binaryExpr.Y)
+		}
 		return op == js.OpCompare || op == js.OpEquals
 	} else if litExpr, ok := expr.(*js.LiteralExpr); ok {
 		return litExpr.TokenType == js.TrueToken || litExpr.TokenType == js.FalseToken
@@ -492,37 +561,196 @@ func isBooleanExpr(expr js.IExpr) bool {
 	return false
 }
 
-func (m *jsMinifier) minifyBooleanExpr(expr js.IExpr, invert bool, prec js.OpPrec) {
+func invertBooleanOp(op js.TokenType) js.TokenType {
+	if op == js.EqEqToken {
+		return js.NotEqToken
+	} else if op == js.NotEqToken {
+		return js.EqEqToken
+	} else if op == js.EqEqEqToken {
+		return js.NotEqEqToken
+	} else if op == js.NotEqEqToken {
+		return js.EqEqEqToken
+	}
+	return js.ErrorToken
+}
+
+func optimizeBooleanExpr(expr js.IExpr, invert bool, prec js.OpPrec) js.IExpr {
 	if invert {
 		// unary !(boolean) has already been handled
 		if binaryExpr, ok := expr.(*js.BinaryExpr); ok && binaryOpPrecMap[binaryExpr.Op] == js.OpEquals {
-			if binaryExpr.Op == js.EqEqToken {
-				binaryExpr.Op = js.NotEqToken
-			} else if binaryExpr.Op == js.NotEqToken {
-				binaryExpr.Op = js.EqEqToken
-			} else if binaryExpr.Op == js.EqEqEqToken {
-				binaryExpr.Op = js.NotEqEqToken
-			} else if binaryExpr.Op == js.NotEqEqToken {
-				binaryExpr.Op = js.EqEqEqToken
-			}
-			m.minifyExpr(expr, prec)
+			binaryExpr.Op = invertBooleanOp(binaryExpr.Op)
+			return expr
 		} else {
-			m.write(notBytes)
-			m.minifyExpr(&js.GroupExpr{X: expr}, js.OpUnary)
+			return optimizeUnaryExpr(&js.UnaryExpr{js.NotToken, groupExpr(expr, js.OpUnary)}, prec)
 		}
 	} else if isBooleanExpr(expr) {
-		m.minifyExpr(&js.GroupExpr{X: expr}, prec)
+		return groupExpr(expr, prec)
 	} else {
-		m.write(notNotBytes)
-		m.minifyExpr(&js.GroupExpr{X: expr}, js.OpUnary)
+		return &js.UnaryExpr{js.NotToken, &js.UnaryExpr{js.NotToken, groupExpr(expr, js.OpUnary)}}
 	}
+}
+
+func optimizeUnaryExpr(expr *js.UnaryExpr, prec js.OpPrec) js.IExpr {
+	if group, ok := expr.X.(*js.GroupExpr); ok && expr.Op == js.NotToken {
+		if binary, ok := group.X.(*js.BinaryExpr); ok && (binary.Op == js.AndToken || binary.Op == js.OrToken) {
+			op := js.AndToken
+			if binary.Op == js.AndToken {
+				op = js.OrToken
+			}
+			precInside := binaryOpPrecMap[op]
+			needsGroup := precInside < prec && (precInside != js.OpCoalesce || prec != js.OpBitOr)
+
+			// rewrite !(a||b) to !a&&!b
+			// rewrite !(a==0||b==0) to a!=0&&b!=0
+			score := 3 // savings if rewritten (group parentheses and not-token)
+			if needsGroup {
+				score -= 2
+			}
+			score -= 2 // add two not-tokens for left and right
+
+			// == and === can become != and !==
+			var isEqX, isEqY bool
+			if binaryExpr, ok := binary.X.(*js.BinaryExpr); ok && binaryOpPrecMap[binaryExpr.Op] == js.OpEquals {
+				score += 1
+				isEqX = true
+			}
+			if binaryExpr, ok := binary.Y.(*js.BinaryExpr); ok && binaryOpPrecMap[binaryExpr.Op] == js.OpEquals {
+				score += 1
+				isEqY = true
+			}
+
+			// left and right may need group or can remove group
+			var needsGroupX, needsGroupY bool
+			if op == js.OrToken {
+				// remove group
+				if exprPrec(binary.X) == js.OpOr {
+					score += 2
+				}
+				if exprPrec(binary.Y) == js.OpAnd {
+					score += 2
+				}
+			} else {
+				// add group
+				if !isEqX && exprPrec(binary.X) < js.OpUnary {
+					score -= 2
+					needsGroupX = true
+				}
+				if !isEqY && exprPrec(binary.Y) < js.OpUnary {
+					score -= 2
+					needsGroupY = true
+				}
+			}
+
+			if 0 < score {
+				binary.Op = op
+				if isEqX {
+					binary.X.(*js.BinaryExpr).Op = invertBooleanOp(binary.X.(*js.BinaryExpr).Op)
+				}
+				if isEqY {
+					binary.Y.(*js.BinaryExpr).Op = invertBooleanOp(binary.Y.(*js.BinaryExpr).Op)
+				}
+				if needsGroupX {
+					binary.X = &js.GroupExpr{binary.X}
+				}
+				if needsGroupY {
+					binary.Y = &js.GroupExpr{binary.Y}
+				}
+				if !isEqX {
+					binary.X = &js.UnaryExpr{js.NotToken, binary.X}
+				}
+				if !isEqY {
+					binary.Y = &js.UnaryExpr{js.NotToken, binary.Y}
+				}
+				if needsGroup {
+					return &js.GroupExpr{binary}
+				}
+				return binary
+			}
+		}
+	}
+	return expr
+}
+
+func (m *jsMinifier) optimizeCondExpr(expr *js.CondExpr, prec js.OpPrec) js.IExpr {
+	// remove double negative !! in condition, or switch cases for single negative !
+	if unary1, ok := expr.Cond.(*js.UnaryExpr); ok && unary1.Op == js.NotToken {
+		if unary2, ok := unary1.X.(*js.UnaryExpr); ok && unary2.Op == js.NotToken {
+			if isBooleanExpr(unary2.X) {
+				expr.Cond = unary2.X
+			}
+		} else {
+			expr.Cond = unary1.X
+			expr.X, expr.Y = expr.Y, expr.X
+		}
+	}
+
+	finalCond := finalExpr(expr.Cond)
+	if truthy, ok := isTruthy(expr.Cond); truthy && ok {
+		// if condition is truthy
+		return expr.X
+	} else if !truthy && ok {
+		// if condition is falsy
+		return expr.Y
+	} else if isEqualExpr(finalCond, expr.X) && (exprPrec(finalCond) < js.OpAssign || binaryLeftPrecMap[js.OrToken] <= exprPrec(finalCond)) && (exprPrec(expr.Y) < js.OpAssign || binaryRightPrecMap[js.OrToken] <= exprPrec(expr.Y)) {
+		// if condition is equal to true body
+		// for higher prec we need to add group parenthesis, and for lower prec we have parenthesis anyways. This only is shorter if len(expr.X) >= 3. isEqualExpr only checks for literal variables, which is a name will be minified to a one or two character name.
+		return &js.BinaryExpr{js.OrToken, groupExpr(expr.Cond, binaryLeftPrecMap[js.OrToken]), expr.Y}
+	} else if isEqualExpr(finalCond, expr.Y) && (exprPrec(finalCond) < js.OpAssign || binaryLeftPrecMap[js.AndToken] <= exprPrec(finalCond)) && (exprPrec(expr.X) < js.OpAssign || binaryRightPrecMap[js.AndToken] <= exprPrec(expr.X)) {
+		// if condition is equal to false body
+		// for higher prec we need to add group parenthesis, and for lower prec we have parenthesis anyways. This only is shorter if len(expr.X) >= 3. isEqualExpr only checks for literal variables, which is a name will be minified to a one or two character name.
+		return &js.BinaryExpr{js.AndToken, groupExpr(expr.Cond, binaryLeftPrecMap[js.AndToken]), expr.X}
+	} else if isEqualExpr(expr.X, expr.Y) {
+		// if true and false bodies are equal
+		return groupExpr(&js.CommaExpr{[]js.IExpr{expr.Cond, expr.X}}, prec)
+	} else if left, right, ok := toNullishExpr(expr); ok && !m.o.NoNullishOperator {
+		// no need to check whether left/right need to add groups, as the space saving is always more
+		return &js.BinaryExpr{js.NullishToken, groupExpr(left, binaryLeftPrecMap[js.NullishToken]), groupExpr(right, binaryRightPrecMap[js.NullishToken])}
+	} else {
+		// shorten when true and false bodies are true and false
+		trueX, falseX := isTrue(expr.X), isFalse(expr.X)
+		trueY, falseY := isTrue(expr.Y), isFalse(expr.Y)
+		if trueX && falseY || falseX && trueY {
+			return optimizeBooleanExpr(expr.Cond, falseX, prec)
+		} else if trueX || trueY {
+			// trueX != trueY
+			cond := optimizeBooleanExpr(expr.Cond, trueY, binaryLeftPrecMap[js.OrToken])
+			if trueY {
+				return &js.BinaryExpr{js.OrToken, cond, groupExpr(expr.X, binaryRightPrecMap[js.OrToken])}
+			} else {
+				return &js.BinaryExpr{js.OrToken, cond, groupExpr(expr.Y, binaryRightPrecMap[js.OrToken])}
+			}
+		} else if falseX || falseY {
+			// falseX != falseY
+			cond := optimizeBooleanExpr(expr.Cond, falseX, binaryLeftPrecMap[js.AndToken])
+			if falseX {
+				return &js.BinaryExpr{js.AndToken, cond, groupExpr(expr.Y, binaryRightPrecMap[js.AndToken])}
+			} else {
+				return &js.BinaryExpr{js.AndToken, cond, groupExpr(expr.X, binaryRightPrecMap[js.AndToken])}
+			}
+		} else if condExpr, ok := expr.X.(*js.CondExpr); ok && isEqualExpr(expr.Y, condExpr.Y) {
+			// nested conditional expression with same false bodies
+			return &js.CondExpr{&js.BinaryExpr{js.AndToken, groupExpr(expr.Cond, binaryLeftPrecMap[js.AndToken]), groupExpr(condExpr.Cond, binaryRightPrecMap[js.AndToken])}, condExpr.X, expr.Y}
+		} else if prec <= js.OpExpr {
+			// regular conditional expression
+			// convert  (a,b)?c:d  =>  a,b?c:d
+			if group, ok := expr.Cond.(*js.GroupExpr); ok {
+				if comma, ok := group.X.(*js.CommaExpr); ok && js.OpCoalesce <= exprPrec(comma.List[len(comma.List)-1]) {
+					expr.Cond = comma.List[len(comma.List)-1]
+					comma.List[len(comma.List)-1] = expr
+					return comma
+				}
+			}
+		}
+	}
+	return expr
 }
 
 func endsInIf(istmt js.IStmt) bool {
 	switch stmt := istmt.(type) {
 	case *js.IfStmt:
 		if stmt.Else == nil {
-			return true
+			_, ok := optimizeStmt(stmt).(*js.IfStmt)
+			return ok
 		}
 		return endsInIf(stmt.Else)
 	case *js.BlockStmt:
