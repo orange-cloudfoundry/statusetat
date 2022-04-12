@@ -353,7 +353,7 @@ func (calendar *Calendar) SetDescription(s string, props ...PropertyParameter) {
 }
 
 func (calendar *Calendar) SetLastModified(t time.Time, props ...PropertyParameter) {
-	calendar.setProperty(PropertyLastModified, t.UTC().Format(icalTimeFormat), props...)
+	calendar.setProperty(PropertyLastModified, t.UTC().Format(icalTimestampFormatUtc), props...)
 }
 
 func (calendar *Calendar) SetRefreshInterval(s string, props ...PropertyParameter) {
@@ -393,17 +393,28 @@ func (calendar *Calendar) setProperty(property Property, value string, props ...
 	}
 	calendar.CalendarProperties = append(calendar.CalendarProperties, r)
 }
-func (calendar *Calendar) AddEvent(id string) *VEvent {
+
+func NewEvent(uniqueId string) *VEvent {
 	e := &VEvent{
 		ComponentBase{
 			Properties: []IANAProperty{
-				{BaseProperty{IANAToken: ToText(string(ComponentPropertyUniqueId)), Value: id}},
+				{BaseProperty{IANAToken: ToText(string(ComponentPropertyUniqueId)), Value: uniqueId}},
 			},
 		},
 	}
+	return e
+}
+
+func (calendar *Calendar) AddEvent(id string) *VEvent {
+	e := NewEvent(id)
 	calendar.Components = append(calendar.Components, e)
 	return e
 }
+
+func (calendar *Calendar) AddVEvent(e *VEvent) {
+	calendar.Components = append(calendar.Components, e)
+}
+
 func (calendar *Calendar) Events() (r []*VEvent) {
 	r = []*VEvent{}
 	for i := range calendar.Components {
@@ -420,7 +431,7 @@ func ParseCalendar(r io.Reader) (*Calendar, error) {
 	c := &Calendar{}
 	cs := NewCalendarStream(r)
 	cont := true
-	for i := 0; cont; i++ {
+	for ln := 0; cont; ln++ {
 		l, err := cs.ReadLine()
 		if err != nil {
 			switch err {
@@ -433,9 +444,12 @@ func ParseCalendar(r io.Reader) (*Calendar, error) {
 		if l == nil || len(*l) == 0 {
 			continue
 		}
-		line := ParseProperty(*l)
+		line, err := ParseProperty(*l)
+		if err != nil {
+			return nil, fmt.Errorf("parsing line %d: %w", ln, err)
+		}
 		if line == nil {
-			return nil, errors.New("Error parsing line")
+			return nil, fmt.Errorf("parsing calendar line %d", ln)
 		}
 		switch state {
 		case "begin":
@@ -445,10 +459,10 @@ func ParseCalendar(r io.Reader) (*Calendar, error) {
 				case "VCALENDAR":
 					state = "properties"
 				default:
-					return nil, errors.New("Malformed calendar")
+					return nil, errors.New("malformed calendar; expected a vcalendar")
 				}
 			default:
-				return nil, errors.New("Malformed calendar")
+				return nil, errors.New("malformed calendar; expected begin")
 			}
 		case "properties":
 			switch line.IANAToken {
@@ -457,7 +471,7 @@ func ParseCalendar(r io.Reader) (*Calendar, error) {
 				case "VCALENDAR":
 					state = "end"
 				default:
-					return nil, errors.New("Malformed calendar")
+					return nil, errors.New("malformed calendar; expected end")
 				}
 			case "BEGIN":
 				state = "components"
@@ -475,7 +489,7 @@ func ParseCalendar(r io.Reader) (*Calendar, error) {
 				case "VCALENDAR":
 					state = "end"
 				default:
-					return nil, errors.New("Malformed calendar")
+					return nil, errors.New("malformed calendar; expected end")
 				}
 			case "BEGIN":
 				co, err := GeneralParseComponent(cs, line)
@@ -486,12 +500,12 @@ func ParseCalendar(r io.Reader) (*Calendar, error) {
 					c.Components = append(c.Components, co)
 				}
 			default:
-				return nil, errors.New("Malformed calendar")
+				return nil, errors.New("malformed calendar; expected begin or end")
 			}
 		case "end":
-			return nil, errors.New("Malformed calendar")
+			return nil, errors.New("malformed calendar; unexpected end")
 		default:
-			return nil, errors.New("Bad state")
+			return nil, errors.New("malformed calendar; bad state")
 		}
 	}
 	return c, nil
@@ -534,7 +548,7 @@ func (cs *CalendarStream) ReadLine() (*ContentLine, error) {
 			}
 			if len(p) == 0 {
 				c = false
-			} else if p[0] == ' ' {
+			} else if p[0] == ' ' || p[0] == '\t' {
 				cs.b.Discard(1) // nolint:errcheck
 			} else {
 				c = false
