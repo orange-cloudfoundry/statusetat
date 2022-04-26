@@ -619,25 +619,24 @@ func optimizeUnaryExpr(expr *js.UnaryExpr, prec js.OpPrec) js.IExpr {
 				isEqY = true
 			}
 
-			// left and right may need group or can remove group
+			// add group if it wasn't already there
 			var needsGroupX, needsGroupY bool
+			if !isEqX && binaryLeftPrecMap[binary.Op] <= exprPrec(binary.X) && exprPrec(binary.X) < js.OpUnary {
+				score -= 2
+				needsGroupX = true
+			}
+			if !isEqY && binaryRightPrecMap[binary.Op] <= exprPrec(binary.Y) && exprPrec(binary.Y) < js.OpUnary {
+				score -= 2
+				needsGroupY = true
+			}
+
+			// remove group
 			if op == js.OrToken {
-				// remove group
 				if exprPrec(binary.X) == js.OpOr {
 					score += 2
 				}
 				if exprPrec(binary.Y) == js.OpAnd {
 					score += 2
-				}
-			} else {
-				// add group
-				if !isEqX && exprPrec(binary.X) < js.OpUnary {
-					score -= 2
-					needsGroupX = true
-				}
-				if !isEqY && exprPrec(binary.Y) < js.OpUnary {
-					score -= 2
-					needsGroupY = true
 				}
 			}
 
@@ -1051,7 +1050,23 @@ func minifyRegExp(b []byte) []byte {
 	return b
 }
 
+func removeUnderscores(b []byte) []byte {
+	for i := 0; i < len(b); i++ {
+		if b[i] == '_' {
+			b = append(b[:i], b[i+1:]...)
+			i--
+		}
+	}
+	return b
+}
+
+func decimalNumber(b []byte, prec int) []byte {
+	b = removeUnderscores(b)
+	return minify.Number(b, prec)
+}
+
 func binaryNumber(b []byte, prec int) []byte {
+	b = removeUnderscores(b)
 	if len(b) <= 2 || 65 < len(b) {
 		return b
 	}
@@ -1071,6 +1086,7 @@ func binaryNumber(b []byte, prec int) []byte {
 }
 
 func octalNumber(b []byte, prec int) []byte {
+	b = removeUnderscores(b)
 	if len(b) <= 2 || 23 < len(b) {
 		return b
 	}
@@ -1090,6 +1106,7 @@ func octalNumber(b []byte, prec int) []byte {
 }
 
 func hexadecimalNumber(b []byte, prec int) []byte {
+	b = removeUnderscores(b)
 	if len(b) <= 2 || 12 < len(b) || len(b) == 12 && ('D' < b[2] && b[2] <= 'F' || 'd' < b[2]) {
 		return b
 	}
