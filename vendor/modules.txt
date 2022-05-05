@@ -179,8 +179,8 @@ github.com/hashicorp/go-hclog
 # github.com/hashicorp/go-multierror v1.1.1
 ## explicit; go 1.13
 github.com/hashicorp/go-multierror
-# github.com/hashicorp/go-plugin v1.4.3
-## explicit; go 1.13
+# github.com/hashicorp/go-plugin v1.4.4
+## explicit; go 1.17
 github.com/hashicorp/go-plugin
 github.com/hashicorp/go-plugin/internal/plugin
 # github.com/hashicorp/yamux v0.0.0-20211028200310-0bc27b27de87
