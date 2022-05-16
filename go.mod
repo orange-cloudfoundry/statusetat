@@ -33,7 +33,7 @@ require (
 	github.com/tdewolff/minify/v2 v2.11.2
 	github.com/yuin/goldmark v1.4.12
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
-	google.golang.org/grpc v1.46.0
+	google.golang.org/grpc v1.46.2
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
