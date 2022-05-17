@@ -34,7 +34,7 @@ var (
 		Help: "Duration of HTTP requests.",
 	}, []string{"code", "method", "path"})
 
-	configFile = kingpin.Flag("config", "Path to Configuration File").Short('c').Default("config.yml").String()
+	configFile = kingpin.Flag("config", "Path to Configuration File").Short('c').String()
 )
 
 func main() {
@@ -42,14 +42,24 @@ func main() {
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
 
-	c, err := config.LoadConfig(*configFile)
+	var (
+		err error
+		c config.Config
+	)
+
+	if configFile != nil && *configFile != "" {
+		c, err = config.LoadConfigFromFile(*configFile)
+	} else {
+		c, err = config.LoadConfigFromEnv()
+	}
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	urls := make([]*url.URL, len(c.Targets))
 	for i, target := range c.Targets {
-		urls[i] = target.URL
+		u, _ := target.Validate()
+		urls[i] = u
 	}
 	store, err := storages.Factory(urls)
 	if err != nil {

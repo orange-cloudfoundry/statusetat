@@ -2,6 +2,7 @@ package grafana
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -32,6 +33,8 @@ type ReqGrafanaAnnotation struct {
 
 type OptsGrafanaAnnotation struct {
 	ApiKey             string `mapstructure:"api_key"`
+	Username           string `mapstructure:"username"`
+	Password           string `mapstructure:"password"`
 	Endpoint           string `mapstructure:"endpoint"`
 	DashboardId        int    `mapstructure:"dashboard_id"`
 	PanelId            int    `mapstructure:"panel_id"`
@@ -64,9 +67,16 @@ func (n GrafanaAnnotation) Creator(params map[string]interface{}, baseInfo confi
 		return nil, err
 	}
 
+	var auth string
+	if opts.ApiKey != "" {
+		auth = fmt.Sprintf("Bearer %s" + opts.ApiKey)
+	} else {
+		val := fmt.Sprintf("%s:%s", opts.Username, opts.Password)
+		auth = fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(val)))
+	}
 	return &GrafanaAnnotation{
 		httpClient: &http.Client{
-			Transport: common.MakeHttpTransportWithHeader(opts.InsecureSkipVerify, "Authorization", "Bearer "+opts.ApiKey),
+			Transport: common.MakeHttpTransportWithHeader(opts.InsecureSkipVerify, "Authorization", auth),
 			Timeout:   5 * time.Second,
 		},
 		id:   opts.Endpoint,
@@ -80,7 +90,7 @@ func (n GrafanaAnnotation) Name() string {
 }
 
 func (n GrafanaAnnotation) Description() string {
-	return `Sending notifications for incident and scheduled task to a grafana panel set. 
+	return `Sending notifications for incident and scheduled task to a grafana panel set.
 If admin trigger manually an notification this notifier **will not** re-notify grafana.`
 }
 

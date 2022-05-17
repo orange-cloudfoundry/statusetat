@@ -229,7 +229,8 @@ func (a Serve) AdminInfo(w http.ResponseWriter, req *http.Request) {
 
 	storages := make([]*url.URL, len(a.config.Targets))
 	for i, t := range a.config.Targets {
-		storages[i] = t.URL
+		u, _ := t.Validate()
+		storages[i] = u
 	}
 
 	err := a.xt.ExecuteTemplate(w, "admin/info.gohtml", struct {
