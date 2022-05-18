@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/url"
@@ -12,18 +13,145 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const (
+	VCAP_SERVICES     = "VCAP_SERVICES"
+	VCAP_APPLICATION  = "VCAP_APPLICATION"
+)
+
+type Config struct {
+	Targets    Targets    `yaml:"targets"`
+	Listen     string     `yaml:"listen"`
+	Log        *Log       `yaml:"log"`
+	Components Components `yaml:"components"`
+	BaseInfo   *BaseInfo  `yaml:"base_info"`
+	Username   string     `yaml:"username"`
+	Password   string     `yaml:"password"`
+
+	CookieKey string     `yaml:"cookie_key"`
+	Notifiers []Notifier `yaml:"notifiers"`
+
+	Theme *Theme `yaml:"theme"`
+}
+
+func (c *Config) Merge(other Config) {
+	c.Targets   = append(c.Targets, other.Targets...)
+	c.Notifiers = append(c.Notifiers, other.Notifiers...)
+	c.Components = append(c.Components, other.Components...)
+	if len(c.Listen) == 0 {
+		c.Listen = other.Listen
+	}
+	if len(c.Username) == 0 || len(c.Password) == 0 {
+		c.Username = other.Username
+		c.Password = other.Password
+	}
+	if len(c.CookieKey) == 0 {
+		c.CookieKey = other.CookieKey
+	}
+	if c.Theme == nil {
+		c.Theme = other.Theme
+	}
+	if c.BaseInfo == nil {
+		c.BaseInfo = other.BaseInfo
+	}
+	if c.Log == nil {
+		c.Log = other.Log
+	}
+}
+
+
+func (c *Config) Validate() error {
+	if len(c.Targets) == 0 {
+		return fmt.Errorf("At least one target must be define")
+	}
+
+	if len(c.Components) == 0 {
+		return fmt.Errorf("At least one component must be define")
+	}
+
+	if c.Username == "" {
+		c.Username = uuid.NewString()
+		log.Infof("Generated username (set username in config): %s", c.Username)
+	}
+
+	if c.Password == "" {
+		c.Password = uuid.NewString()
+		log.Infof("Generated password (set password in config): %s", c.Password)
+	}
+
+	host := "0.0.0.0"
+	port := "8080"
+	splitListen := strings.Split(c.Listen, ":")
+	if splitListen[0] != "" {
+		host = splitListen[0]
+	}
+	if len(splitListen) == 2 {
+		port = splitListen[1]
+	}
+	envPort := os.Getenv("PORT")
+	if envPort != "" {
+		port = envPort
+	}
+	c.Listen = host + ":" + port
+
+	if c.CookieKey == "" {
+		c.CookieKey = uuid.NewString()
+	}
+
+
+	if c.Theme == nil {
+		c.Theme = &Theme{}
+	}
+	if err := c.Theme.Validate(); err != nil {
+		return nil
+	}
+
+	if c.BaseInfo == nil {
+		c.BaseInfo = &BaseInfo{}
+	}
+	if err := c.BaseInfo.Validate(c.Listen); err != nil {
+		return nil
+	}
+
+	if c.Log == nil {
+		c.Log = &Log{}
+	}
+	if err := c.Log.Validate(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type Target string
+
+func (t Target) Validate() (*url.URL, error) {
+	u, err := url.Parse(string(t))
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
+}
+
+
+type Targets []Target
+
+func (t Targets) Validate() error {
+	for _, v := range t {
+		if _, err := v.Validate(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+
 type Log struct {
 	Level   string `yaml:"level"`
 	NoColor bool   `yaml:"no_color"`
 	InJson  bool   `yaml:"in_json"`
 }
 
-func (c *Log) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type plain Log
-	err := unmarshal((*plain)(c))
-	if err != nil {
-		return err
-	}
+func (c *Log) Validate() error {
 	log.SetFormatter(&log.TextFormatter{
 		DisableColors: c.NoColor,
 	})
@@ -40,31 +168,6 @@ func (c *Log) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-type target struct {
-	Raw string
-	URL *url.URL
-}
-
-func (d *target) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var raw string
-	err := unmarshal(&raw)
-	if err != nil {
-		return err
-	}
-	if raw == "" {
-		return nil
-	}
-	u, err := url.Parse(raw)
-	if err != nil {
-		return err
-	}
-	*d = target{
-		Raw: raw,
-		URL: u,
-	}
-	return nil
-}
-
 type BaseInfo struct {
 	BaseURL  string `yaml:"base_url"`
 	Support  string `yaml:"support"`
@@ -73,16 +176,24 @@ type BaseInfo struct {
 	TimeZone string `yaml:"time_zone"`
 }
 
-func (c *BaseInfo) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type plain BaseInfo
-	err := unmarshal((*plain)(c))
-	if err != nil {
-		return err
+func (b *BaseInfo) Validate(listen string) error {
+	b.BaseURL = strings.TrimSuffix(b.BaseURL, "/")
+	if b.Title == "" {
+		b.Title = "Statusetat"
 	}
-	c.BaseURL = strings.TrimSuffix(c.BaseURL, "/")
-	if c.Title == "" {
-		c.Title = "Statusetat"
+	if b.BaseURL == "" {
+		b.BaseURL = "http://" + listen
 	}
+	if b.Support == "" {
+		b.Support = b.BaseURL
+	}
+	if b.Contact == "" {
+		b.Contact = b.Support
+	}
+	if b.TimeZone == "" {
+		b.TimeZone = "UTC"
+	}
+
 	return nil
 }
 
@@ -109,19 +220,11 @@ type Theme struct {
 	Footer string `yaml:"footer"`
 }
 
-type Config struct {
-	Targets    []target   `yaml:"targets"`
-	Listen     string     `yaml:"listen"`
-	Log        Log        `yaml:"log"`
-	Components Components `yaml:"components"`
-	BaseInfo   *BaseInfo  `yaml:"base_info"`
-	Username   string     `yaml:"username"`
-	Password   string     `yaml:"password"`
-
-	CookieKey string     `yaml:"cookie_key"`
-	Notifiers []Notifier `yaml:"notifiers"`
-
-	Theme *Theme `yaml:"theme"`
+func (t *Theme) Validate() error {
+	if t.PersistentDisplayName == "" {
+		t.PersistentDisplayName = "persistent incident"
+	}
+	return nil
 }
 
 type Component struct {
@@ -129,6 +232,7 @@ type Component struct {
 	Description string
 	Group       string
 }
+
 
 type Components []Component
 
@@ -160,84 +264,71 @@ func (cs Components) Inline() []string {
 	return components
 }
 
-func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type plain Config
-	err := unmarshal((*plain)(c))
-	if err != nil {
-		return err
-	}
 
-	if len(c.Targets) == 0 {
-		return fmt.Errorf("At least one target must be define")
-	}
-
-	if len(c.Components) == 0 {
-		return fmt.Errorf("At least one component must be define")
-	}
-
-	if c.Username == "" {
-		c.Username = uuid.NewString()
-		log.Infof("Generated username (set username in config): %s", c.Username)
-	}
-
-	if c.Password == "" {
-		c.Password = uuid.NewString()
-		log.Infof("Generated password (set password in config): %s", c.Password)
-	}
-	if c.BaseInfo == nil {
-		c.BaseInfo = &BaseInfo{
-			Title: "Statusetat",
-		}
-	}
-
-	host := "0.0.0.0"
-	port := "8080"
-	splitListen := strings.Split(c.Listen, ":")
-	if splitListen[0] != "" {
-		host = splitListen[0]
-	}
-	if len(splitListen) == 2 {
-		port = splitListen[1]
-	}
-	envPort := os.Getenv("PORT")
-	if envPort != "" {
-		port = envPort
-	}
-	c.Listen = host + ":" + port
-	if c.BaseInfo.BaseURL == "" {
-		c.BaseInfo.BaseURL = "http://" + c.Listen
-	}
-	if c.BaseInfo.Support == "" {
-		c.BaseInfo.Support = c.BaseInfo.BaseURL
-	}
-	if c.BaseInfo.Contact == "" {
-		c.BaseInfo.Contact = c.BaseInfo.Support
-	}
-	if c.CookieKey == "" {
-		c.CookieKey = uuid.NewString()
-	}
-	if c.BaseInfo.TimeZone == "" {
-		c.BaseInfo.TimeZone = "UTC"
-	}
-	if c.Theme == nil {
-		c.Theme = &Theme{}
-	}
-	if c.Theme.PersistentDisplayName == "" {
-		c.Theme.PersistentDisplayName = "persistent incident"
-	}
-
-	return nil
-}
-
-func LoadConfig(filename string) (Config, error) {
-	b, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return Config{}, err
-	}
+func LoadConfig(content []byte) (Config, error) {
 	var config Config
-	err = yaml.Unmarshal(b, &config)
+	err := yaml.Unmarshal(content, &config)
 	if err != nil {
 		return Config{}, err
 	}
 	return config, nil
+}
+
+func LoadConfigFromFile(filename string) (Config, error) {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return Config{}, err
+	}
+	return LoadConfig(b)
+}
+
+func LoadConfigFromEnv() (Config, error) {
+	type config map[string]interface{}
+	type configs []config
+	type vcapservices map[string]configs
+
+	var (
+		services vcapservices
+		res      Config
+	)
+
+	vcap := os.Getenv(VCAP_SERVICES)
+	if vcap == "" {
+		return Config{}, fmt.Errorf("empty %s env variable", VCAP_SERVICES)
+	}
+
+	if err := json.Unmarshal([]byte(vcap), &services); err != nil {
+		return Config{}, fmt.Errorf("invalid json in %s env variable: %s", VCAP_SERVICES, err)
+	}
+
+	for _, cConfigs := range services {
+		for _, cConfig := range cConfigs {
+			name, ok := cConfig["name"]
+			if !ok {
+				continue
+			}
+			nameStr, ok := name.(string)
+			if !ok {
+				continue
+			}
+
+			creds, err := json.Marshal(cConfig["credentials"])
+			if err != nil {
+				return Config{}, fmt.Errorf("unable to marshal config '%s': %s", nameStr, err)
+			}
+
+			log.Infof("loading vcap service '%s'", nameStr)
+			c, err := LoadConfig(creds)
+			if err != nil {
+				log.Errorf("error while loading vcap service '%s': %s", nameStr, err)
+				continue
+			}
+			res.Merge(c)
+		}
+	}
+
+	if err := res.Validate(); err != nil {
+		return Config{}, fmt.Errorf("could not find any valid configuration in %s: %s", VCAP_SERVICES, err)
+	}
+	return res, nil
 }

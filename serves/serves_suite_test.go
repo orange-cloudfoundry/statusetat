@@ -95,9 +95,9 @@ var _ = BeforeEach(func() {
 	fakeStoreMem.SubscribersStub = dbStore.Subscribers
 
 	err = serves.RegisterWithHtmlTemplater(fakeStoreMem, router, UserInfo, fakeHtmlTemplater, config.Config{
-		Targets:    nil,
+		Targets:    config.Targets{},
 		Listen:     "",
-		Log:        config.Log{},
+		Log:        &config.Log{},
 		Components: Components,
 		BaseInfo:   &BaseInfo,
 		Username:   "",
