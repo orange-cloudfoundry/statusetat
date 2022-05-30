@@ -29,11 +29,7 @@ var (
 	notBytes                   = []byte("!")
 	questionBytes              = []byte("?")
 	equalBytes                 = []byte("=")
-	notNotBytes                = []byte("!!")
-	andBytes                   = []byte("&&")
-	orBytes                    = []byte("||")
 	optChainBytes              = []byte("?.")
-	nullishBytes               = []byte("??")
 	arrowBytes                 = []byte("=>")
 	zeroBytes                  = []byte("0")
 	oneBytes                   = []byte("1")
@@ -776,26 +772,92 @@ func isHexDigit(b byte) bool {
 	return '0' <= b && b <= '9' || 'a' <= b && b <= 'f' || 'A' <= b && b <= 'F'
 }
 
+func mergeBinaryExpr(expr *js.BinaryExpr) {
+	// merge string concatenations which may be intertwined with other additions
+	var ok bool
+	for expr.Op == js.AddToken {
+		if lit, ok := expr.Y.(*js.LiteralExpr); ok && lit.TokenType == js.StringToken {
+			left := expr
+			strings := []*js.LiteralExpr{lit}
+			n := len(lit.Data) - 2
+			for left.Op == js.AddToken {
+				if 50 < len(strings) {
+					return // limit recursion
+				}
+				if lit, ok := left.X.(*js.LiteralExpr); ok && lit.TokenType == js.StringToken {
+					strings = append(strings, lit)
+					n += len(lit.Data) - 2
+					left.X = nil
+				} else if newLeft, ok := left.X.(*js.BinaryExpr); ok {
+					if lit, ok := newLeft.Y.(*js.LiteralExpr); ok && lit.TokenType == js.StringToken {
+						strings = append(strings, lit)
+						n += len(lit.Data) - 2
+						left = newLeft
+						continue
+					}
+				}
+				break
+			}
+
+			if 1 < len(strings) {
+				// unescaped quotes will be repaired in minifyString later on
+				b := make([]byte, 0, n+2)
+				b = append(b, strings[len(strings)-1].Data[:len(strings[len(strings)-1].Data)-1]...)
+				for i := len(strings) - 2; 0 < i; i-- {
+					b = append(b, strings[i].Data[1:len(strings[i].Data)-1]...)
+				}
+				b = append(b, strings[0].Data[1:]...)
+				b[len(b)-1] = b[0]
+
+				expr.X = left.X
+				expr.Y.(*js.LiteralExpr).Data = b
+			}
+		}
+		if expr, ok = expr.X.(*js.BinaryExpr); !ok {
+			break
+		}
+	}
+}
+
 func minifyString(b []byte) []byte {
 	if len(b) < 3 {
-		return b
+		return []byte("\"\"")
 	}
 
 	// switch quotes if more optimal
 	singleQuotes := 0
 	doubleQuotes := 0
+	backtickQuotes := 0
+	newlines := 0
+	dollarSigns := 0
+	notEscapes := false
 	for i := 1; i < len(b)-1; i++ {
 		if b[i] == '\'' {
 			singleQuotes++
 		} else if b[i] == '"' {
 			doubleQuotes++
+		} else if b[i] == '`' {
+			backtickQuotes++
+		} else if b[i] == '$' {
+			dollarSigns++
+		} else if b[i] == '\\' && i+1 < len(b) {
+			if b[i+1] == 'n' || b[i+1] == 'r' {
+				newlines++
+			} else {
+				notEscapes = true
+			}
 		}
 	}
-	quote := b[0]
+	quote := byte('"') // default to " for better GZIP compression
+	quotes := singleQuotes
 	if doubleQuotes < singleQuotes {
 		quote = byte('"')
+		quotes = doubleQuotes
 	} else if singleQuotes < doubleQuotes {
 		quote = byte('\'')
+	}
+	if !notEscapes && backtickQuotes+dollarSigns < quotes+newlines {
+		quote = byte('`')
 	}
 	b[0] = quote
 	b[len(b)-1] = quote
@@ -806,7 +868,7 @@ func minifyString(b []byte) []byte {
 	for i := 1; i < len(b)-1; i++ {
 		if c := b[i]; c == '\\' {
 			c = b[i+1]
-			if c == '0' && (i+2 == len(b)-1 || b[i+2] < '0' || '7' < b[i+2]) || c == '\\' || c == quote || c == 'n' || c == 'r' || c == 'u' {
+			if c == quote || c == '\\' || c == 'u' || c == '0' && (i+2 == len(b)-1 || b[i+2] < '0' || '7' < b[i+2]) || quote != '`' && (c == 'n' || c == 'r') {
 				// keep escape sequence
 				i++
 				continue
@@ -864,6 +926,10 @@ func minifyString(b []byte) []byte {
 					n--
 					b[i+n] = '\\'
 				}
+			} else if c == 'n' {
+				b[i+1] = '\n' // only for template literals
+			} else if c == 'r' {
+				b[i+1] = '\r' // only for template literals
 			} else if c == 't' {
 				b[i+1] = '\t'
 			} else if c == 'f' {
@@ -881,7 +947,7 @@ func minifyString(b []byte) []byte {
 			}
 			start = i + n
 			i += n - 1
-		} else if c == quote {
+		} else if c == quote || c == '$' && quote == '`' {
 			// may not be escaped properly when changing quotes
 			if j < start {
 				// avoid append
