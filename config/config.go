@@ -60,10 +60,6 @@ func (c *Config) Merge(other Config) {
 
 
 func (c *Config) Validate() error {
-	if len(c.Targets) == 0 {
-		return fmt.Errorf("At least one target must be define")
-	}
-
 	if len(c.Components) == 0 {
 		return fmt.Errorf("At least one component must be define")
 	}
@@ -119,16 +115,25 @@ func (c *Config) Validate() error {
 		return err
 	}
 
+	if len(c.Targets) == 0 {
+		return fmt.Errorf("At least one target must be define")
+	}
+	if err := c.Targets.Validate(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 type Target string
 
 func (t Target) Validate() (*url.URL, error) {
+	log.Debugf("url: %s", string(t))
 	u, err := url.Parse(string(t))
 	if err != nil {
 		return nil, err
 	}
+	log.Debugf("-> value: %+v", u)
 	return u, nil
 }
 

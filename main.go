@@ -58,7 +58,10 @@ func main() {
 
 	urls := make([]*url.URL, len(c.Targets))
 	for i, target := range c.Targets {
-		u, _ := target.Validate()
+		u, err := target.Validate()
+		if err != nil {
+			log.Fatalf("unable to parse target url '%s': %s", string(target), err.Error())
+		}
 		urls[i] = u
 	}
 	store, err := storages.Factory(urls)
