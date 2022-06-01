@@ -440,7 +440,7 @@ golang.org/x/xerrors/internal
 # google.golang.org/genproto v0.0.0-20220407144326-9054f6ed7bac
 ## explicit; go 1.15
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.46.2
+# google.golang.org/grpc v1.47.0
 ## explicit; go 1.14
 google.golang.org/grpc
 google.golang.org/grpc/attributes
