@@ -15,7 +15,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
-	github.com/hashicorp/go-hclog v1.2.0
+	github.com/hashicorp/go-hclog v1.2.1
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/go-plugin v1.4.4
 	github.com/jinzhu/gorm v1.9.16
@@ -77,7 +77,7 @@ require (
 	github.com/tdewolff/parse/v2 v2.5.32 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
-	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
+	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6 // indirect
 	golang.org/x/term v0.0.0-20220411215600-e5f449aeb171 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.10 // indirect
