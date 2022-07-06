@@ -6,7 +6,7 @@
 
 **[Python bindings](https://pypi.org/project/tdewolff-minify/)** install with `pip install tdewolff-minify`
 
-**[JavaScript bindings](https://www.npmjs.com/package/tdewolff-minify)**
+**[JavaScript bindings](https://www.npmjs.com/package/@tdewolff/minify)** install with `npm i @tdewolff/minify`
 
 ---
 
@@ -106,8 +106,7 @@ See [CLI tool](https://github.com/tdewolff/minify/tree/master/cmd/minify) for in
 If you want to use Docker, please see https://hub.docker.com/r/tdewolff/minify.
 
 ```bash
-$ docker run -it tdewolff/minify
-/ # minify --version
+$ docker run -it tdewolff/minify --help
 ```
 
 ## API stability
