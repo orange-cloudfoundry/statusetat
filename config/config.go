@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	VCAP_SERVICES     = "VCAP_SERVICES"
-	VCAP_APPLICATION  = "VCAP_APPLICATION"
+	VCAP_SERVICES    = "VCAP_SERVICES"
+	VCAP_APPLICATION = "VCAP_APPLICATION"
 )
 
 type Config struct {
@@ -34,7 +34,7 @@ type Config struct {
 }
 
 func (c *Config) Merge(other Config) {
-	c.Targets   = append(c.Targets, other.Targets...)
+	c.Targets = append(c.Targets, other.Targets...)
 	c.Notifiers = append(c.Notifiers, other.Notifiers...)
 	c.Components = append(c.Components, other.Components...)
 	if len(c.Listen) == 0 {
@@ -57,7 +57,6 @@ func (c *Config) Merge(other Config) {
 		c.Log = other.Log
 	}
 }
-
 
 func (c *Config) Validate() error {
 	if len(c.Components) == 0 {
@@ -92,7 +91,6 @@ func (c *Config) Validate() error {
 	if c.CookieKey == "" {
 		c.CookieKey = uuid.NewString()
 	}
-
 
 	if c.Theme == nil {
 		c.Theme = &Theme{}
@@ -137,7 +135,6 @@ func (t Target) Validate() (*url.URL, error) {
 	return u, nil
 }
 
-
 type Targets []Target
 
 func (t Targets) Validate() error {
@@ -148,7 +145,6 @@ func (t Targets) Validate() error {
 	}
 	return nil
 }
-
 
 type Log struct {
 	Level   string `yaml:"level"`
@@ -238,7 +234,6 @@ type Component struct {
 	Group       string
 }
 
-
 type Components []Component
 
 func (cs Components) Regroups() map[string][]Component {
@@ -269,7 +264,6 @@ func (cs Components) Inline() []string {
 	return components
 }
 
-
 func LoadConfig(content []byte) (Config, error) {
 	var config Config
 	err := yaml.Unmarshal(content, &config)
@@ -284,7 +278,13 @@ func LoadConfigFromFile(filename string) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
-	return LoadConfig(b)
+
+	config, err := LoadConfig(b)
+	if err := config.Validate(); err != nil {
+		return Config{}, fmt.Errorf("Invalid config in file %s: %s", filename, err)
+	}
+
+	return config, nil
 }
 
 func LoadConfigFromEnv() (Config, error) {
