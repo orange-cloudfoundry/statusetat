@@ -25,7 +25,7 @@ require (
 	github.com/nicklaw5/go-respond v1.6.0
 	github.com/olebedev/emitter v0.0.0-20190110104742-e8d1457e6aee
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.20.0
+	github.com/onsi/gomega v1.20.1
 	github.com/prometheus/client_golang v1.13.0
 	github.com/prometheus/common v0.37.0
 	github.com/rs/cors v1.8.2
