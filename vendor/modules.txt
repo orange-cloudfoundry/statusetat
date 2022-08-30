@@ -180,7 +180,7 @@ github.com/hako/durafmt
 # github.com/hashicorp/errwrap v1.1.0
 ## explicit
 github.com/hashicorp/errwrap
-# github.com/hashicorp/go-hclog v1.2.2
+# github.com/hashicorp/go-hclog v1.3.0
 ## explicit; go 1.13
 github.com/hashicorp/go-hclog
 # github.com/hashicorp/go-multierror v1.1.1
