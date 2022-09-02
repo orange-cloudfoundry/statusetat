@@ -356,7 +356,7 @@ github.com/tdewolff/parse/v2/js
 github.com/tdewolff/parse/v2/json
 github.com/tdewolff/parse/v2/strconv
 github.com/tdewolff/parse/v2/xml
-# github.com/yuin/goldmark v1.4.13
+# github.com/yuin/goldmark v1.4.14
 ## explicit; go 1.18
 github.com/yuin/goldmark
 github.com/yuin/goldmark/ast
