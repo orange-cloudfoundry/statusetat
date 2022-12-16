@@ -177,8 +177,8 @@ func (a Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	after := from.Add(27 * 24 * time.Hour)
-	before := from.AddDate(0, 0, -27)
+	after := from.Add(26 * 24 * time.Hour)
+	before := from.AddDate(0, 0, -26)
 
 	maintenance, err := a.scheduled(from, to)
 	if err != nil {
