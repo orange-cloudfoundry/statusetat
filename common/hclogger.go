@@ -13,6 +13,22 @@ type LogrusHclogger struct {
 	name   string
 }
 
+func (l LogrusHclogger) GetLevel() hclog.Level {
+	switch l.logger.GetLevel() {
+		case logrus.InfoLevel:
+			return hclog.Info
+		case logrus.TraceLevel:
+			return hclog.Trace
+		case logrus.DebugLevel:
+			return hclog.Debug
+		case logrus.WarnLevel:
+			return hclog.Warn
+		case logrus.ErrorLevel:
+			return hclog.Error
+	}
+	return hclog.NoLevel
+}
+
 func NewLogrusHclogger(logger *logrus.Logger) *LogrusHclogger {
 
 	return &LogrusHclogger{logger: logger, entry: logrus.NewEntry(logger)}
