@@ -41,7 +41,7 @@ github.com/alecthomas/units
 # github.com/arran4/golang-ical v0.0.0-20221122102835-109346913e54
 ## explicit; go 1.13
 github.com/arran4/golang-ical
-# github.com/aws/aws-sdk-go v1.44.169
+# github.com/aws/aws-sdk-go v1.44.170
 ## explicit; go 1.11
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/arn
