@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/alecthomas/chroma v0.10.0
 	github.com/arran4/golang-ical v0.0.0-20221122102835-109346913e54
-	github.com/aws/aws-sdk-go v1.44.170
+	github.com/aws/aws-sdk-go v1.44.171
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gobuffalo/packr/v2 v2.8.3
 	github.com/goji/httpauth v0.0.0-20160601135302-2da839ab0f4d
