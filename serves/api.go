@@ -3,7 +3,7 @@ package serves
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -22,7 +22,7 @@ import (
 func (a Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
 	guid := uuid.NewString()
 
-	b, err := ioutil.ReadAll(req.Body)
+	b, err := io.ReadAll(req.Body)
 	if err != nil {
 		JSONError(w, err, http.StatusPreconditionRequired)
 		return
@@ -175,7 +175,7 @@ func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	guid := v["guid"]
 
-	b, err := ioutil.ReadAll(req.Body)
+	b, err := io.ReadAll(req.Body)
 	if err != nil {
 		JSONError(w, err, http.StatusPreconditionRequired)
 		return
@@ -342,7 +342,7 @@ func (a Serve) AddMessage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	b, err := ioutil.ReadAll(req.Body)
+	b, err := io.ReadAll(req.Body)
 	if err != nil {
 		JSONError(w, err, http.StatusPreconditionRequired)
 		return
@@ -474,7 +474,7 @@ func (a Serve) UpdateMessage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	b, err := ioutil.ReadAll(req.Body)
+	b, err := io.ReadAll(req.Body)
 	if err != nil {
 		JSONError(w, err, http.StatusPreconditionRequired)
 		return

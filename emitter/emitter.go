@@ -37,7 +37,7 @@ func ToNotifyRequest(evt emitter.Event) *models.NotifyRequest {
 	return evt.Args[0].(*models.NotifyRequest)
 }
 
-// this is only made for testing purpose
+// SetEmitter this is only made for testing purpose
 func SetEmitter(emit emitterInterface) {
 	e = emit
 }

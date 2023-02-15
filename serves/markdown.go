@@ -1,7 +1,7 @@
 package serves
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/orange-cloudfoundry/statusetat/markdown"
@@ -18,7 +18,7 @@ func (a Serve) convertMessageToHtml(messages []models.Message) []models.Message 
 }
 
 func (a Serve) preview(w http.ResponseWriter, req *http.Request) {
-	b, err := ioutil.ReadAll(req.Body)
+	b, err := io.ReadAll(req.Body)
 	if err != nil {
 		JSONError(w, err, http.StatusPreconditionRequired)
 		return

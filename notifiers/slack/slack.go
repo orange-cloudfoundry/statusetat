@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -231,7 +231,7 @@ func (n Slack) notifyScheduled(incident models.Incident) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode > 399 {
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return fmt.Errorf("Get error code %d", resp.StatusCode)
 		}

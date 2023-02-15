@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"strings"
@@ -274,7 +273,7 @@ func LoadConfig(content []byte) (Config, error) {
 }
 
 func LoadConfigFromFile(filename string) (Config, error) {
-	b, err := ioutil.ReadFile(filename)
+	b, err := os.ReadFile(filename)
 	if err != nil {
 		return Config{}, err
 	}

@@ -5,9 +5,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/notifiers"
-
 	"github.com/gorilla/mux"
+	"github.com/orange-cloudfoundry/statusetat/notifiers"
 
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"

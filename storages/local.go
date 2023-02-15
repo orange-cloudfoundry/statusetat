@@ -2,7 +2,6 @@ package storages
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -44,12 +43,12 @@ func (l Local) Create(incident models.Incident) (models.Incident, error) {
 		return incident, err
 	}
 	b, _ := json.Marshal(incident)
-	err := ioutil.WriteFile(l.path(incident.GUID), b, 0644)
+	err := os.WriteFile(l.path(incident.GUID), b, 0644)
 	return incident, err
 }
 
 func (l Local) retrieveSubscribers() ([]string, error) {
-	b, err := ioutil.ReadFile(l.path(subscriberFilename))
+	b, err := os.ReadFile(l.path(subscriberFilename))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return []string{}, nil
@@ -65,7 +64,7 @@ func (l Local) retrieveSubscribers() ([]string, error) {
 }
 
 func (l Local) Persistents() ([]models.Incident, error) {
-	b, err := ioutil.ReadFile(l.path(persistentFilename))
+	b, err := os.ReadFile(l.path(persistentFilename))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return []models.Incident{}, nil
@@ -112,7 +111,7 @@ func (l Local) storePersistents(incidents []models.Incident) error {
 	b, _ := json.Marshal(incidents)
 	l.mutexPersistent.Lock()
 	defer l.mutexPersistent.Unlock()
-	err := ioutil.WriteFile(l.path(persistentFilename), b, 0644)
+	err := os.WriteFile(l.path(persistentFilename), b, 0644)
 	return err
 }
 
@@ -120,7 +119,7 @@ func (l Local) storeSubscribers(subscribers []string) error {
 	b, _ := json.Marshal(subscribers)
 	l.mutexSubscriber.Lock()
 	defer l.mutexSubscriber.Unlock()
-	err := ioutil.WriteFile(l.path(subscriberFilename), b, 0644)
+	err := os.WriteFile(l.path(subscriberFilename), b, 0644)
 	return err
 }
 
@@ -158,7 +157,7 @@ func (l Local) Update(guid string, incident models.Incident) (models.Incident, e
 
 	_ = l.removePersistent(guid) // nolint
 	b, _ := json.Marshal(incident)
-	err := ioutil.WriteFile(l.path(guid), b, 0644)
+	err := os.WriteFile(l.path(guid), b, 0644)
 	return incident, err
 }
 
@@ -183,7 +182,7 @@ func (l Local) Read(guid string) (models.Incident, error) {
 		return incident, nil
 	}
 
-	b, err := ioutil.ReadFile(l.path(guid))
+	b, err := os.ReadFile(l.path(guid))
 	if err != nil {
 		return models.Incident{}, err
 	}
@@ -210,7 +209,7 @@ func (l Local) ByDate(from, to time.Time) ([]models.Incident, error) {
 		}
 		var incident models.Incident
 
-		b, err := ioutil.ReadFile(path)
+		b, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}

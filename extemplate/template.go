@@ -186,7 +186,7 @@ func (x *Extemplate) ParseDir(box *packr.Box, extensions []string) error {
 			parent, parentExists = files[parent.layout]
 		}
 
-		// parse template files in reverse order (because childs should override parents)
+		// parse template files in reverse order (because children should override parents)
 		for j := len(templateFiles) - 1; j >= 0; j-- {
 			b = files[templateFiles[j]].contents
 			_, err = tmpl.Parse(string(b))

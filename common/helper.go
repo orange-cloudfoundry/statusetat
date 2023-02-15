@@ -3,7 +3,7 @@ package common
 import (
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"time"
@@ -36,7 +36,7 @@ func MakeHttpTransportWithHeader(skipInsecure bool, key, val string) http.RoundT
 
 func ExtractHttpError(resp *http.Response) error {
 	if resp.StatusCode > 399 {
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return fmt.Errorf("Get error code %d", resp.StatusCode)
 		}

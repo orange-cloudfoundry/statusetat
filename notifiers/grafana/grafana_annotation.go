@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -112,7 +112,7 @@ func (n GrafanaAnnotation) deleteNotify(incident models.Incident) error {
 		return err
 	}
 	defer respFind.Body.Close()
-	b, err := ioutil.ReadAll(respFind.Body)
+	b, err := io.ReadAll(respFind.Body)
 	if err != nil {
 		return fmt.Errorf("Get error code %d", respFind.StatusCode)
 	}

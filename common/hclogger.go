@@ -1,10 +1,11 @@
 package common
 
 import (
-	"github.com/hashicorp/go-hclog"
-	"github.com/sirupsen/logrus"
 	"io"
 	"log"
+
+	"github.com/hashicorp/go-hclog"
+	"github.com/sirupsen/logrus"
 )
 
 type LogrusHclogger struct {
@@ -15,16 +16,16 @@ type LogrusHclogger struct {
 
 func (l LogrusHclogger) GetLevel() hclog.Level {
 	switch l.logger.GetLevel() {
-		case logrus.InfoLevel:
-			return hclog.Info
-		case logrus.TraceLevel:
-			return hclog.Trace
-		case logrus.DebugLevel:
-			return hclog.Debug
-		case logrus.WarnLevel:
-			return hclog.Warn
-		case logrus.ErrorLevel:
-			return hclog.Error
+	case logrus.InfoLevel:
+		return hclog.Info
+	case logrus.TraceLevel:
+		return hclog.Trace
+	case logrus.DebugLevel:
+		return hclog.Debug
+	case logrus.WarnLevel:
+		return hclog.Warn
+	case logrus.ErrorLevel:
+		return hclog.Error
 	}
 	return hclog.NoLevel
 }
