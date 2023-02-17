@@ -16,7 +16,7 @@
           </tr>
           <tr>
             <td>Base URL</td>
-            <td>{{ .Config.BaseInfo.BaseURL}}</td>
+            <td><a href="{{ .Config.BaseInfo.BaseURL }}">{{ .Config.BaseInfo.BaseURL }}</a></td>
           </tr>
           <tr>
             <td>Components</td>
@@ -34,6 +34,7 @@
             <td>Default Time Zone</td>
             <td>{{ .Config.BaseInfo.TimeZone}}</td>
           </tr>
+          <tr><th>Version</th><td>{{ .Version }}</td></tr>
           </tbody>
         </table>
       </div>
@@ -50,15 +51,15 @@
         <table class="striped highlight">
           <thead>
           <tr>
-            <td>Name</td>
-            <td>Description</td>
-            <td>Number Loaded</td>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Number Loaded</th>
           </tr>
           </thead>
           <tbody>
           {{ range $name, $notifiers := .Notifiers }}
             <tr>
-              <td>{{$name}}</td>
+              <th>{{$name}}</th>
               <td>{{(index $notifiers 0).Description | markdown}}</td>
               <td>{{len $notifiers}}</td>
             </tr>
@@ -79,10 +80,10 @@
         <table class="striped highlight">
           <thead>
           <tr>
-            <td>Type</td>
-            <td>Host</td>
-            <td>Target</td>
-            <td>Parameters</td>
+            <th>Type</th>
+            <th>Host</th>
+            <th>Target</th>
+            <th>Parameters</th>
           </tr>
           </thead>
           <tbody>

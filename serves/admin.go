@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
+	"github.com/prometheus/common/version"
 
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
@@ -237,6 +238,7 @@ func (a Serve) AdminInfo(w http.ResponseWriter, req *http.Request) {
 		Notifiers map[string][]notifiers.Notifier
 		Config    config.Config
 		Storages  []*url.URL
+		Version   string
 	}{
 		adminDefaultData: adminDefaultData{
 			BaseInfo:   a.BaseInfo(),
@@ -247,6 +249,7 @@ func (a Serve) AdminInfo(w http.ResponseWriter, req *http.Request) {
 		Notifiers: notifiers.ListAll(),
 		Config:    a.config,
 		Storages:  storages,
+		Version:   version.Print("statusetat"),
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
