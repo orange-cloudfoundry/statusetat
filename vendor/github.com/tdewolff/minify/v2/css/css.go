@@ -51,6 +51,7 @@ type cssMinifier struct {
 	o *Minifier
 
 	tokenBuffer []Token
+	tokensLevel int
 }
 
 ////////////////////////////////////////////////////////////////
@@ -445,6 +446,11 @@ func (c *cssMinifier) writeDeclaration(values []Token, important bool) {
 }
 
 func (c *cssMinifier) minifyTokens(prop Hash, fun Hash, values []Token) []Token {
+	if 100 < c.tokensLevel+1 {
+		return values
+	}
+	c.tokensLevel++
+
 	for i, value := range values {
 		tt := value.TokenType
 		switch tt {
@@ -612,6 +618,7 @@ func (c *cssMinifier) minifyTokens(prop Hash, fun Hash, values []Token) []Token 
 			}
 		}
 	}
+	c.tokensLevel--
 	return values
 }
 
@@ -1015,17 +1022,19 @@ func (c *cssMinifier) minifyProperty(prop Hash, values []Token) []Token {
 			}
 			// removing zero offsets in the previous loop might make it eligible for the next loop
 			if end-start == 1 || end-start == 2 {
-				if values[start].Ident == Top || values[start].Ident == Bottom {
-					if end-start == 1 {
-						// we can't make this smaller, and converting to a number will break it
-						// (https://github.com/tdewolff/minify/issues/221#issuecomment-415419918)
-						break
-					}
+				if end-start == 1 && (values[start].Ident == Top || values[start].Ident == Bottom) {
+					// we can't make this smaller, and converting to a number will break it
+					// (https://github.com/tdewolff/minify/issues/221#issuecomment-415419918)
+					break
+				}
+
+				if end-start == 2 && (values[start].Ident == Top || values[start].Ident == Bottom || values[start+1].Ident == Left || values[start+1].Ident == Right) {
 					// if it's a vertical position keyword, swap it with the next element
 					// since otherwise converted number positions won't be valid anymore
 					// (https://github.com/tdewolff/minify/issues/221#issue-353067229)
 					values[start], values[start+1] = values[start+1], values[start]
 				}
+
 				// transform keywords to lengths|percentages
 				for i := start; i < end; i++ {
 					if values[i].TokenType == css.IdentToken {
