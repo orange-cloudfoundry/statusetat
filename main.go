@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"gopkg.in/alecthomas/kingpin.v2"
+	"github.com/alecthomas/kingpin/v2"
 
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/mux"
