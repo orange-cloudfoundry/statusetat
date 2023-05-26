@@ -3,6 +3,8 @@ package js
 import (
 	"bytes"
 	"encoding/hex"
+	stdStrconv "strconv"
+	"unicode/utf8"
 
 	"github.com/tdewolff/minify/v2"
 	"github.com/tdewolff/parse/v2/js"
@@ -825,7 +827,7 @@ func (m *jsMinifier) optimizeCondExpr(expr *js.CondExpr, prec js.OpPrec) js.IExp
 	} else if isEqualExpr(expr.X, expr.Y) {
 		// if true and false bodies are equal
 		return groupExpr(&js.CommaExpr{[]js.IExpr{expr.Cond, expr.X}}, prec)
-	} else if nullishExpr, ok := toNullishExpr(expr); ok && 2020 <= m.o.Version {
+	} else if nullishExpr, ok := toNullishExpr(expr); ok && m.o.minVersion(2020) {
 		// no need to check whether left/right need to add groups, as the space saving is always more
 		return nullishExpr
 	} else {
@@ -981,12 +983,12 @@ func replaceEscapes(b []byte, quote byte, prefix, suffix int) []byte {
 	for i := prefix; i < len(b)-suffix; i++ {
 		if c := b[i]; c == '\\' {
 			c = b[i+1]
-			if c == quote || c == '\\' || c == 'u' || c == '0' && (i+2 == len(b)-1 || b[i+2] < '0' || '7' < b[i+2]) || quote != '`' && (c == 'n' || c == 'r') {
+			if c == quote || c == '\\' || quote != '`' && (c == 'n' || c == 'r') {
 				// keep escape sequence
 				i++
 				continue
 			}
-			n := 1
+			n := 1 // number of characters to skip
 			if c == '\n' || c == '\r' || c == 0xE2 && i+3 < len(b)-1 && b[i+2] == 0x80 && (b[i+3] == 0xA8 || b[i+3] == 0xA9) {
 				// line continuations
 				if c == 0xE2 {
@@ -1001,10 +1003,8 @@ func replaceEscapes(b []byte, quote byte, prefix, suffix int) []byte {
 					// hexadecimal escapes
 					_, _ = hex.Decode(b[i+3:i+4:i+4], b[i+2:i+4])
 					n = 3
-					if b[i+3] == 0 || b[i+3] == '\\' || b[i+3] == quote || b[i+3] == '\n' || b[i+3] == '\r' {
-						if b[i+3] == 0 {
-							b[i+3] = '0'
-						} else if b[i+3] == '\n' {
+					if b[i+3] == '\\' || b[i+3] == quote || b[i+3] == '\n' || b[i+3] == '\r' {
+						if b[i+3] == '\n' {
 							b[i+3] = 'n'
 						} else if b[i+3] == '\r' {
 							b[i+3] = 'r'
@@ -1016,6 +1016,43 @@ func replaceEscapes(b []byte, quote byte, prefix, suffix int) []byte {
 					i++
 					continue
 				}
+			} else if c == 'u' && i+2 < len(b) {
+				l := i + 2
+				if b[i+2] == '{' {
+					l++
+				}
+				r := l
+				for ; r < len(b) && (b[i+2] == '{' || r < l+4); r++ {
+					if b[r] < '0' || '9' < b[r] && b[r] < 'A' || 'F' < b[r] && b[r] < 'a' || 'f' < b[r] {
+						break
+					}
+				}
+				if b[i+2] == '{' && 6 < r-l || b[i+2] != '{' && r-l != 4 {
+					i++
+					continue
+				}
+				num, err := stdStrconv.ParseInt(string(b[l:r]), 16, 32)
+				if err != nil || 0x10FFFF <= num {
+					i++
+					continue
+				}
+
+				// decode unicode character to UTF-8 and put at the end of the escape sequence
+				// then skip the first part of the escape sequence until the decoded character
+				n = 2 + r - l
+				if b[i+2] == '{' {
+					n += 2
+				}
+				m := utf8.RuneLen(rune(num))
+				if m == -1 {
+					i++
+					continue
+				}
+				utf8.EncodeRune(b[i+n-m:], rune(num))
+				n -= m
+			} else if c == '0' && (i+2 == len(b)-1 || b[i+2] < '0' || '7' < b[i+2]) {
+				// \0 (NULL)
+				b[i+1] = '\x00'
 			} else if '0' <= c && c <= '7' {
 				// octal escapes (legacy), \0 already handled
 				num := c - '0'
