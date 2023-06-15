@@ -21,7 +21,7 @@ require (
 	github.com/hashicorp/go-plugin v1.4.10
 	github.com/jinzhu/gorm v1.9.16
 	github.com/kyokomi/emoji v2.2.4+incompatible
-	github.com/maxbrunsfeld/counterfeiter/v6 v6.6.1
+	github.com/maxbrunsfeld/counterfeiter/v6 v6.6.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/nicklaw5/go-respond v1.6.0
 	github.com/olebedev/emitter v0.0.0-20190110104742-e8d1457e6aee
@@ -76,12 +76,12 @@ require (
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/tdewolff/parse/v2 v2.6.6 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
-	golang.org/x/mod v0.10.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/term v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
-	golang.org/x/tools v0.9.1 // indirect
+	golang.org/x/mod v0.11.0 // indirect
+	golang.org/x/net v0.11.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
+	golang.org/x/term v0.9.0 // indirect
+	golang.org/x/text v0.10.0 // indirect
+	golang.org/x/tools v0.9.3 // indirect
 	google.golang.org/genproto v0.0.0-20230403163135-c38d8f061ccd // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
