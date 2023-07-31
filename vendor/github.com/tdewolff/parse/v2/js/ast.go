@@ -17,8 +17,7 @@ type JSONer interface {
 
 // AST is the full ECMAScript abstract syntax tree.
 type AST struct {
-	Comments  [][]byte // first comments in file
-	BlockStmt          // module
+	BlockStmt // module
 }
 
 func (ast *AST) String() string {
@@ -369,6 +368,25 @@ type IExpr interface {
 }
 
 ////////////////////////////////////////////////////////////////
+
+// Comment block or line, usually a bang comment.
+type Comment struct {
+	Value []byte
+}
+
+func (n Comment) String() string {
+	return "Stmt(" + string(n.Value) + ")"
+}
+
+// JS converts the node back to valid JavaScript
+func (n Comment) JS() string {
+	return string(n.Value)
+}
+
+// JS converts the node back to valid JavaScript (writes to io.Writer)
+func (n Comment) JSWriteTo(w io.Writer) (i int, err error) {
+	return w.Write(n.Value)
+}
 
 // BlockStmt is a block statement.
 type BlockStmt struct {
@@ -1721,12 +1739,10 @@ func (n DirectivePrologueStmt) JS() string {
 
 // JS converts the node back to valid JavaScript (writes to io.Writer)
 func (n DirectivePrologueStmt) JSWriteTo(w io.Writer) (i int, err error) {
-	var wn int
-	wn, err = w.Write(n.Value)
-	i += wn
-	return
+	return w.Write(n.Value)
 }
 
+func (n Comment) stmtNode()               {}
 func (n BlockStmt) stmtNode()             {}
 func (n EmptyStmt) stmtNode()             {}
 func (n ExprStmt) stmtNode()              {}
@@ -3569,7 +3585,7 @@ func (n UnaryExpr) String() string {
 func (n UnaryExpr) JS() string {
 	if n.Op == PostIncrToken || n.Op == PostDecrToken {
 		return n.X.JS() + n.Op.String()
-	} else if IsIdentifierName(n.Op) {
+	} else if unary, ok := n.X.(*UnaryExpr); ok && (n.Op == PosToken && unary.Op == PreIncrToken || n.Op == NegToken && unary.Op == PreDecrToken) || IsIdentifierName(n.Op) {
 		return n.Op.String() + " " + n.X.JS()
 	}
 	return n.Op.String() + n.X.JS()
@@ -3587,7 +3603,7 @@ func (n UnaryExpr) JSWriteTo(w io.Writer) (i int, err error) {
 		wn, err = w.Write(n.Op.Bytes())
 		i += wn
 		return
-	} else if IsIdentifierName(n.Op) {
+	} else if unary, ok := n.X.(UnaryExpr); ok && (n.Op == PosToken && unary.Op == PreIncrToken || n.Op == NegToken && unary.Op == PreDecrToken) || IsIdentifierName(n.Op) {
 		wn, err = w.Write(n.Op.Bytes())
 		i += wn
 		if err != nil {
