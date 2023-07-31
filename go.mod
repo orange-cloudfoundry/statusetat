@@ -31,7 +31,7 @@ require (
 	github.com/prometheus/common v0.44.0
 	github.com/rs/cors v1.9.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/tdewolff/minify/v2 v2.12.7
+	github.com/tdewolff/minify/v2 v2.12.8
 	github.com/yuin/goldmark v1.5.5
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
 	google.golang.org/grpc v1.57.0
@@ -74,7 +74,7 @@ require (
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/procfs v0.11.0 // indirect
-	github.com/tdewolff/parse/v2 v2.6.6 // indirect
+	github.com/tdewolff/parse/v2 v2.6.7 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	golang.org/x/mod v0.11.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
