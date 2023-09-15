@@ -37,7 +37,7 @@ github.com/alecthomas/kingpin/v2
 # github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137
 ## explicit; go 1.15
 github.com/alecthomas/units
-# github.com/arran4/golang-ical v0.0.0-20230425234049-f69e132f2b0c
+# github.com/arran4/golang-ical v0.1.0
 ## explicit; go 1.13
 github.com/arran4/golang-ical
 # github.com/aws/aws-sdk-go v1.45.10
@@ -329,7 +329,7 @@ github.com/prometheus/common/expfmt
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
 github.com/prometheus/common/model
 github.com/prometheus/common/version
-# github.com/prometheus/procfs v0.11.0
+# github.com/prometheus/procfs v0.11.1
 ## explicit; go 1.19
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
@@ -381,7 +381,7 @@ github.com/yuin/goldmark-highlighting
 golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/module
 golang.org/x/mod/semver
-# golang.org/x/net v0.14.0
+# golang.org/x/net v0.15.0
 ## explicit; go 1.17
 golang.org/x/net/html
 golang.org/x/net/html/atom
@@ -392,17 +392,17 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/sys v0.11.0
+# golang.org/x/sys v0.12.0
 ## explicit; go 1.17
 golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.11.0
+# golang.org/x/term v0.12.0
 ## explicit; go 1.17
 golang.org/x/term
-# golang.org/x/text v0.12.0
+# golang.org/x/text v0.13.0
 ## explicit; go 1.17
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
@@ -449,7 +449,7 @@ golang.org/x/tools/internal/pkgbits
 golang.org/x/tools/internal/tokeninternal
 golang.org/x/tools/internal/typeparams
 golang.org/x/tools/internal/typesinternal
-# google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98
+# google.golang.org/genproto/googleapis/rpc v0.0.0-20230913181813-007df8e322eb
 ## explicit; go 1.19
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.58.1
