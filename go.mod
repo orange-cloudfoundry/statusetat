@@ -29,7 +29,7 @@ require (
 	github.com/onsi/gomega v1.28.0
 	github.com/prometheus/client_golang v1.16.0
 	github.com/prometheus/common v0.44.0
-	github.com/rs/cors v1.10.0
+	github.com/rs/cors v1.10.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/tdewolff/minify/v2 v2.12.9
 	github.com/yuin/goldmark v1.5.6
