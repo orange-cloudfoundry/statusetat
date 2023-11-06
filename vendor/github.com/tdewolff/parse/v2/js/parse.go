@@ -12,6 +12,7 @@ import (
 
 type Options struct {
 	WhileToFor bool
+	Inline     bool
 }
 
 // Parser is the state for the parser.
@@ -44,20 +45,33 @@ func Parse(r *parse.Input, o Options) (*AST, error) {
 		await: true,
 	}
 
-	// catch shebang in first line
-	var shebang []byte
-	if r.Peek(0) == '#' && r.Peek(1) == '!' {
-		r.Move(2)
-		p.l.consumeSingleLineComment() // consume till end-of-line
-		shebang = r.Shift()
-	}
+	if o.Inline {
+		p.next()
+		p.retrn = true
+		p.allowDirectivePrologue = true
+		p.enterScope(&ast.BlockStmt.Scope, true)
+		for {
+			if p.tt == ErrorToken {
+				break
+			}
+			ast.BlockStmt.List = append(ast.BlockStmt.List, p.parseStmt(true))
+		}
+	} else {
+		// catch shebang in first line
+		var shebang []byte
+		if r.Peek(0) == '#' && r.Peek(1) == '!' {
+			r.Move(2)
+			p.l.consumeSingleLineComment() // consume till end-of-line
+			shebang = r.Shift()
+		}
 
-	// parse JS module
-	p.next()
-	ast.BlockStmt = p.parseModule()
+		// parse JS module
+		p.next()
+		ast.BlockStmt = p.parseModule()
 
-	if 0 < len(shebang) {
-		ast.BlockStmt.List = append([]IStmt{&Comment{shebang}}, ast.BlockStmt.List...)
+		if 0 < len(shebang) {
+			ast.BlockStmt.List = append([]IStmt{&Comment{shebang}}, ast.BlockStmt.List...)
+		}
 	}
 
 	if p.err == nil {
@@ -533,14 +547,18 @@ func (p *Parser) parseStmt(allowDeclaration bool) (stmt IStmt) {
 		}
 		stmt = &TryStmt{body, binding, catch, finally}
 	case DebuggerToken:
-		p.next()
 		stmt = &DebuggerStmt{}
-	case SemicolonToken, ErrorToken:
+		p.next()
+	case SemicolonToken:
 		stmt = &EmptyStmt{}
+		p.next()
 	case CommentToken, CommentLineTerminatorToken:
 		// bang comment
 		stmt = &Comment{p.data}
 		p.next()
+	case ErrorToken:
+		stmt = &EmptyStmt{}
+		return
 	default:
 		if p.retrn && p.tt == ReturnToken {
 			p.next()
@@ -581,7 +599,7 @@ func (p *Parser) parseStmt(allowDeclaration bool) (stmt IStmt) {
 			}
 		}
 	}
-	if p.tt == SemicolonToken {
+	if !p.prevLT && p.tt == SemicolonToken {
 		p.next()
 	}
 	p.stmtLevel--
