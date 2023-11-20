@@ -31,7 +31,7 @@ github.com/alecthomas/chroma/lexers/x
 github.com/alecthomas/chroma/lexers/y
 github.com/alecthomas/chroma/lexers/z
 github.com/alecthomas/chroma/styles
-# github.com/alecthomas/kingpin/v2 v2.3.2
+# github.com/alecthomas/kingpin/v2 v2.4.0
 ## explicit; go 1.17
 github.com/alecthomas/kingpin/v2
 # github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137
