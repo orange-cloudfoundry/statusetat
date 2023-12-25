@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/alecthomas/chroma v0.10.0
 	github.com/alecthomas/kingpin/v2 v2.4.0
-	github.com/arran4/golang-ical v0.2.2
+	github.com/arran4/golang-ical v0.2.3
 	github.com/aws/aws-sdk-go v1.49.9
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gobuffalo/packr/v2 v2.8.3
