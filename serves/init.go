@@ -84,7 +84,7 @@ func RegisterWithHtmlTemplater(
 	router.HandleFunc("/rss.xml", api.Rss)
 	router.HandleFunc("/atom.xml", api.Atom)
 	router.HandleFunc("/cal.ics", api.Ical)
-	router.HandleFunc("/health", api.HealthCheck)
+	router.HandleFunc("/healthy", api.HealthCheck)
 	subRouter := router.PathPrefix("/v1").Subrouter()
 
 	subRouter.HandleFunc("/subscribe", api.SubscribeEmail).Methods(http.MethodGet, http.MethodPatch, http.MethodPost, http.MethodPut)
