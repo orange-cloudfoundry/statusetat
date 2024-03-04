@@ -27,7 +27,7 @@ require (
 	github.com/olebedev/emitter v0.0.0-20230411050614-349169dec2ba
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.31.1
-	github.com/prometheus/client_golang v1.18.0
+	github.com/prometheus/client_golang v1.19.0
 	github.com/prometheus/common v0.48.0
 	github.com/rs/cors v1.10.1
 	github.com/sirupsen/logrus v1.9.3
