@@ -31,7 +31,7 @@ require (
 	github.com/prometheus/common v0.49.0
 	github.com/rs/cors v1.10.1
 	github.com/sirupsen/logrus v1.9.3
-	github.com/tdewolff/minify/v2 v2.20.17
+	github.com/tdewolff/minify/v2 v2.20.18
 	github.com/yuin/goldmark v1.7.0
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
 	google.golang.org/grpc v1.62.0
