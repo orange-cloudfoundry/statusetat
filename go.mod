@@ -76,7 +76,7 @@ require (
 	github.com/tdewolff/parse/v2 v2.7.12 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
