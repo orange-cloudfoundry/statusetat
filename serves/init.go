@@ -5,6 +5,7 @@ package serves
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/orange-cloudfoundry/statusetat/config"
 	"io"
 	"net/http"
 	"net/url"
@@ -14,7 +15,6 @@ import (
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/extemplate"
 	"github.com/orange-cloudfoundry/statusetat/storages"
 )

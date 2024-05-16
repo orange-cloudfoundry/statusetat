@@ -34,7 +34,7 @@ var _ = Describe("Api", func() {
 			httpErr.Status = http.StatusPreconditionFailed
 			httpErr.Description = "At least one message must be set"
 		})
-		It("should give back setted incident, store it and emit in emitter an incident data", func() {
+		It("should give back set incident, store it and emit in emitter an incident data", func() {
 
 			inc := models.Incident{
 				Components: &models.Components{{

@@ -44,7 +44,7 @@ func main() {
 
 	var (
 		err error
-		c config.Config
+		c   config.Config
 	)
 
 	if configFile != nil && *configFile != "" {
