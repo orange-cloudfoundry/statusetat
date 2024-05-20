@@ -34,7 +34,7 @@ require (
 	github.com/tdewolff/minify/v2 v2.20.21
 	github.com/yuin/goldmark v1.7.1
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
-	google.golang.org/grpc v1.63.2
+	google.golang.org/grpc v1.64.0
 	google.golang.org/protobuf v1.34.1
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v2 v2.4.0
@@ -82,7 +82,7 @@ require (
 	golang.org/x/term v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.20.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240227224415-6ceb2ff114de // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
