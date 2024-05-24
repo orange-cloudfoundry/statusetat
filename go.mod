@@ -2,6 +2,8 @@ module github.com/orange-cloudfoundry/statusetat
 
 go 1.21
 
+toolchain go1.21.10
+
 require (
 	github.com/alecthomas/chroma v0.10.0
 	github.com/alecthomas/kingpin/v2 v2.4.0
