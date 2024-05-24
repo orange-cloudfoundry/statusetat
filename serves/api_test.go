@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/orange-cloudfoundry/statusetat/models"
@@ -34,7 +34,7 @@ var _ = Describe("Api", func() {
 			httpErr.Status = http.StatusPreconditionFailed
 			httpErr.Description = "At least one message must be set"
 		})
-		It("should give back setted incident, store it and emit in emitter an incident data", func() {
+		It("should give back set incident, store it and emit in emitter an incident data", func() {
 
 			inc := models.Incident{
 				Components: &models.Components{{

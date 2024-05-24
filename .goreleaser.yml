@@ -14,10 +14,8 @@ builds:
       - -X github.com/prometheus/common/version.Branch={{.Branch}}
       - -X github.com/prometheus/common/version.BuildUser={{.Env.USER}}
       - -X github.com/prometheus/common/version.BuildDate={{.Date}}
-      -
     goos:
       - linux
-      - darwin
     goarch:
       - amd64
 

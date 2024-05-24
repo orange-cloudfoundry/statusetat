@@ -2,7 +2,7 @@ name: goreleaser
 
 on:
   push:
-    # not not consider simplec commit
+    # do not consider simple commit
     branches:
       - '!*'
     # consider only release and pre-release tags
@@ -20,15 +20,15 @@ jobs:
           fetch-depth: 0
 
       - name: set up go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
-          go-version: "1.21"
+          go-version: "1.22"
 
       - name: cache go modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: "${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}"
           restore-keys: |
             ${{ runner.os }}-go-
 
@@ -36,7 +36,7 @@ jobs:
         run: |
           go mod vendor
           if [ ! -z "$(git status --porcelain)" ]; then
-            echo "::error::vendor directory if not synched with go.mod, please run go mod vendor"
+            echo "::error::vendor directory if not synced with go.mod, please run go mod vendor"
             exit 1
           fi
 
@@ -55,7 +55,7 @@ jobs:
         if: success() && startsWith(github.ref, 'refs/tags/')
         with:
           version: latest
-          args: release --rm-dist
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USER: github-actions
