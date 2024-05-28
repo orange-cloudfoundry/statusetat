@@ -278,7 +278,11 @@ func LoadConfigFromFile(filename string) (Config, error) {
 		return Config{}, err
 	}
 
+	//nolint:ineffassign
 	config, err := LoadConfig(b)
+	if err != nil {
+		return Config{}, err
+	}
 	if err := config.Validate(); err != nil {
 		return Config{}, fmt.Errorf("Invalid config in file %s: %s", filename, err)
 	}

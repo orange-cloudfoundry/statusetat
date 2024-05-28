@@ -25,5 +25,6 @@ func (a Serve) preview(w http.ResponseWriter, req *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	w.Write(markdown.Convert(b))
 }

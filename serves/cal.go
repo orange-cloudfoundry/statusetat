@@ -39,5 +39,6 @@ func (a Serve) Ical(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Add("Content-Type", "text/calendar")
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	w.Write([]byte(cal.Serialize()))
 }
