@@ -37,5 +37,6 @@ func (a Serve) UnsubscribeEmail(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	w.Write([]byte("you have successfully unsubscribed"))
 }

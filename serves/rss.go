@@ -20,6 +20,7 @@ func (a Serve) Rss(w http.ResponseWriter, req *http.Request) {
 	}
 	w.Header().Add("Content-Type", "application/xml")
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	w.Write([]byte(rss))
 }
 
@@ -36,6 +37,7 @@ func (a Serve) Atom(w http.ResponseWriter, req *http.Request) {
 	}
 	w.Header().Add("Content-Type", "application/atom+xml")
 	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
 	w.Write([]byte(atom))
 }
 

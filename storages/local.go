@@ -23,7 +23,9 @@ type Local struct {
 func (l Local) Creator() func(u *url.URL) (Store, error) {
 	return func(u *url.URL) (Store, error) {
 		path := strings.TrimPrefix(u.String(), "file://")
-		os.MkdirAll(path, 0775)
+		if err := os.MkdirAll(path, 0775); err != nil {
+			return nil, err
+		}
 
 		return &Local{
 			dir:             filepath.FromSlash(strings.TrimSuffix(path, "/")),

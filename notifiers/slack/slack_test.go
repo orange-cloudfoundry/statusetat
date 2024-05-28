@@ -2,7 +2,7 @@ package slack_test
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -52,7 +52,7 @@ var _ = Describe("Slack", func() {
 			It("should wrote on slack a scheduled task message", func() {
 				var slackReq slack.SlackRequest
 				server.RouteToHandler("POST", "/", func(writer http.ResponseWriter, request *http.Request) {
-					b, _ := ioutil.ReadAll(request.Body)
+					b, _ := io.ReadAll(request.Body)
 					err := json.Unmarshal(b, &slackReq)
 					Expect(err).To(BeNil())
 				})
@@ -85,7 +85,7 @@ var _ = Describe("Slack", func() {
 			It("should wrote on slack a scheduled task message", func() {
 				var slackReq slack.SlackRequest
 				server.RouteToHandler("POST", "/", func(writer http.ResponseWriter, request *http.Request) {
-					b, _ := ioutil.ReadAll(request.Body)
+					b, _ := io.ReadAll(request.Body)
 					err := json.Unmarshal(b, &slackReq)
 					Expect(err).To(BeNil())
 				})
@@ -118,7 +118,7 @@ var _ = Describe("Slack", func() {
 					It("should not wrote on slack update", func() {
 						var slackReq slack.SlackRequest
 						server.RouteToHandler("POST", "/", func(writer http.ResponseWriter, request *http.Request) {
-							b, _ := ioutil.ReadAll(request.Body)
+							b, _ := io.ReadAll(request.Body)
 							err := json.Unmarshal(b, &slackReq)
 							Expect(err).To(BeNil())
 						})
@@ -153,7 +153,7 @@ var _ = Describe("Slack", func() {
 					It("should wrote on slack update", func() {
 						var slackReq slack.SlackRequest
 						server.RouteToHandler("POST", "/", func(writer http.ResponseWriter, request *http.Request) {
-							b, _ := ioutil.ReadAll(request.Body)
+							b, _ := io.ReadAll(request.Body)
 							err := json.Unmarshal(b, &slackReq)
 							Expect(err).To(BeNil())
 						})
