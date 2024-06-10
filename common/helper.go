@@ -95,12 +95,23 @@ func cleanupInterfaceMap(in map[interface{}]interface{}) map[string]interface{} 
 	return res
 }
 
+func cleanupInterfaceMapStr(in map[string]interface{}) map[string]interface{} {
+	res := make(map[string]interface{})
+	for k, v := range in {
+		res[k] = cleanupMapValue(v)
+	}
+	return res
+}
+
 func cleanupMapValue(v interface{}) interface{} {
+
 	switch v := v.(type) {
 	case []interface{}:
 		return cleanupInterfaceArray(v)
 	case map[interface{}]interface{}:
 		return cleanupInterfaceMap(v)
+	case map[string]interface{}:
+		return cleanupInterfaceMapStr(v)
 	case string:
 		return v
 	default:
