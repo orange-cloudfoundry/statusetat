@@ -70,7 +70,7 @@ func (n GrafanaAnnotation) Creator(params map[string]interface{}, baseInfo confi
 
 	var auth string
 	if opts.ApiKey != "" {
-		auth = fmt.Sprintf("Bearer %s" + opts.ApiKey)
+		auth = fmt.Sprintf("Bearer %s", opts.ApiKey)
 	} else {
 		val := fmt.Sprintf("%s:%s", opts.Username, opts.Password)
 		auth = fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(val)))
@@ -108,7 +108,7 @@ func (n GrafanaAnnotation) deleteNotify(incident models.Incident) error {
 	query.Add("tags", n.incidentTag(incident))
 	req.Header.Add("Content-Type", "application/json")
 	if n.opts.OrgID != 0 {
-		query.Add("X-Grafana-Org-Id", fmt.Sprintf("%d", n.opts.OrgID))
+		req.Header.Add("X-Grafana-Org-Id", fmt.Sprintf("%d", n.opts.OrgID))
 	}
 	req.URL.RawQuery = query.Encode()
 	respFind, err := n.httpClient.Do(req)
