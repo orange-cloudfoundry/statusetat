@@ -204,6 +204,8 @@ panel_id: <string>
 [ time_zone: <string> ]
 # skip ssl verification when sending notification
 [ insecure_skip_verify: <bool> ]
+# organization id to use when sending annotation
+[ org_id: <int> ]
 ```
 
 ### Email

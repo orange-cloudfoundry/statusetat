@@ -41,6 +41,7 @@ type OptsGrafanaAnnotation struct {
 	Tag                string `mapstructure:"tag"`
 	TimeZone           string `mapstructure:"time_zone"`
 	InsecureSkipVerify bool   `mapstructure:"insecure_skip_verify"`
+	OrgID              int    `mapstructure:"org_id"`
 }
 
 type GrafanaAnnotation struct {
@@ -106,6 +107,9 @@ func (n GrafanaAnnotation) deleteNotify(incident models.Incident) error {
 	query := req.URL.Query()
 	query.Add("tags", n.incidentTag(incident))
 	req.Header.Add("Content-Type", "application/json")
+	if n.opts.OrgID != 0 {
+		query.Add("X-Grafana-Org-Id", fmt.Sprintf("%d", n.opts.OrgID))
+	}
 	req.URL.RawQuery = query.Encode()
 	respFind, err := n.httpClient.Do(req)
 	if err != nil {
@@ -185,6 +189,9 @@ func (n GrafanaAnnotation) Notify(notifyReq *models.NotifyRequest) error {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
+	if n.opts.OrgID != 0 {
+		req.Header.Add("X-Grafana-Org-Id", fmt.Sprintf("%d", n.opts.OrgID))
+	}
 
 	resp, err := n.httpClient.Do(req)
 	if err != nil {
