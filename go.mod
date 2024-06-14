@@ -8,7 +8,7 @@ require (
 	github.com/alecthomas/chroma v0.10.0
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/arran4/golang-ical v0.3.0
-	github.com/aws/aws-sdk-go v1.53.14
+	github.com/aws/aws-sdk-go v1.53.19
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gobuffalo/packr/v2 v2.8.3
 	github.com/goji/httpauth v0.0.0-20160601135302-2da839ab0f4d
@@ -33,7 +33,7 @@ require (
 	github.com/prometheus/common v0.54.0
 	github.com/rs/cors v1.11.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/tdewolff/minify/v2 v2.20.32
+	github.com/tdewolff/minify/v2 v2.20.33
 	github.com/yuin/goldmark v1.7.1
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
 	google.golang.org/grpc v1.64.0
