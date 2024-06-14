@@ -8,7 +8,7 @@ import (
 	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
-func (a Serve) convertMessageToHtml(messages []models.Message) []models.Message {
+func (a *Serve) convertMessageToHtml(messages []models.Message) []models.Message {
 	for i, msg := range messages {
 		content := markdown.Convert([]byte(msg.Content))
 		msg.Content = string(content)
@@ -17,7 +17,7 @@ func (a Serve) convertMessageToHtml(messages []models.Message) []models.Message 
 	return messages
 }
 
-func (a Serve) preview(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) preview(w http.ResponseWriter, req *http.Request) {
 	b, err := io.ReadAll(req.Body)
 	if err != nil {
 		JSONError(w, err, http.StatusPreconditionRequired)

@@ -9,7 +9,7 @@ import (
 	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
-func (a Serve) Ical(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) Ical(w http.ResponseWriter, req *http.Request) {
 	from, to, err := a.periodFromReq(req, -26, 26)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)

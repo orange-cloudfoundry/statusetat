@@ -20,7 +20,7 @@ type Local struct {
 	mutexPersistent *sync.Mutex
 }
 
-func (l Local) Creator() func(u *url.URL) (Store, error) {
+func (l *Local) Creator() func(u *url.URL) (Store, error) {
 	return func(u *url.URL) (Store, error) {
 		path := strings.TrimPrefix(u.String(), "file://")
 		if err := os.MkdirAll(path, 0775); err != nil {
@@ -35,11 +35,11 @@ func (l Local) Creator() func(u *url.URL) (Store, error) {
 	}
 }
 
-func (l Local) Detect(u *url.URL) bool {
+func (l *Local) Detect(u *url.URL) bool {
 	return u.Scheme == "file"
 }
 
-func (l Local) Create(incident models.Incident) (models.Incident, error) {
+func (l *Local) Create(incident models.Incident) (models.Incident, error) {
 	if incident.Persistent {
 		err := l.addPersistent(incident)
 		return incident, err
@@ -49,7 +49,7 @@ func (l Local) Create(incident models.Incident) (models.Incident, error) {
 	return incident, err
 }
 
-func (l Local) retrieveSubscribers() ([]string, error) {
+func (l *Local) retrieveSubscribers() ([]string, error) {
 	b, err := os.ReadFile(l.path(subscriberFilename))
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -65,7 +65,7 @@ func (l Local) retrieveSubscribers() ([]string, error) {
 	return subs, err
 }
 
-func (l Local) Persistents() ([]models.Incident, error) {
+func (l *Local) Persistents() ([]models.Incident, error) {
 	b, err := os.ReadFile(l.path(persistentFilename))
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -81,7 +81,7 @@ func (l Local) Persistents() ([]models.Incident, error) {
 	return subs, err
 }
 
-func (l Local) addPersistent(incident models.Incident) error {
+func (l *Local) addPersistent(incident models.Incident) error {
 	incidents, err := l.Persistents()
 	if err != nil {
 		return err
@@ -91,7 +91,7 @@ func (l Local) addPersistent(incident models.Incident) error {
 	return l.storePersistents(incidents)
 }
 
-func (l Local) removePersistent(guid string) error {
+func (l *Local) removePersistent(guid string) error {
 	incidents, err := l.Persistents()
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func (l Local) removePersistent(guid string) error {
 	return l.storePersistents(incidents)
 }
 
-func (l Local) readPersistent(guid string) (models.Incident, error) {
+func (l *Local) readPersistent(guid string) (models.Incident, error) {
 	incidents, err := l.Persistents()
 	if err != nil {
 		return models.Incident{}, err
@@ -108,7 +108,7 @@ func (l Local) readPersistent(guid string) (models.Incident, error) {
 	return models.Incidents(incidents).Find(guid), nil
 }
 
-func (l Local) storePersistents(incidents []models.Incident) error {
+func (l *Local) storePersistents(incidents []models.Incident) error {
 	sort.Sort(models.Incidents(incidents))
 	b, _ := json.Marshal(incidents)
 	l.mutexPersistent.Lock()
@@ -117,7 +117,7 @@ func (l Local) storePersistents(incidents []models.Incident) error {
 	return err
 }
 
-func (l Local) storeSubscribers(subscribers []string) error {
+func (l *Local) storeSubscribers(subscribers []string) error {
 	b, _ := json.Marshal(subscribers)
 	l.mutexSubscriber.Lock()
 	defer l.mutexSubscriber.Unlock()
@@ -125,7 +125,7 @@ func (l Local) storeSubscribers(subscribers []string) error {
 	return err
 }
 
-func (l Local) Subscribe(email string) error {
+func (l *Local) Subscribe(email string) error {
 	subs, err := l.retrieveSubscribers()
 	if err != nil {
 		return err
@@ -137,7 +137,7 @@ func (l Local) Subscribe(email string) error {
 	return l.storeSubscribers(subs)
 }
 
-func (l Local) Unsubscribe(email string) error {
+func (l *Local) Unsubscribe(email string) error {
 	subs, err := l.retrieveSubscribers()
 	if err != nil {
 		return err
@@ -146,11 +146,11 @@ func (l Local) Unsubscribe(email string) error {
 	return l.storeSubscribers(subs)
 }
 
-func (l Local) Subscribers() ([]string, error) {
+func (l *Local) Subscribers() ([]string, error) {
 	return l.retrieveSubscribers()
 }
 
-func (l Local) Update(guid string, incident models.Incident) (models.Incident, error) {
+func (l *Local) Update(guid string, incident models.Incident) (models.Incident, error) {
 	if incident.Persistent {
 		_ = l.Delete(guid) // nolint
 		err := l.addPersistent(incident)
@@ -163,7 +163,7 @@ func (l Local) Update(guid string, incident models.Incident) (models.Incident, e
 	return incident, err
 }
 
-func (l Local) Delete(guid string) error {
+func (l *Local) Delete(guid string) error {
 	err := l.removePersistent(guid)
 	if err != nil {
 		return err
@@ -171,11 +171,11 @@ func (l Local) Delete(guid string) error {
 	return os.Remove(l.path(guid))
 }
 
-func (l Local) path(fileName string) string {
+func (l *Local) path(fileName string) string {
 	return filepath.Join(l.dir, fileName)
 }
 
-func (l Local) Read(guid string) (models.Incident, error) {
+func (l *Local) Read(guid string) (models.Incident, error) {
 	incident, err := l.readPersistent(guid)
 	if err != nil {
 		return models.Incident{}, err
@@ -196,7 +196,7 @@ func (l Local) Read(guid string) (models.Incident, error) {
 	return incident, nil
 }
 
-func (l Local) ByDate(from, to time.Time) ([]models.Incident, error) {
+func (l *Local) ByDate(from, to time.Time) ([]models.Incident, error) {
 	incidents := make([]models.Incident, 0)
 	err := filepath.Walk(l.dir, func(path string, info os.FileInfo, err error) error {
 		if filepath.Base(path) == subscriberFilename ||
@@ -230,6 +230,6 @@ func (l Local) ByDate(from, to time.Time) ([]models.Incident, error) {
 	return incidents, err
 }
 
-func (l Local) Ping() error {
+func (l *Local) Ping() error {
 	return nil
 }

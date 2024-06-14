@@ -51,7 +51,7 @@ type GrafanaAnnotation struct {
 	loc        *time.Location
 }
 
-func (n GrafanaAnnotation) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
+func (n *GrafanaAnnotation) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
 	var opts OptsGrafanaAnnotation
 	err := mapstructure.Decode(params, &opts)
 	if err != nil {
@@ -86,20 +86,20 @@ func (n GrafanaAnnotation) Creator(params map[string]interface{}, baseInfo confi
 	}, nil
 }
 
-func (n GrafanaAnnotation) Name() string {
+func (n *GrafanaAnnotation) Name() string {
 	return "grafana_annotation"
 }
 
-func (n GrafanaAnnotation) Description() string {
+func (n *GrafanaAnnotation) Description() string {
 	return `Sending notifications for incident and scheduled task to a grafana panel set.
 If admin trigger manually an notification this notifier **will not** re-notify grafana.`
 }
 
-func (n GrafanaAnnotation) Id() string {
+func (n *GrafanaAnnotation) Id() string {
 	return n.id
 }
 
-func (n GrafanaAnnotation) deleteNotify(incident models.Incident) error {
+func (n *GrafanaAnnotation) deleteNotify(incident models.Incident) error {
 	req, err := http.NewRequest(http.MethodGet, n.opts.Endpoint+"/api/annotations", nil)
 	if err != nil {
 		return err
@@ -154,11 +154,11 @@ func (n GrafanaAnnotation) deleteNotify(incident models.Incident) error {
 	return nil
 }
 
-func (n GrafanaAnnotation) incidentTag(incident models.Incident) string {
+func (n *GrafanaAnnotation) incidentTag(incident models.Incident) string {
 	return "incident-guid-" + incident.GUID
 }
 
-func (n GrafanaAnnotation) Notify(notifyReq *models.NotifyRequest) error {
+func (n *GrafanaAnnotation) Notify(notifyReq *models.NotifyRequest) error {
 	incident := notifyReq.Incident
 	if incident.State == models.Idle {
 		return nil

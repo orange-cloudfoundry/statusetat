@@ -25,7 +25,7 @@ type adminDefaultData struct {
 	Timezone   string
 }
 
-func (a Serve) AdminIncidents(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) AdminIncidents(w http.ResponseWriter, req *http.Request) {
 	from, to, err := a.periodFromReq(req, -6, 0)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -75,7 +75,7 @@ func (a Serve) AdminIncidents(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (a Serve) AdminPersistentIncidents(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) AdminPersistentIncidents(w http.ResponseWriter, req *http.Request) {
 	incidents, err := a.store.Persistents()
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -107,11 +107,11 @@ func (a Serve) AdminPersistentIncidents(w http.ResponseWriter, req *http.Request
 	}
 }
 
-func (a Serve) AdminAddEditIncident(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) AdminAddEditIncident(w http.ResponseWriter, req *http.Request) {
 	a.AdminAddEditIncidentByType(w, req, "incident")
 }
 
-func (a Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Request, typ string) {
+func (a *Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Request, typ string) {
 	var incident models.Incident
 	var err error
 	v := mux.Vars(req)
@@ -170,7 +170,7 @@ func (a Serve) AdminAddEditIncidentByType(w http.ResponseWriter, req *http.Reque
 	}
 }
 
-func (a Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
 	from, to, err := a.periodFromReq(req, -26, 26)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -221,7 +221,7 @@ func (a Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (a Serve) AdminInfo(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) AdminInfo(w http.ResponseWriter, req *http.Request) {
 	timezone := ""
 	if !a.IsDefaultLocation(req) {
 		timezone = a.Location(req).String()
@@ -257,6 +257,6 @@ func (a Serve) AdminInfo(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (a Serve) AdminAddEditMaintenance(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) AdminAddEditMaintenance(w http.ResponseWriter, req *http.Request) {
 	a.AdminAddEditIncidentByType(w, req, "maintenance")
 }

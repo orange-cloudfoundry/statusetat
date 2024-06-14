@@ -28,11 +28,11 @@ type Subscriber struct {
 	Email string `gorm:"primary_key"`
 }
 
-func (s DB) GetDb() *gorm.DB {
+func (s *DB) GetDb() *gorm.DB {
 	return s.db
 }
 
-func (s DB) Creator() func(u *url.URL) (Store, error) {
+func (s *DB) Creator() func(u *url.URL) (Store, error) {
 	return func(u *url.URL) (Store, error) {
 		s := &DB{}
 		user := ""
@@ -78,12 +78,12 @@ func (s DB) Creator() func(u *url.URL) (Store, error) {
 	}
 }
 
-func (s DB) Detect(u *url.URL) bool {
+func (s *DB) Detect(u *url.URL) bool {
 	return u.Scheme == "sqlite" || u.Scheme == "mysql" ||
 		u.Scheme == "mariadb" || u.Scheme == "postgres"
 }
 
-func (s DB) Create(incident models.Incident) (models.Incident, error) {
+func (s *DB) Create(incident models.Incident) (models.Incident, error) {
 	for _, msg := range incident.Messages {
 		err := s.db.Create(&msg).Error
 		if err != nil {
@@ -94,7 +94,7 @@ func (s DB) Create(incident models.Incident) (models.Incident, error) {
 	return incident, err
 }
 
-func (s DB) Subscribe(email string) error {
+func (s *DB) Subscribe(email string) error {
 	err := s.db.Create(&Subscriber{Email: email}).Error
 	if err != nil {
 		return err
@@ -102,7 +102,7 @@ func (s DB) Subscribe(email string) error {
 	return nil
 }
 
-func (s DB) Unsubscribe(email string) error {
+func (s *DB) Unsubscribe(email string) error {
 	err := s.db.Where("email = ?", email).Delete(Subscriber{}).Error
 	if err != nil {
 		return err
@@ -110,7 +110,7 @@ func (s DB) Unsubscribe(email string) error {
 	return nil
 }
 
-func (s DB) Subscribers() ([]string, error) {
+func (s *DB) Subscribers() ([]string, error) {
 	subs := make([]Subscriber, 0)
 	err := s.db.Find(&subs).Error
 	if err != nil {
@@ -123,7 +123,7 @@ func (s DB) Subscribers() ([]string, error) {
 	return finalSubs, nil
 }
 
-func (s DB) Update(guid string, incident models.Incident) (models.Incident, error) {
+func (s *DB) Update(guid string, incident models.Incident) (models.Incident, error) {
 	err := s.db.Where("incident_guid = ?", guid).Delete(models.Message{}).Error
 	if err != nil {
 		return incident, err
@@ -167,7 +167,7 @@ func (s DB) Update(guid string, incident models.Incident) (models.Incident, erro
 	return updatedIncident, err
 }
 
-func (s DB) Delete(guid string) error {
+func (s *DB) Delete(guid string) error {
 	err := s.db.Where("incident_guid = ?", guid).Delete(models.Message{}).Error
 	if err != nil {
 		return err
@@ -183,7 +183,7 @@ func (s DB) Delete(guid string) error {
 	return err
 }
 
-func (s DB) Read(guid string) (models.Incident, error) {
+func (s *DB) Read(guid string) (models.Incident, error) {
 	var incident models.Incident
 	err := s.db.Preload("Messages", func(db *gorm.DB) *gorm.DB {
 		return db.Order("messages.created_at DESC")
@@ -191,7 +191,7 @@ func (s DB) Read(guid string) (models.Incident, error) {
 	return incident, err
 }
 
-func (s DB) ByDate(from, to time.Time) ([]models.Incident, error) {
+func (s *DB) ByDate(from, to time.Time) ([]models.Incident, error) {
 	var incidents []models.Incident
 	err := s.db.Preload("Messages", func(db *gorm.DB) *gorm.DB {
 		return db.Order("messages.created_at DESC")
@@ -199,7 +199,7 @@ func (s DB) ByDate(from, to time.Time) ([]models.Incident, error) {
 	return incidents, err
 }
 
-func (s DB) Persistents() ([]models.Incident, error) {
+func (s *DB) Persistents() ([]models.Incident, error) {
 	var incidents []models.Incident
 	err := s.db.Preload("Messages", func(db *gorm.DB) *gorm.DB {
 		return db.Order("messages.created_at DESC")
@@ -208,7 +208,7 @@ func (s DB) Persistents() ([]models.Incident, error) {
 	return incidents, err
 }
 
-func (s DB) Ping() error {
+func (s *DB) Ping() error {
 	sdb := s.db.DB()
 	return sdb.Ping()
 }

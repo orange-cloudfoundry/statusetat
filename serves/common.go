@@ -9,7 +9,7 @@ import (
 	"github.com/orange-cloudfoundry/statusetat/models"
 )
 
-func (a Serve) scheduled(from, to time.Time) ([]models.Incident, error) {
+func (a *Serve) scheduled(from, to time.Time) ([]models.Incident, error) {
 	scheduled := make([]models.Incident, 0)
 
 	incidents, err := a.store.ByDate(from, to)
@@ -26,7 +26,7 @@ func (a Serve) scheduled(from, to time.Time) ([]models.Incident, error) {
 	return scheduled, nil
 }
 
-func (a Serve) periodFromReq(req *http.Request, nbDaysFrom, nbDaysTo int) (from, to time.Time, err error) {
+func (a *Serve) periodFromReq(req *http.Request, nbDaysFrom, nbDaysTo int) (from, to time.Time, err error) {
 	defaultNbDaysFrom := time.Duration(nbDaysFrom) * 24 * time.Hour
 	defaultNbDaysTo := time.Duration(nbDaysTo) * 24 * time.Hour
 
@@ -44,11 +44,11 @@ func (a Serve) periodFromReq(req *http.Request, nbDaysFrom, nbDaysTo int) (from,
 
 }
 
-func (a Serve) isAllType(req *http.Request) bool {
+func (a *Serve) isAllType(req *http.Request) bool {
 	return req.URL.Query().Get("all_types") != ""
 }
 
-func (a Serve) incidentsByParamsDate(from, to time.Time, allType bool) ([]models.Incident, error) {
+func (a *Serve) incidentsByParamsDate(from, to time.Time, allType bool) ([]models.Incident, error) {
 	incidents, err := a.store.ByDate(from, to)
 	if err != nil {
 		return []models.Incident{}, err
@@ -69,14 +69,14 @@ func (a Serve) incidentsByParamsDate(from, to time.Time, allType bool) ([]models
 	return finalIncidents, nil
 }
 
-func (a Serve) timelineFormat(t time.Time) string {
+func (a *Serve) timelineFormat(t time.Time) string {
 	return t.Format("Jan 02, 2006")
 }
 
-func (a Serve) BaseInfo() config.BaseInfo {
+func (a *Serve) BaseInfo() config.BaseInfo {
 	return *a.config.BaseInfo
 }
 
-func (a Serve) BaseURL() string {
+func (a *Serve) BaseURL() string {
 	return a.config.BaseInfo.BaseURL
 }

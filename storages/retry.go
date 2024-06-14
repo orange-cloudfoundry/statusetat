@@ -22,7 +22,7 @@ func NewRetryWithSleepTime(next Store, nbRetry int, sleepTime time.Duration) *Re
 	return &Retry{next: next, nbRetry: nbRetry, sleepTime: sleepTime}
 }
 
-func (m Retry) Creator() func(u *url.URL) (Store, error) {
+func (m *Retry) Creator() func(u *url.URL) (Store, error) {
 	return func(u *url.URL) (Store, error) {
 		newM := &Retry{}
 		store, err := m.next.Creator()(u)
@@ -35,11 +35,11 @@ func (m Retry) Creator() func(u *url.URL) (Store, error) {
 	}
 }
 
-func (m Retry) Detect(u *url.URL) bool {
+func (m *Retry) Detect(u *url.URL) bool {
 	return m.next.Detect(u)
 }
 
-func (m Retry) Create(incident models.Incident) (models.Incident, error) {
+func (m *Retry) Create(incident models.Incident) (models.Incident, error) {
 	var err error
 	var ret models.Incident
 	for i := 0; i < m.nbRetry; i++ {
@@ -56,7 +56,7 @@ func (m Retry) Create(incident models.Incident) (models.Incident, error) {
 	return incident, err
 }
 
-func (m Retry) Subscribe(email string) error {
+func (m *Retry) Subscribe(email string) error {
 	var err error
 	for i := 0; i < m.nbRetry; i++ {
 		err = m.next.Subscribe(email)
@@ -72,7 +72,7 @@ func (m Retry) Subscribe(email string) error {
 	return err
 }
 
-func (m Retry) Unsubscribe(email string) error {
+func (m *Retry) Unsubscribe(email string) error {
 	var err error
 	for i := 0; i < m.nbRetry; i++ {
 		err = m.next.Unsubscribe(email)
@@ -88,7 +88,7 @@ func (m Retry) Unsubscribe(email string) error {
 	return err
 }
 
-func (m Retry) Subscribers() ([]string, error) {
+func (m *Retry) Subscribers() ([]string, error) {
 	var err error
 	var ret []string
 	for i := 0; i < m.nbRetry; i++ {
@@ -105,7 +105,7 @@ func (m Retry) Subscribers() ([]string, error) {
 	return []string{}, err
 }
 
-func (m Retry) Update(guid string, incident models.Incident) (models.Incident, error) {
+func (m *Retry) Update(guid string, incident models.Incident) (models.Incident, error) {
 	var err error
 	var ret models.Incident
 	for i := 0; i < m.nbRetry; i++ {
@@ -122,7 +122,7 @@ func (m Retry) Update(guid string, incident models.Incident) (models.Incident, e
 	return incident, err
 }
 
-func (m Retry) Delete(guid string) error {
+func (m *Retry) Delete(guid string) error {
 	var err error
 	for i := 0; i < m.nbRetry; i++ {
 		err = m.next.Delete(guid)
@@ -138,7 +138,7 @@ func (m Retry) Delete(guid string) error {
 	return err
 }
 
-func (m Retry) Read(guid string) (models.Incident, error) {
+func (m *Retry) Read(guid string) (models.Incident, error) {
 	var err error
 	var ret models.Incident
 	for i := 0; i < m.nbRetry; i++ {
@@ -155,7 +155,7 @@ func (m Retry) Read(guid string) (models.Incident, error) {
 	return models.Incident{}, err
 }
 
-func (m Retry) ByDate(from, to time.Time) ([]models.Incident, error) {
+func (m *Retry) ByDate(from, to time.Time) ([]models.Incident, error) {
 	var err error
 	var ret []models.Incident
 	for i := 0; i < m.nbRetry; i++ {
@@ -172,7 +172,7 @@ func (m Retry) ByDate(from, to time.Time) ([]models.Incident, error) {
 	return []models.Incident{}, err
 }
 
-func (m Retry) Persistents() ([]models.Incident, error) {
+func (m *Retry) Persistents() ([]models.Incident, error) {
 	var err error
 	var ret []models.Incident
 	for i := 0; i < m.nbRetry; i++ {
@@ -189,7 +189,7 @@ func (m Retry) Persistents() ([]models.Incident, error) {
 	return []models.Incident{}, err
 }
 
-func (m Retry) Ping() error {
+func (m *Retry) Ping() error {
 	var err error
 	for i := 0; i < m.nbRetry; i++ {
 		err = m.next.Ping()

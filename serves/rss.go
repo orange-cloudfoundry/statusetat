@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/feeds"
 )
 
-func (a Serve) Rss(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) Rss(w http.ResponseWriter, req *http.Request) {
 	feed, err := a.feed(req)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -24,7 +24,7 @@ func (a Serve) Rss(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(rss))
 }
 
-func (a Serve) Atom(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) Atom(w http.ResponseWriter, req *http.Request) {
 	feed, err := a.feed(req)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
@@ -41,7 +41,7 @@ func (a Serve) Atom(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(atom))
 }
 
-func (a Serve) feed(req *http.Request) (*feeds.Feed, error) {
+func (a *Serve) feed(req *http.Request) (*feeds.Feed, error) {
 	loc := a.Location(req)
 	incidents, err := a.store.ByDate(time.Now().Add(-7*24*time.Hour).In(loc), time.Now().In(loc))
 	if err != nil {

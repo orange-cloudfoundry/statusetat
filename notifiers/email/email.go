@@ -96,7 +96,7 @@ type SmtpInfo struct {
 	Port     int
 }
 
-func (n Email) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
+func (n *Email) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
 	var opts OptsEmail
 	err := mapstructure.Decode(params, &opts)
 	if err != nil {
@@ -176,20 +176,20 @@ func loadDialer(opts OptsEmail) *gomail.Dialer {
 	return dialer
 }
 
-func (n Email) Name() string {
+func (n *Email) Name() string {
 	return "email"
 }
 
-func (n Email) Description() string {
+func (n *Email) Description() string {
 	return `Sending notifications for incident and scheduled task only to subscribers which subscribed by email or/and set in config. 
 If admin trigger manually an notification this notifier **will not** re-notify subscribed users.`
 }
 
-func (n Email) Id() string {
+func (n *Email) Id() string {
 	return n.id
 }
 
-func (n Email) Notify(notifyReq *models.NotifyRequest) error {
+func (n *Email) Notify(notifyReq *models.NotifyRequest) error {
 	incident := notifyReq.Incident
 	if len(incident.Messages) > 1 && incident.State != models.Resolved {
 		return nil
@@ -200,7 +200,7 @@ func (n Email) Notify(notifyReq *models.NotifyRequest) error {
 	return n.notifySubscriber(incident, subscribers)
 }
 
-func (n Email) notifySubscriber(incident models.Incident, subscribers []string) error {
+func (n *Email) notifySubscriber(incident models.Incident, subscribers []string) error {
 	if len(subscribers) == 0 {
 		return nil
 	}
@@ -224,7 +224,7 @@ func (n Email) notifySubscriber(incident models.Incident, subscribers []string) 
 	return result
 }
 
-func (n Email) incidentToMail(incident models.Incident) (subject string, textHtml string, err error) {
+func (n *Email) incidentToMail(incident models.Incident) (subject string, textHtml string, err error) {
 	title := incident.MainMessage().Title
 	msg := incident.MainMessage()
 	if incident.State == models.Resolved {
@@ -269,7 +269,7 @@ func (n Email) incidentToMail(incident models.Incident) (subject string, textHtm
 	return subject, textHtml, nil
 }
 
-func (n Email) sendEmailTo(subject, textHtml, to string) error {
+func (n *Email) sendEmailTo(subject, textHtml, to string) error {
 	m := gomail.NewMessage()
 	m.SetHeader("From", n.opts.From)
 	m.SetHeader("To", to)

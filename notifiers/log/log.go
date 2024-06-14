@@ -17,24 +17,24 @@ func init() {
 type Log struct {
 }
 
-func (n Log) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
+func (n *Log) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
 	return &Log{}, nil
 }
 
-func (n Log) Name() string {
+func (n *Log) Name() string {
 	return "log"
 }
 
-func (n Log) Description() string {
+func (n *Log) Description() string {
 	return `Show inside logs all information about notification which has been triggerred. 
 Even manual trigger by admin can be seen.`
 }
 
-func (n Log) Id() string {
+func (n *Log) Id() string {
 	return "log"
 }
 
-func (n Log) Notify(notifyReq *models.NotifyRequest) error {
+func (n *Log) Notify(notifyReq *models.NotifyRequest) error {
 	RequestToEntry(notifyReq).Info("notify")
 	return nil
 }

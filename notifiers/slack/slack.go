@@ -90,7 +90,7 @@ type Slack struct {
 	loc        *time.Location
 }
 
-func (n Slack) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
+func (n *Slack) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
 	var opts SlackOpts
 	err := mapstructure.Decode(params, &opts)
 	if err != nil {
@@ -117,20 +117,20 @@ func (n Slack) Creator(params map[string]interface{}, baseInfo config.BaseInfo) 
 	}, nil
 }
 
-func (n Slack) Name() string {
+func (n *Slack) Name() string {
 	return "slack"
 }
 
-func (n Slack) Description() string {
+func (n *Slack) Description() string {
 	return `Sending notifications for incident and scheduled task to a slack channel defined. 
 Even manual trigger by admin can be seen if there is new messages.`
 }
 
-func (n Slack) Id() string {
+func (n *Slack) Id() string {
 	return n.id
 }
 
-func (n Slack) colorStateIncident(state models.IncidentState) string {
+func (n *Slack) colorStateIncident(state models.IncidentState) string {
 	switch state {
 	case models.Unresolved:
 		return "#ff5722"
@@ -140,7 +140,7 @@ func (n Slack) colorStateIncident(state models.IncidentState) string {
 	return "#4CAF50"
 }
 
-func (n Slack) Notify(notifyReq *models.NotifyRequest) error {
+func (n *Slack) Notify(notifyReq *models.NotifyRequest) error {
 	incident := notifyReq.Incident
 	if incident.IsScheduled {
 		return n.notifyScheduled(incident)
@@ -148,7 +148,7 @@ func (n Slack) Notify(notifyReq *models.NotifyRequest) error {
 	return n.notifyIncident(incident, notifyReq.TriggerByUser)
 }
 
-func (n Slack) notifyScheduled(incident models.Incident) error {
+func (n *Slack) notifyScheduled(incident models.Incident) error {
 	if len(incident.Messages) > 1 && incident.State != models.Resolved {
 		return nil
 	}
@@ -240,7 +240,7 @@ func (n Slack) notifyScheduled(incident models.Incident) error {
 	return nil
 }
 
-func (n Slack) notifyIncident(incident models.Incident, triggered bool) error {
+func (n *Slack) notifyIncident(incident models.Incident, triggered bool) error {
 	if len(incident.Messages) > 1 && incident.State != models.Resolved && !triggered {
 		return nil
 	}

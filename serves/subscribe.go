@@ -6,7 +6,7 @@ import (
 	"net/mail"
 )
 
-func (a Serve) SubscribeEmail(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) SubscribeEmail(w http.ResponseWriter, req *http.Request) {
 	email := req.URL.Query().Get("email")
 	if email == "" {
 		JSONError(w, fmt.Errorf("You must set an email"), http.StatusPreconditionRequired)
@@ -25,7 +25,7 @@ func (a Serve) SubscribeEmail(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (a Serve) UnsubscribeEmail(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) UnsubscribeEmail(w http.ResponseWriter, req *http.Request) {
 	email := req.URL.Query().Get("email")
 	if email == "" {
 		HTMLError(w, fmt.Errorf("You must set an email"), http.StatusPreconditionRequired)

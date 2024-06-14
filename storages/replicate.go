@@ -33,7 +33,7 @@ type Replicate struct {
 	storesInit []Store
 	stores     map[string]Store
 	records    *[]*record
-	mu         sync.Mutex
+	mu         *sync.Mutex
 	waitReplay time.Duration
 	waitClean  time.Duration
 }
@@ -48,7 +48,7 @@ func NewReplicateWithWaits(storesInit []Store, waitReplay, waitClean time.Durati
 		storesInit: storesInit,
 		stores:     make(map[string]Store),
 		records:    &records,
-		mu:         sync.Mutex{},
+		mu:         &sync.Mutex{},
 		waitReplay: waitReplay,
 		waitClean:  waitClean,
 	}

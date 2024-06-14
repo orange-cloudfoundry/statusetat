@@ -29,7 +29,7 @@ type Plugin struct {
 	BaseRequest Base
 }
 
-func (n Plugin) loadPlugin(path string) (Notifier, error) {
+func (n *Plugin) loadPlugin(path string) (Notifier, error) {
 	client := pluginhc.NewClient(&pluginhc.ClientConfig{
 		HandshakeConfig: Handshake,
 		Plugins: map[string]pluginhc.Plugin{
@@ -54,7 +54,7 @@ func (n Plugin) loadPlugin(path string) (Notifier, error) {
 
 }
 
-func (n Plugin) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
+func (n *Plugin) Creator(params map[string]interface{}, baseInfo config.BaseInfo) (notifiers.Notifier, error) {
 	var opts optsPlugin
 	err := mapstructure.Decode(params, &opts)
 	if err != nil {
@@ -77,7 +77,7 @@ func (n Plugin) Creator(params map[string]interface{}, baseInfo config.BaseInfo)
 	}, nil
 }
 
-func (n Plugin) Name() string {
+func (n *Plugin) Name() string {
 	if n.notifier == nil {
 		return "plugin"
 	}
@@ -89,7 +89,7 @@ func (n Plugin) Name() string {
 	return name
 }
 
-func (n Plugin) Description() string {
+func (n *Plugin) Description() string {
 	if n.notifier == nil {
 		return "plugin"
 	}
@@ -101,7 +101,7 @@ func (n Plugin) Description() string {
 	return name
 }
 
-func (n Plugin) Id() string {
+func (n *Plugin) Id() string {
 	if n.notifier == nil {
 		return "plugin"
 	}
@@ -113,11 +113,11 @@ func (n Plugin) Id() string {
 	return id
 }
 
-func (n Plugin) Notify(notifyReq *models.NotifyRequest) error {
+func (n *Plugin) Notify(notifyReq *models.NotifyRequest) error {
 	return n.notifier.Notify(notifyReq)
 }
 
-func (n Plugin) MetadataFields() []models.MetadataField {
+func (n *Plugin) MetadataFields() []models.MetadataField {
 	fields, err := n.notifier.MetadataFields()
 	if err != nil {
 		logrus.Errorf("Error from plugin: %s", err.Error())
@@ -126,6 +126,6 @@ func (n Plugin) MetadataFields() []models.MetadataField {
 	return fields
 }
 
-func (n Plugin) PreCheck(incident models.Incident) error {
+func (n *Plugin) PreCheck(incident models.Incident) error {
 	return n.notifier.PreCheck(incident)
 }

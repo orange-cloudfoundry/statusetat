@@ -26,7 +26,7 @@ func SetLocationContext(req *http.Request, location *time.Location) {
 	*req = *ctxValueReq
 }
 
-func (a Serve) Location(req *http.Request) *time.Location {
+func (a *Serve) Location(req *http.Request) *time.Location {
 	val := req.Context().Value(LocationContextKey)
 	if val == nil {
 		return locations.DefaultLocation()
@@ -34,7 +34,7 @@ func (a Serve) Location(req *http.Request) *time.Location {
 	return val.(*time.Location)
 }
 
-func (a Serve) IsDefaultLocation(req *http.Request) bool {
+func (a *Serve) IsDefaultLocation(req *http.Request) bool {
 	val := req.Context().Value(LocationContextKey)
 	return val == nil
 }

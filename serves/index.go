@@ -53,7 +53,7 @@ type ComponentStateData struct {
 	State       models.ComponentState
 }
 
-func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) Index(w http.ResponseWriter, req *http.Request) {
 
 	from, to, err := a.periodFromReq(req, -6, 0)
 	if err != nil {
@@ -169,7 +169,7 @@ func (a Serve) Index(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (a Serve) ShowIncident(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) ShowIncident(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	guid := v["guid"]
 	incident, err := a.store.Read(guid)
@@ -198,7 +198,7 @@ func (a Serve) ShowIncident(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (a Serve) History(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) History(w http.ResponseWriter, req *http.Request) {
 	from, to, err := a.periodFromReq(req, -6, 0)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)

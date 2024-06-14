@@ -19,7 +19,7 @@ import (
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
 )
 
-func (a Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
 	guid := uuid.NewString()
 
 	b, err := io.ReadAll(req.Body)
@@ -96,7 +96,7 @@ func (a Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Created(incident)
 }
 
-func (a Serve) messagesGuid(incidentGuid string, messages []models.Message, loc *time.Location) []models.Message {
+func (a *Serve) messagesGuid(incidentGuid string, messages []models.Message, loc *time.Location) []models.Message {
 	for i, msg := range messages {
 		msg.IncidentGUID = incidentGuid
 
@@ -113,7 +113,7 @@ func (a Serve) messagesGuid(incidentGuid string, messages []models.Message, loc 
 	return messages
 }
 
-func (a Serve) parseDate(req *http.Request, key string, defaultTime time.Time) (time.Time, error) {
+func (a *Serve) parseDate(req *http.Request, key string, defaultTime time.Time) (time.Time, error) {
 	if req == nil {
 		return defaultTime, nil
 	}
@@ -129,7 +129,7 @@ func (a Serve) parseDate(req *http.Request, key string, defaultTime time.Time) (
 	return date, nil
 }
 
-func (a Serve) ByDate(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) ByDate(w http.ResponseWriter, req *http.Request) {
 	var err error
 	from, to, err := a.periodFromReq(req, -7, 0)
 	if err != nil {
@@ -145,7 +145,7 @@ func (a Serve) ByDate(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Ok(incidents)
 }
 
-func (a Serve) Persistents(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) Persistents(w http.ResponseWriter, req *http.Request) {
 	var err error
 	incidents, err := a.store.Persistents()
 	if err != nil {
@@ -155,7 +155,7 @@ func (a Serve) Persistents(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Ok(incidents)
 }
 
-func (a Serve) Incident(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) Incident(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	guid := v["guid"]
 	incident, err := a.store.Read(guid)
@@ -171,7 +171,7 @@ func (a Serve) Incident(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Ok(incident)
 }
 
-func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) Update(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	guid := v["guid"]
 
@@ -282,7 +282,7 @@ func (a Serve) Update(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Ok(incident)
 }
 
-func (a Serve) runPreCheck(incident models.Incident) error {
+func (a *Serve) runPreCheck(incident models.Incident) error {
 	var result error
 	for _, preChecker := range notifiers.PreCheckers(*incident.Components) {
 		err := preChecker.PreCheck(incident)
@@ -296,7 +296,7 @@ func (a Serve) runPreCheck(incident models.Incident) error {
 	return result
 }
 
-func (a Serve) Notify(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) Notify(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	guid := v["guid"]
 
@@ -312,7 +312,7 @@ func (a Serve) Notify(w http.ResponseWriter, req *http.Request) {
 	emitter.Emit(models.NewNotifyRequest(incident, true))
 }
 
-func (a Serve) Delete(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) Delete(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	guid := v["guid"]
 
@@ -328,7 +328,7 @@ func (a Serve) Delete(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(200)
 }
 
-func (a Serve) AddMessage(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) AddMessage(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	incidentGuid := v["incident_guid"]
 
@@ -377,7 +377,7 @@ func (a Serve) AddMessage(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Created(incident)
 }
 
-func (a Serve) DeleteMessage(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) DeleteMessage(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	incidentGuid := v["incident_guid"]
 	messageGuid := v["message_guid"]
@@ -418,7 +418,7 @@ func (a Serve) DeleteMessage(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Ok(incident)
 }
 
-func (a Serve) ReadMessage(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) ReadMessage(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	incidentGuid := v["incident_guid"]
 	messageGuid := v["message_guid"]
@@ -443,7 +443,7 @@ func (a Serve) ReadMessage(w http.ResponseWriter, req *http.Request) {
 	JSONError(w, fmt.Errorf("message not found"), http.StatusNotFound)
 }
 
-func (a Serve) ReadMessages(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) ReadMessages(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	incidentGuid := v["incident_guid"]
 
@@ -459,7 +459,7 @@ func (a Serve) ReadMessages(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Ok(incident.Messages)
 }
 
-func (a Serve) UpdateMessage(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) UpdateMessage(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	incidentGuid := v["incident_guid"]
 	messageGuid := v["message_guid"]
@@ -510,11 +510,11 @@ func (a Serve) UpdateMessage(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Ok(incident)
 }
 
-func (a Serve) ShowComponents(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) ShowComponents(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Ok(a.config.Components.Inline())
 }
 
-func (a Serve) ShowFlagIncidentStates(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) ShowFlagIncidentStates(w http.ResponseWriter, req *http.Request) {
 	type stateDetail struct {
 		Value       models.IncidentState `json:"value"`
 		Description string               `json:"description"`
@@ -540,7 +540,7 @@ func (a Serve) ShowFlagIncidentStates(w http.ResponseWriter, req *http.Request) 
 	respond.NewResponse(w).Ok(states)
 }
 
-func (a Serve) ListSubscribers(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) ListSubscribers(w http.ResponseWriter, req *http.Request) {
 	subs, err := a.store.Subscribers()
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -553,7 +553,7 @@ func (a Serve) ListSubscribers(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Ok(subs)
 }
 
-func (a Serve) ShowFlagComponentStates(w http.ResponseWriter, req *http.Request) {
+func (a *Serve) ShowFlagComponentStates(w http.ResponseWriter, req *http.Request) {
 	type stateDetail struct {
 		Value       models.ComponentState `json:"value"`
 		Description string                `json:"description"`

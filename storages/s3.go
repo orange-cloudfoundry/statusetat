@@ -46,7 +46,7 @@ func (s *S3) Create(incident models.Incident) (models.Incident, error) {
 	return incident, err
 }
 
-func (s S3) retrieveSubscribers() ([]string, error) {
+func (s *S3) retrieveSubscribers() ([]string, error) {
 	obj, err := s.sess.svc.GetObject(&s3.GetObjectInput{
 		Bucket: &s.sess.bucket,
 		Key:    aws.String(subscriberFilename),
@@ -66,7 +66,7 @@ func (s S3) retrieveSubscribers() ([]string, error) {
 	return subs, err
 }
 
-func (s S3) storeSubscribers(subscribers []string) error {
+func (s *S3) storeSubscribers(subscribers []string) error {
 	b, _ := json.Marshal(subscribers)
 	uploader := s3manager.NewUploader(s.sess.awsSess)
 	_, err := uploader.Upload(&s3manager.UploadInput{
@@ -77,7 +77,7 @@ func (s S3) storeSubscribers(subscribers []string) error {
 	return err
 }
 
-func (s S3) addPersistent(incident models.Incident) error {
+func (s *S3) addPersistent(incident models.Incident) error {
 	incidents, err := s.Persistents()
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func (s S3) addPersistent(incident models.Incident) error {
 	return s.storePersistents(incidents)
 }
 
-func (s S3) removePersistent(guid string) error {
+func (s *S3) removePersistent(guid string) error {
 	incidents, err := s.Persistents()
 	if err != nil {
 		return err
@@ -96,7 +96,7 @@ func (s S3) removePersistent(guid string) error {
 	return s.storePersistents(incidents)
 }
 
-func (s S3) readPersistent(guid string) (models.Incident, error) {
+func (s *S3) readPersistent(guid string) (models.Incident, error) {
 	incidents, err := s.Persistents()
 	if err != nil {
 		return models.Incident{}, err
@@ -104,7 +104,7 @@ func (s S3) readPersistent(guid string) (models.Incident, error) {
 	return models.Incidents(incidents).Find(guid), nil
 }
 
-func (s S3) Subscribe(email string) error {
+func (s *S3) Subscribe(email string) error {
 	subs, _ := s.retrieveSubscribers()
 	if common.InStrSlice(email, subs) {
 		return nil
@@ -113,7 +113,7 @@ func (s S3) Subscribe(email string) error {
 	return s.storeSubscribers(subs)
 }
 
-func (s S3) Unsubscribe(email string) error {
+func (s *S3) Unsubscribe(email string) error {
 	subs, err := s.retrieveSubscribers()
 	if err != nil {
 		return err
@@ -122,7 +122,7 @@ func (s S3) Unsubscribe(email string) error {
 	return s.storeSubscribers(subs)
 }
 
-func (s S3) storePersistents(incidents []models.Incident) error {
+func (s *S3) storePersistents(incidents []models.Incident) error {
 	sort.Sort(models.Incidents(incidents))
 	b, _ := json.Marshal(incidents)
 	uploader := s3manager.NewUploader(s.sess.awsSess)
@@ -134,7 +134,7 @@ func (s S3) storePersistents(incidents []models.Incident) error {
 	return err
 }
 
-func (s S3) Subscribers() ([]string, error) {
+func (s *S3) Subscribers() ([]string, error) {
 	return s.retrieveSubscribers()
 }
 
@@ -235,11 +235,11 @@ func (s *S3) Creator() func(u *url.URL) (Store, error) {
 	}
 }
 
-func (s S3) Detect(u *url.URL) bool {
+func (s *S3) Detect(u *url.URL) bool {
 	return u.Scheme == "s3"
 }
 
-func (s S3) urlToSession(u *url.URL) (*s3Session, error) {
+func (s *S3) urlToSession(u *url.URL) (*s3Session, error) {
 	if strings.HasSuffix(u.Host, "s3.amazonaws.com") && (u.User == nil || u.User.Username() == "") {
 		bucket, path := s.extractBucketPath(u)
 		sess, err := session.NewSession()
@@ -288,7 +288,7 @@ func (s S3) urlToSession(u *url.URL) (*s3Session, error) {
 	}, nil
 }
 
-func (s S3) Persistents() ([]models.Incident, error) {
+func (s *S3) Persistents() ([]models.Incident, error) {
 	obj, err := s.sess.svc.GetObject(&s3.GetObjectInput{
 		Bucket: &s.sess.bucket,
 		Key:    aws.String(persistentFilename),
@@ -308,7 +308,7 @@ func (s S3) Persistents() ([]models.Incident, error) {
 	return subs, err
 }
 
-func (s S3) extractBucketPath(u *url.URL) (bucket string, path string) {
+func (s *S3) extractBucketPath(u *url.URL) (bucket string, path string) {
 	if strings.HasSuffix(u.Host, ".s3.amazonaws.com") {
 		return strings.TrimSuffix(u.Host, ".s3.amazonaws.com"), u.Path
 	}

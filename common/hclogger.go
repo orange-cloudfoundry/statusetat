@@ -14,7 +14,7 @@ type LogrusHclogger struct {
 	name   string
 }
 
-func (l LogrusHclogger) GetLevel() hclog.Level {
+func (l *LogrusHclogger) GetLevel() hclog.Level {
 	switch l.logger.GetLevel() {
 	case logrus.InfoLevel:
 		return hclog.Info
@@ -57,7 +57,7 @@ func NewLogrusHclogger(logger *logrus.Logger) *LogrusHclogger {
 //	Error Level = 5
 //)
 
-func (l LogrusHclogger) Log(level hclog.Level, msg string, args ...interface{}) {
+func (l *LogrusHclogger) Log(level hclog.Level, msg string, args ...interface{}) {
 	switch level {
 	case hclog.NoLevel:
 		l.Info(msg, args...)
@@ -74,47 +74,47 @@ func (l LogrusHclogger) Log(level hclog.Level, msg string, args ...interface{}) 
 	}
 }
 
-func (l LogrusHclogger) Trace(msg string, args ...interface{}) {
+func (l *LogrusHclogger) Trace(msg string, args ...interface{}) {
 	l.CreateEntry(args).Trace(msg)
 }
 
-func (l LogrusHclogger) Debug(msg string, args ...interface{}) {
+func (l *LogrusHclogger) Debug(msg string, args ...interface{}) {
 	l.CreateEntry(args).Debug(msg)
 }
 
-func (l LogrusHclogger) Info(msg string, args ...interface{}) {
+func (l *LogrusHclogger) Info(msg string, args ...interface{}) {
 	l.CreateEntry(args).Info(msg)
 }
 
-func (l LogrusHclogger) Warn(msg string, args ...interface{}) {
+func (l *LogrusHclogger) Warn(msg string, args ...interface{}) {
 	l.CreateEntry(args).Warn(msg)
 }
 
-func (l LogrusHclogger) Error(msg string, args ...interface{}) {
+func (l *LogrusHclogger) Error(msg string, args ...interface{}) {
 	l.CreateEntry(args).Error(msg)
 }
 
-func (l LogrusHclogger) IsTrace() bool {
+func (l *LogrusHclogger) IsTrace() bool {
 	return l.logger.GetLevel() == logrus.TraceLevel
 }
 
-func (l LogrusHclogger) IsDebug() bool {
+func (l *LogrusHclogger) IsDebug() bool {
 	return l.logger.GetLevel() >= logrus.DebugLevel
 }
 
-func (l LogrusHclogger) IsInfo() bool {
+func (l *LogrusHclogger) IsInfo() bool {
 	return l.logger.GetLevel() >= logrus.InfoLevel
 }
 
-func (l LogrusHclogger) IsWarn() bool {
+func (l *LogrusHclogger) IsWarn() bool {
 	return l.logger.GetLevel() >= logrus.WarnLevel
 }
 
-func (l LogrusHclogger) IsError() bool {
+func (l *LogrusHclogger) IsError() bool {
 	return l.logger.GetLevel() >= logrus.ErrorLevel
 }
 
-func (l LogrusHclogger) ImpliedArgs() []interface{} {
+func (l *LogrusHclogger) ImpliedArgs() []interface{} {
 	return []interface{}{}
 }
 
@@ -123,7 +123,7 @@ func (l *LogrusHclogger) With(args ...interface{}) hclog.Logger {
 	return l
 }
 
-func (l LogrusHclogger) Name() string {
+func (l *LogrusHclogger) Name() string {
 	return l.name
 }
 
@@ -139,7 +139,7 @@ func (l *LogrusHclogger) ResetNamed(name string) hclog.Logger {
 	return l
 }
 
-func (l LogrusHclogger) SetLevel(level hclog.Level) {
+func (l *LogrusHclogger) SetLevel(level hclog.Level) {
 	switch level {
 	case hclog.NoLevel:
 		l.logger.SetLevel(logrus.InfoLevel)
@@ -156,14 +156,14 @@ func (l LogrusHclogger) SetLevel(level hclog.Level) {
 	}
 }
 
-func (l LogrusHclogger) StandardLogger(opts *hclog.StandardLoggerOptions) *log.Logger {
+func (l *LogrusHclogger) StandardLogger(opts *hclog.StandardLoggerOptions) *log.Logger {
 	return log.New(logrus.StandardLogger().Out, "", log.LstdFlags)
 }
 
-func (l LogrusHclogger) StandardWriter(opts *hclog.StandardLoggerOptions) io.Writer {
+func (l *LogrusHclogger) StandardWriter(opts *hclog.StandardLoggerOptions) io.Writer {
 	return l.logger.Writer()
 }
-func (l LogrusHclogger) CreateEntry(args []interface{}) *logrus.Entry {
+func (l *LogrusHclogger) CreateEntry(args []interface{}) *logrus.Entry {
 	if len(args)%2 != 0 {
 		args = append(args, "<unknown>")
 	}

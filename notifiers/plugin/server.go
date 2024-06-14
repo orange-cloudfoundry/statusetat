@@ -18,7 +18,7 @@ type GRPCServer struct {
 	Impl Notifier
 }
 
-func (s GRPCServer) Init(ctx context.Context, request *proto.InitRequest) (*emptypb.Empty, error) {
+func (s *GRPCServer) Init(ctx context.Context, request *proto.InitRequest) (*emptypb.Empty, error) {
 	err := s.Impl.Init(
 		config.BaseInfo{
 			BaseURL:  request.GetBaseInfo().GetBaseUrl(),
@@ -35,7 +35,7 @@ func (s GRPCServer) Init(ctx context.Context, request *proto.InitRequest) (*empt
 	return &emptypb.Empty{}, nil
 }
 
-func (s GRPCServer) Name(ctx context.Context, request *emptypb.Empty) (*proto.NameResponse, error) {
+func (s *GRPCServer) Name(ctx context.Context, request *emptypb.Empty) (*proto.NameResponse, error) {
 	name, err := s.Impl.Name()
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (s GRPCServer) Name(ctx context.Context, request *emptypb.Empty) (*proto.Na
 	return &proto.NameResponse{Name: name}, nil
 }
 
-func (s GRPCServer) Description(ctx context.Context, empty *emptypb.Empty) (*proto.DescriptionResponse, error) {
+func (s *GRPCServer) Description(ctx context.Context, empty *emptypb.Empty) (*proto.DescriptionResponse, error) {
 	desc, err := s.Impl.Description()
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (s GRPCServer) Description(ctx context.Context, empty *emptypb.Empty) (*pro
 	return &proto.DescriptionResponse{Description: desc}, nil
 }
 
-func (s GRPCServer) Id(ctx context.Context, request *emptypb.Empty) (*proto.IdResponse, error) {
+func (s *GRPCServer) Id(ctx context.Context, request *emptypb.Empty) (*proto.IdResponse, error) {
 	id, err := s.Impl.Id()
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (s GRPCServer) Id(ctx context.Context, request *emptypb.Empty) (*proto.IdRe
 	return &proto.IdResponse{Id: id}, nil
 }
 
-func (s GRPCServer) Notify(ctx context.Context, request *proto.NotifyRequest) (*proto.ErrorResponse, error) {
+func (s *GRPCServer) Notify(ctx context.Context, request *proto.NotifyRequest) (*proto.ErrorResponse, error) {
 	err := s.Impl.Notify(ProtoToNotifyRequest(request))
 	if err != nil {
 		return &proto.ErrorResponse{
@@ -71,7 +71,7 @@ func (s GRPCServer) Notify(ctx context.Context, request *proto.NotifyRequest) (*
 	return &proto.ErrorResponse{}, nil
 }
 
-func (s GRPCServer) MetadataFields(ctx context.Context, request *emptypb.Empty) (*proto.ListMetadataField, error) {
+func (s *GRPCServer) MetadataFields(ctx context.Context, request *emptypb.Empty) (*proto.ListMetadataField, error) {
 	fields, err := s.Impl.MetadataFields()
 	if err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func (s GRPCServer) MetadataFields(ctx context.Context, request *emptypb.Empty) 
 	return &proto.ListMetadataField{Fields: protoFields}, nil
 }
 
-func (s GRPCServer) PreCheck(ctx context.Context, request *proto.NotifyRequest) (*proto.ErrorResponse, error) {
+func (s *GRPCServer) PreCheck(ctx context.Context, request *proto.NotifyRequest) (*proto.ErrorResponse, error) {
 	err := s.Impl.PreCheck(ProtoToIncident(request.Incident))
 	if err != nil {
 		return &proto.ErrorResponse{
