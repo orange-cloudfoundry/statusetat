@@ -3,3 +3,4 @@
 /*.db
 /tmp
 /dist
+/config*.yml

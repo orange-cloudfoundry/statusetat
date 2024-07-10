@@ -115,8 +115,18 @@ func main() {
 
 	go notifiers.Notify(store)
 
-	log.Infof("Listening on address %s ...", c.Listen)
-	err = http.ListenAndServe(c.Listen, router)
+	protocol := "http://"
+	if c.TlsConfig != nil {
+		protocol = "https://"
+	}
+
+	log.Infof("Listening on address %s%s ...", protocol, c.Listen)
+
+	if c.TlsConfig != nil {
+		err = http.ListenAndServeTLS(c.Listen, c.TlsConfig.CertFile, c.TlsConfig.KeyFile, router)
+	} else {
+		err = http.ListenAndServe(c.Listen, router)
+	}
 	if err != nil {
 		log.Fatal(err.Error())
 	}

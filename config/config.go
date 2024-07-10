@@ -25,11 +25,31 @@ type Config struct {
 	BaseInfo   *BaseInfo  `yaml:"base_info"`
 	Username   string     `yaml:"username"`
 	Password   string     `yaml:"password"`
-
-	CookieKey string     `yaml:"cookie_key"`
-	Notifiers []Notifier `yaml:"notifiers"`
+	TlsConfig  *TlsConfig `yaml:"tls"`
+	CookieKey  string     `yaml:"cookie_key"`
+	Notifiers  []Notifier `yaml:"notifiers"`
 
 	Theme *Theme `yaml:"theme"`
+}
+
+type TlsConfig struct {
+	CertFile string `yaml:"cert_file"`
+	KeyFile  string `yaml:"key_file"`
+}
+
+func (c *TlsConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type plain TlsConfig
+	err := unmarshal((*plain)(c))
+	if err != nil {
+		return err
+	}
+	if c.CertFile == "" {
+		return fmt.Errorf("tls cert_file is required")
+	}
+	if c.KeyFile == "" {
+		return fmt.Errorf("tls key_file is required")
+	}
+	return nil
 }
 
 func (c *Config) Merge(other Config) {

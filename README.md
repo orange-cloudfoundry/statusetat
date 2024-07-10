@@ -67,6 +67,15 @@ For understanding config definition format:
 # Listen address for listening in http
 # If empty and env var `PORT` set default listen will 0.0.0.0:${PORT}
 [ listen: <string> | default = 0.0.0.0:8080 ]
+
+# If config tls not set no https will be enabled
+# only set tls if you want https on statusetat
+tls:
+  # Path to cert file
+  [ cert_file: <string> ]
+  # Path to key file
+  [ key_file: <string> ]
+
 log:
   # log level to use for server
   # you can chose: `trace`, `debug`, `info`, `warn`, `error`, `fatal` or `panic`
