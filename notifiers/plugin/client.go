@@ -65,7 +65,7 @@ func (m *GRPCClient) Notify(notifyReq *models.NotifyRequest) error {
 		return err
 	}
 	if resp.GetError() != nil {
-		return fmt.Errorf(resp.GetError().GetDetail())
+		return fmt.Errorf("%s", resp.GetError().GetDetail())
 	}
 	return nil
 }
@@ -107,7 +107,7 @@ func (m *GRPCClient) PreCheck(incident models.Incident) error {
 		return err
 	}
 	if resp.GetError() != nil {
-		return fmt.Errorf(resp.GetError().GetDetail())
+		return fmt.Errorf("%s", resp.GetError().GetDetail())
 	}
 	return nil
 }
