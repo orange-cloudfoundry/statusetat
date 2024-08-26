@@ -174,8 +174,8 @@ github.com/gorilla/mux
 # github.com/gorilla/securecookie v1.1.2
 ## explicit; go 1.20
 github.com/gorilla/securecookie
-# github.com/gorilla/sessions v1.3.0
-## explicit; go 1.20
+# github.com/gorilla/sessions v1.4.0
+## explicit; go 1.23
 github.com/gorilla/sessions
 # github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 ## explicit; go 1.11

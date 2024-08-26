@@ -1,8 +1,7 @@
 module github.com/orange-cloudfoundry/statusetat
 
 go 1.22
-
-toolchain go1.22.6
+toolchain go1.23.0
 
 require (
 	github.com/alecthomas/chroma v0.10.0
@@ -16,7 +15,7 @@ require (
 	github.com/gorilla/feeds v1.2.0
 	github.com/gorilla/handlers v1.5.2
 	github.com/gorilla/mux v1.8.1
-	github.com/gorilla/sessions v1.3.0
+	github.com/gorilla/sessions v1.4.0
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-multierror v1.1.1
