@@ -7,7 +7,6 @@ import (
 
 	"github.com/alecthomas/kingpin/v2"
 
-	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -68,7 +67,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	box := packr.New("assets", "./website/assets")
+
+	// box := packr.New("assets", "./website/assets")
 	if c.BaseInfo.TimeZone != "" {
 		err = locations.LoadByTimezone(c.BaseInfo.TimeZone)
 		if err != nil {
@@ -103,7 +103,7 @@ func main() {
 	})
 	router.Handle("/metrics", promhttp.Handler())
 	router.PathPrefix("/assets").Handler(
-		http.StripPrefix("/assets", serves.NewMinifyMiddleware(http.FileServer(box))),
+		http.StripPrefix("/assets", serves.NewMinifyMiddleware(http.FileServer(http.Dir("./website/assets")))),
 	)
 
 	for _, n := range c.Notifiers {

@@ -20,6 +20,7 @@ package stats
 
 import (
 	"maps"
+	"testing"
 
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/internal"
@@ -249,9 +250,9 @@ func RegisterInt64Gauge(descriptor MetricDescriptor) *Int64GaugeHandle {
 }
 
 // snapshotMetricsRegistryForTesting snapshots the global data of the metrics
-// registry. Returns a cleanup function that sets the metrics registry to its
-// original state.
-func snapshotMetricsRegistryForTesting() func() {
+// registry. Registers a cleanup function on the provided testing.T that sets
+// the metrics registry to its original state. Only called in testing functions.
+func snapshotMetricsRegistryForTesting(t *testing.T) {
 	oldDefaultMetrics := DefaultMetrics
 	oldRegisteredMetrics := registeredMetrics
 	oldMetricsRegistry := metricsRegistry
@@ -261,9 +262,9 @@ func snapshotMetricsRegistryForTesting() func() {
 	maps.Copy(registeredMetrics, registeredMetrics)
 	maps.Copy(metricsRegistry, metricsRegistry)
 
-	return func() {
+	t.Cleanup(func() {
 		DefaultMetrics = oldDefaultMetrics
 		registeredMetrics = oldRegisteredMetrics
 		metricsRegistry = oldMetricsRegistry
-	}
+	})
 }

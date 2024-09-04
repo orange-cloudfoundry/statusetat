@@ -137,6 +137,14 @@ func (x *Extemplate) ExecuteTemplate(wr io.Writer, name string, data interface{}
 	return tmpl.Execute(wr, data)
 }
 
+// var assets embed.FS
+
+// func Assests() (fs.FS, error) {
+// 	return fs.Sub(assets, "templates")
+// }
+
+// assets, _ := ui.Assests()
+
 // ParseDir walks the given directory root and parses all files with any of the registered extensions.
 // Default extensions are .html and .tmpl
 // If a template file has {{/* extends "other-file.tmpl" */}} as its first line it will parse that file for base templates.

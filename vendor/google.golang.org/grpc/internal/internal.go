@@ -228,6 +228,7 @@ var (
 	// SetBufferPoolingThresholdForTesting updates the buffer pooling threshold, for
 	// testing purposes.
 	SetBufferPoolingThresholdForTesting any // func(int)
+	SetBufferPoolingThresholdForTesting any // func(int)
 )
 
 // HealthChecker defines the signature of the client-side LB channel health
