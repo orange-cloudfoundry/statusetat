@@ -1,0 +1,132 @@
+{{ define "content" }}
+
+    {{ with .Theme.PreStatus }}
+      <div class="row">
+        <div class="col s1"></div>
+        <div class="col s10">{{ . | markdown }}</div>
+        <div class="col s1"></div>
+      </div>
+    {{end}}
+    <div class="row">
+      <div class="col s1"></div>
+      <div class="col s10">
+        <div class="components-status z-depth-1">
+            {{ range $group, $components := .ComponentStatesData}}
+                {{ $groupState := index $.GroupComponentState $group }}
+                <ul class="collection with-header">
+                  <li class="collection-header {{ $groupState | colorState }} global-status white-text">
+                      {{ if eq $group "" }}Global{{else}}{{$group | title }}{{end}}
+                    <div class="secondary-content white-text">
+                        {{ $groupState | textState | title }}
+                      <i class="material-icons inline">{{ $groupState | iconState }}</i>
+                    </div>
+                  </li>
+                    {{ range $components }}
+                      <li class="collection-item grey lighten-4 grey-text">{{ .Name | title }}
+                          {{with .Description}}
+                            <i class="material-icons tiny tooltipped" data-position="top" data-tooltip="{{ . | title }}">help_outline</i>
+                          {{end}}
+                        <div class="secondary-content {{ .State |colorState  }}-text">{{ .State | textState | title}}
+                          <i class="material-icons inline">{{ .State | iconState }}</i>
+                        </div>
+                      </li>
+                    {{ end }}
+                </ul>
+            {{end}}
+
+        </div>
+      </div>
+      <div class="col s1"></div>
+    </div>
+    {{ with .Theme.PostStatus }}
+      <div class="row">
+        <div class="col s1"></div>
+        <div class="col s10">{{ . | markdown }}</div>
+        <div class="col s1"></div>
+      </div>
+    {{end}}
+    {{ with .PersistentIncidents }}
+
+      <div class="row">
+        <div class="col s1"></div>
+        <div class="col s10">
+          <h4 id="list-persistent-incidents">{{$.Theme.PersistentDisplayName}}</h4>
+            {{ with $.Theme.PrePersistent }}
+              <p>{{ . | markdown }}</p>
+            {{end}}
+            {{ range . }}
+                {{ template "persistent.gohtml" . }}
+            {{end}}
+            {{ with $.Theme.PostPersistent }}
+              <p>{{ . | markdown }}</p>
+            {{end}}
+        </div>
+        <div class="col s1"></div>
+      </div>
+    {{ end }}
+    {{ with .Scheduled }}
+
+      <div class="row">
+        <div class="col s1"></div>
+        <div class="col s10" >
+          <h4 id="list-scheduled-incidents">Scheduled Maintenance</h4>
+            {{ with $.Theme.PreMaintenance }}
+              <p>{{ . | markdown }}</p>
+            {{end}}
+            {{ range . }}
+                {{ template "scheduled.gohtml" . }}
+            {{end}}
+            {{ with $.Theme.PostMaintenance }}
+              <p>{{ . | markdown }}</p>
+            {{end}}
+        </div>
+        <div class="col s1"></div>
+      </div>
+    {{ end }}
+
+
+    <div class="row">
+      <div class="col s1"></div>
+      <div class="col s10" id="timeline-incidents">
+        <h4>Latest Incidents</h4>
+          {{ with .Theme.PreTimeline }}
+            <p>{{ . | markdown }}</p>
+          {{end}}
+        <ul class="timeline">
+            {{ range .TimelineDates }}
+                {{ $incidents := index $.Timeline . }}
+                <li class="timeline-incident timeline-incident-{{ $incidents | stateFromIncidents | colorState }}">
+                  <h3 class="timeline-incident-title">
+                    <time>{{ . }}</time>
+                  </h3>
+                  <div class="timeline-incident-body">
+                      {{ if $incidents }}
+                          {{ range $incidents }}
+                              {{ template "incident.gohtml" . }}
+                          {{end}}
+                      {{ else }}
+                        <div class="message">
+                          No incidents reported.
+                        </div>
+                      {{ end }}
+                  </div>
+                </li>
+            {{ end }}
+        </ul>
+          {{ with .Theme.PostTimeline }}
+            <p>{{ . | markdown }}</p>
+          {{end}}
+      </div>
+      <div class="col s1"></div>
+    </div>
+    <div class="row">
+      <div class="col s1"></div>
+      <div class="col s10 center-align">
+        <a class="waves-effect waves-light btn blue lighten-5 black-text" href="/history?all_types=true">
+          Incident History
+        </a>
+      </div>
+      <div class="col s1"></div>
+    </div>
+
+{{ end }}

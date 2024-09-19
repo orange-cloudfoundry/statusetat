@@ -1,0 +1,102 @@
+{{ define "title" }}{{.BaseInfo.Title}} - Info{{ end }}
+{{ define "content"}}
+  <div class="row">
+    <div class="col s12">
+      <div class="head">
+        <h4>Base Info</h4>
+        <div class="divider"></div>
+      </div>
+      <div>
+        <table class="striped highlight">
+          <tbody>
+          <tr>
+            <td>Title</td>
+            <td>{{ .Config.BaseInfo.Title}}</td>
+          </tr>
+          <tr>
+            <td>Base URL</td>
+            <td><a href="{{ .Config.BaseInfo.BaseURL }}">{{ .Config.BaseInfo.BaseURL }}</a></td>
+          </tr>
+          <tr>
+            <td>Components</td>
+            <td>{{ join .Config.Components.Inline ", "}}</td>
+          </tr>
+          <tr>
+            <td>Support</td>
+            <td>{{ .Config.BaseInfo.Support}}</td>
+          </tr>
+          <tr>
+            <td>Contact</td>
+            <td>{{ .Config.BaseInfo.Contact}}</td>
+          </tr>
+          <tr>
+            <td>Default Time Zone</td>
+            <td>{{ .Config.BaseInfo.TimeZone}}</td>
+          </tr>
+          <tr><th>Version</th><td>{{ .Version }}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col s12">
+      <div class="head">
+        <h4>Notifiers</h4>
+        <div class="divider"></div>
+      </div>
+      <div>
+        <table class="striped highlight">
+          <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Number Loaded</th>
+          </tr>
+          </thead>
+          <tbody>
+          {{ range $name, $notifiers := .Notifiers }}
+            <tr>
+              <th>{{$name}}</th>
+              <td>{{(index $notifiers 0).Description | markdown}}</td>
+              <td>{{len $notifiers}}</td>
+            </tr>
+          {{end}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col s12">
+      <div class="head">
+        <h4>Storages</h4>
+        <div class="divider"></div>
+      </div>
+      <div>
+        <table class="striped highlight">
+          <thead>
+          <tr>
+            <th>Type</th>
+            <th>Host</th>
+            <th>Target</th>
+            <th>Parameters</th>
+          </tr>
+          </thead>
+          <tbody>
+          {{ range .Storages }}
+            <tr>
+              <td>{{.Scheme}}</td>
+              <td>{{.Host}}</td>
+              <td>{{.Path}}</td>
+              <td>{{.RawQuery}}</td>
+            </tr>
+          {{end}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{{end}}

@@ -1,0 +1,28 @@
+.alert {
+  @extend .card-panel, .lighten-4, .text-darken-4;
+
+  &.alert-success {
+      @extend .green, .green-text;
+  }
+
+  &.alert-info {
+      @extend .blue, .blue-text;
+  }
+
+  &.alert-warning {
+      @extend .yellow, .yellow-text;
+  }
+
+  &.alert-danger {
+      @extend .red, .red-text;
+  }
+  position: relative;
+  .close {
+      position: absolute;
+      top: 50%;
+      right: 0.5rem;
+
+      color: inherit;
+      margin-top: -18px;
+  }
+}

@@ -7,9 +7,11 @@ package extemplate
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -149,11 +151,11 @@ func (x *Extemplate) ExecuteTemplate(wr io.Writer, name string, data interface{}
 // Default extensions are .html and .tmpl
 // If a template file has {{/* extends "other-file.tmpl" */}} as its first line it will parse that file for base templates.
 // Parsed templates are named relative to the given root directory
-func (x *Extemplate) ParseDir(box *packr.Box, extensions []string) error {
+func (x *Extemplate) ParseDir(fs embed.FS, path string, extensions []string) error {
 	var b []byte
 	var err error
 
-	files, err := findTemplateFiles(box, extensions)
+	files, err := findTemplateFiles(fs, path, extensions)
 	if err != nil {
 		return err
 	}
@@ -208,7 +210,7 @@ func (x *Extemplate) ParseDir(box *packr.Box, extensions []string) error {
 	return nil
 }
 
-func findTemplateFiles(box *packr.Box, extensions []string) (map[string]*templatefile, error) {
+func findTemplateFiles(efs *embed.FS, path string, extensions []string) (map[string]*templatefile, error) {
 	var files = map[string]*templatefile{}
 	var exts = map[string]bool{}
 
@@ -218,7 +220,7 @@ func findTemplateFiles(box *packr.Box, extensions []string) (map[string]*templat
 	}
 
 	// find all template files
-	err := box.Walk(func(path string, file packr.File) error {
+	err := fs.WalkDir(efs, ) error {
 
 		info, err := file.FileInfo()
 		if err != nil {

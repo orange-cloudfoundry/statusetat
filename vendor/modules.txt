@@ -128,21 +128,6 @@ github.com/go-sql-driver/mysql
 # github.com/go-task/slim-sprig/v3 v3.0.0
 ## explicit; go 1.20
 github.com/go-task/slim-sprig/v3
-# github.com/gobuffalo/logger v1.0.7
-## explicit; go 1.16
-github.com/gobuffalo/logger
-# github.com/gobuffalo/packd v1.0.2
-## explicit; go 1.13
-github.com/gobuffalo/packd
-github.com/gobuffalo/packd/internal/takeon/github.com/markbates/errx
-# github.com/gobuffalo/packr/v2 v2.8.3
-## explicit; go 1.16
-github.com/gobuffalo/packr/v2
-github.com/gobuffalo/packr/v2/file
-github.com/gobuffalo/packr/v2/file/resolver
-github.com/gobuffalo/packr/v2/file/resolver/encoding/hex
-github.com/gobuffalo/packr/v2/jam/parser
-github.com/gobuffalo/packr/v2/plog
 # github.com/goji/httpauth v0.0.0-20160601135302-2da839ab0f4d
 ## explicit
 github.com/goji/httpauth
@@ -213,9 +198,6 @@ github.com/jinzhu/inflection
 # github.com/jmespath/go-jmespath v0.4.0
 ## explicit; go 1.14
 github.com/jmespath/go-jmespath
-# github.com/karrick/godirwalk v1.17.0
-## explicit; go 1.13
-github.com/karrick/godirwalk
 # github.com/klauspost/compress v1.17.9
 ## explicit; go 1.20
 github.com/klauspost/compress
@@ -234,22 +216,13 @@ github.com/lib/pq
 github.com/lib/pq/hstore
 github.com/lib/pq/oid
 github.com/lib/pq/scram
-# github.com/markbates/errx v1.1.0
-## explicit; go 1.12
-github.com/markbates/errx
-# github.com/markbates/oncer v1.0.0
-## explicit; go 1.12
-github.com/markbates/oncer
-# github.com/markbates/safe v1.1.0
-## explicit; go 1.22
-github.com/markbates/safe
 # github.com/mattn/go-colorable v0.1.13
 ## explicit; go 1.15
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.20
 ## explicit; go 1.15
 github.com/mattn/go-isatty
-# github.com/mattn/go-sqlite3 v1.14.22
+# github.com/mattn/go-sqlite3 v1.14.23
 ## explicit; go 1.19
 github.com/mattn/go-sqlite3
 # github.com/maxbrunsfeld/counterfeiter/v6 v6.9.0
@@ -397,12 +370,10 @@ golang.org/x/net/trace
 golang.org/x/sync/errgroup
 # golang.org/x/sys v0.25.0
 ## explicit; go 1.18
-golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/term v0.24.0
 ## explicit; go 1.18
-golang.org/x/term
 # golang.org/x/text v0.18.0
 ## explicit; go 1.18
 golang.org/x/text/cases

@@ -1,0 +1,54 @@
+{{ define "title" }}{{.BaseInfo.Title}} - Admin incidents{{ end }}
+{{ define "content" }}
+  <div class="row">
+    <div class="col s12">
+      <!-- Modal Structure -->
+
+      <div class="head">
+        <a href="/admin/incident/add?persistent=true" class="right waves-effect waves-light btn green lighten-1 white-text">Report
+          a {{ .PersistentDisplayName }}<i class="material-icons">add</i></a>
+        <h4>{{ .PersistentDisplayName | title}}</h4>
+        <div class="divider"></div>
+      </div>
+        {{ if .Incidents }}
+          <ul class="collection collection-incidents">
+              {{ range .Incidents }}
+                  {{ $mainMsg := .MainMessage }}
+                  <li class="collection-item incident-item avatar">
+                    <form>
+                      <input type="hidden" name="guid" value="{{ .GUID }}">
+                      <a href="#!" class="secondary-content waves-effect waves-light btn red white-text tooltipped-btn delete-incident" data-tooltip="Delete incident"><i class="material-icons">delete</i></a>
+                      <a href="/admin/incident/edit/{{ .GUID }}?persistent=true" class="secondary-content waves-effect waves-light btn grey lighten-4 grey-text tooltipped-btn" data-tooltip="Edit incident"><i class="material-icons">edit</i></a>
+                      <a href="#!" class="secondary-content waves-effect waves-light btn orange lighten-2 white-text tooltipped-btn notify-incident" data-tooltip="Trigger Notification"><i class="material-icons">notifications_active</i></a>
+                    </form>
+
+                    <span class="title">
+                  <span class="badge {{ .State | colorIncidentState }} white-text">{{ .State | textIncidentState | title }}</span>
+                    {{$mainMsg.Title | title | markdownNoParaph }}
+                </span>
+                    <p>
+                        {{ range .Components }}
+                          <span class="badge grey lighten-4 grey-text">{{ . }}</span>
+                        {{ end }}
+                      <br/>
+                      <span class="details-date">
+                  Created at:
+                  <time class="grey-text human tooltipped" datetime="{{ .CreatedAt | timeStdFormat }}" data-tooltip="{{ .CreatedAt | timeFormat }}">{{ .CreatedAt | humanTime }}</time>
+                  </span>
+                    </p>
+
+                  </li>
+              {{end}}
+          </ul>
+
+        {{ else }}
+          No Persistent incidents.
+        {{ end }}
+    </div>
+  </div>
+{{end}}
+
+{{ define "pre_body_close" }}
+    {{ template "admin/delete-incident.gohtml" . }}
+    {{ template "admin/notify-incident.gohtml" . }}
+{{end}}

@@ -1,0 +1,43 @@
+{{ if eq .Field.InputType 0 }}
+  <input id="{{.Field.Id}}" type="text" name="{{.Field.Id}}" class="metadata-field" value="{{metadataValue .Incident.Metadata .Field.Id}}">
+  <label for="{{.Field.Id}}" class="tooltip" data-position="bottom" data-tooltip="{{.Field.Info}}">{{.Field.Name | title}}</label>
+{{end}}
+{{ if eq .Field.InputType 1 }}
+  <input id="{{.Field.Id}}" type="password" name="{{.Field.Id}}" class="metadata-field" value="{{metadataValue .Incident.Metadata .Field.Id}}">
+  <label for="{{.Field.Id}}" class="tooltip" data-position="bottom" data-tooltip="{{.Field.Info}}">{{.Field.Name | title}}</label>
+{{end}}
+{{ if eq .Field.InputType 2 }}
+  <label for="{{.Field.Id}}" title="{{.Field.Id}}" data-position="bottom" data-tooltip="{{.Field.Info}}">
+    <input type="checkbox" id="{{.Field.Id}}" name="{{.Field.Id}}" class="metadata-field" {{if (metadataValue .Incident.Metadata .Field.Id) }}checked="checked"{{end}}/>
+    <span>{{.Field.Name | title}}</span>
+  </label>
+{{end}}
+{{ if eq .Field.InputType 3 }}
+    {{.Field.Name}}:
+    {{ range $index, $element := .Field.Opts }}
+      <p>
+        <label for="{{$.Field.Id}}" class="tooltip" data-position="bottom" data-tooltip="{{$.Field.Info}}">
+          <input name="{{$.Field.Id}}" value="{{$element}}" class="metadata-field" type="radio" {{if eq $index 0}}checked{{end}} />
+          <span>{{$element | title}}</span>
+        </label>
+      </p>
+    {{end}}
+{{end}}
+{{ if eq .Field.InputType 4 }}
+  <select id="{{.Field.Id}}" name="{{.Field.Id}}" class="metadata-field">
+      {{if .Field.DefaultOpt }}
+        <option value="{{index .Field.Opts .Field.DefaultOpt}}">{{.Field.DefaultOpt}}</option>
+      {{end}}
+      {{ range $key, $val := .Field.Opts }}
+          {{if not $.Field.DefaultOpt}}
+            <option value="{{$val}}" {{if eq (metadataValue $.Incident.Metadata $.Field.Id) $val }}selected{{end}}>{{$key}}</option>
+          {{end}}
+          {{if $.Field.DefaultOpt}}
+              {{if not (eq $key $.Field.DefaultOpt)}}
+                <option value="{{$val}}" {{if eq (metadataValue $.Incident.Metadata $.Field.Id) $val }}selected{{end}}>{{$key}}</option>
+              {{end}}
+          {{end}}
+      {{end}}
+  </select>
+  <label for="{{.Field.Id}}" class="tooltip" data-position="bottom" data-tooltip="{{.Field.Info}}">{{.Field.Name | title}}</label>
+{{end}}

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"embed"
+	"io/fs"
 	"net/http"
 	"net/url"
 	"strings"
@@ -36,6 +38,9 @@ var (
 	configFile = kingpin.Flag("config", "Path to Configuration File").Short('c').String()
 )
 
+//go:embed serves/website/assets
+var assetsContent embed.FS
+
 func main() {
 	kingpin.Version(version.Print("statusetat"))
 	kingpin.HelpFlag.Short('h')
@@ -67,8 +72,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-
-	// box := packr.New("assets", "./website/assets")
+	assetsFs, err := fs.Sub(assetsContent, "serves/website/assets")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	if c.BaseInfo.TimeZone != "" {
 		err = locations.LoadByTimezone(c.BaseInfo.TimeZone)
 		if err != nil {
@@ -103,7 +110,7 @@ func main() {
 	})
 	router.Handle("/metrics", promhttp.Handler())
 	router.PathPrefix("/assets").Handler(
-		http.StripPrefix("/assets", serves.NewMinifyMiddleware(http.FileServer(http.Dir("./website/assets")))),
+		http.StripPrefix("/assets/", serves.NewMinifyMiddleware(http.FileServer(http.FS(assetsFs)))),
 	)
 
 	for _, n := range c.Notifiers {
