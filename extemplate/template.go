@@ -220,7 +220,18 @@ func findTemplateFiles(efs *embed.FS, path string, extensions []string) (map[str
 	}
 
 	// find all template files
-	err := fs.WalkDir(efs, ) error {
+	err := fs.WalkDir(efs, path, func(path string, d fs.DirEntry, err error) error {
+		if !d.IsDir() {
+			// skip if extension not in list of allowed extensions
+			e := filepath.Ext(d.Name())
+			if _, ok := exts[e]; !ok {
+				return nil
+			}
+			log.Println(path)
+		}
+		return nil
+	},
+	)
 
 		info, err := file.FileInfo()
 		if err != nil {
