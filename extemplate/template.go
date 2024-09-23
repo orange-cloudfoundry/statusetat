@@ -16,8 +16,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gobuffalo/packr/v2"
-
 	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/markdown"
 	"github.com/orange-cloudfoundry/statusetat/models"
@@ -151,7 +149,7 @@ func (x *Extemplate) ExecuteTemplate(wr io.Writer, name string, data interface{}
 // Default extensions are .html and .tmpl
 // If a template file has {{/* extends "other-file.tmpl" */}} as its first line it will parse that file for base templates.
 // Parsed templates are named relative to the given root directory
-func (x *Extemplate) ParseDir(fs embed.FS, path string, extensions []string) error {
+func (x *Extemplate) ParseDir(fs *embed.FS, path string, extensions []string) error {
 	var b []byte
 	var err error
 
@@ -220,50 +218,29 @@ func findTemplateFiles(efs *embed.FS, path string, extensions []string) (map[str
 	}
 
 	// find all template files
-	err := fs.WalkDir(efs, path, func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(efs, path, func(templatepath string, d fs.DirEntry, err error) error {
 		if !d.IsDir() {
 			// skip if extension not in list of allowed extensions
 			e := filepath.Ext(d.Name())
 			if _, ok := exts[e]; !ok {
 				return nil
 			}
-			log.Println(path)
-		}
-		return nil
-	},
-	)
-
-		info, err := file.FileInfo()
-		if err != nil {
-			return err
-		}
-
-		// skip dirs as they can never be valid templates
-		if info == nil || info.IsDir() {
+			// read file into memory
+			contents, err := efs.ReadFile(templatepath)
+			if err != nil {
+				return err
+			}
+			// parse file into templatefile
+			tf, err := newTemplateFile(contents)
+			if err != nil {
+				return err
+			}
+			relativename, err := filepath.Rel(path, templatepath)
+			files[relativename] = tf
 			return nil
 		}
-
-		// skip if extension not in list of allowed extensions
-		e := filepath.Ext(info.Name())
-		if _, ok := exts[e]; !ok {
-			return nil
-		}
-
-		// read file into memory
-		contents, err := box.Find(path)
-		if err != nil {
-			return err
-		}
-
-		tf, err := newTemplateFile(contents)
-		if err != nil {
-			return err
-		}
-
-		files[info.Name()] = tf
 		return nil
 	})
-
 	return files, err
 }
 

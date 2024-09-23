@@ -17,6 +17,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/config"
+	"github.com/orange-cloudfoundry/statusetat/extemplate"
 	"github.com/orange-cloudfoundry/statusetat/markdown"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	log "github.com/sirupsen/logrus"
@@ -94,24 +95,11 @@ func Register(
 	userInfo *url.Userinfo,
 	config config.Config,
 ) error {
-	xt, err := template.New("").Funcs(registeredFuncs).ParseFS(templateContent,
-		"website/templates/*.gohtml")
-	// "website/templates/admin/*.gohtml",
-	// "website/templates/components/*.gohtml")
+	xt := extemplate.New()
+	err := xt.ParseDir(&templateContent, "website/templates", []string{".gohtml"})
 	if err != nil {
 		return err
 	}
-	fs.WalkDir(templateContent, "website/templates", func(path string, d fs.DirEntry, err error) error {
-		if !d.IsDir() {
-			log.Println(path)
-			log.Println(d.Name())
-			log.Println(d.Type())
-		}
-		return nil
-	},
-	)
-	temple, _ := getAllFilenames(templateContent, "website/templates")
-	log.Infoln("read templates", temple)
 	return RegisterWithHtmlTemplater(store, router, userInfo, xt, config)
 }
 
