@@ -352,7 +352,6 @@ func (p *TextParser) startLabelName() stateFn {
 	// Check for duplicate label names.
 	labels := make(map[string]struct{})
 	for _, l := range p.currentLabelPairs {
-	for _, l := range p.currentLabelPairs {
 		lName := l.GetName()
 		if _, exists := labels[lName]; !exists {
 			labels[lName] = struct{}{}
@@ -641,8 +640,6 @@ func (p *TextParser) readTokenUntilNewline(recognizeEscapeSequence bool) {
 				p.currentToken.WriteByte('\n')
 			case '"':
 				p.currentToken.WriteByte('"')
-			case '"':
-				p.currentToken.WriteByte('"')
 			default:
 				p.parseError(fmt.Sprintf("invalid escape sequence '\\%c'", p.currentByte))
 				return
@@ -668,9 +665,6 @@ func (p *TextParser) readTokenUntilNewline(recognizeEscapeSequence bool) {
 // but not into p.currentToken.
 func (p *TextParser) readTokenAsMetricName() {
 	p.currentToken.Reset()
-	// A UTF-8 metric name must be quoted and may have escaped characters.
-	quoted := false
-	escaped := false
 	// A UTF-8 metric name must be quoted and may have escaped characters.
 	quoted := false
 	escaped := false
@@ -731,30 +725,6 @@ func (p *TextParser) readTokenAsLabelName() {
 		if escaped {
 			switch p.currentByte {
 			case '\\':
-				p.currentToken.WriteByte(p.currentByte)
-			case 'n':
-				p.currentToken.WriteByte('\n')
-			case '"':
-				p.currentToken.WriteByte('"')
-			default:
-				p.parseError(fmt.Sprintf("invalid escape sequence '\\%c'", p.currentByte))
-				return
-			}
-			escaped = false
-		} else {
-			switch p.currentByte {
-			case '"':
-				quoted = !quoted
-				if !quoted {
-					p.currentByte, p.err = p.buf.ReadByte()
-					return
-				}
-			case '\n':
-				p.parseError(fmt.Sprintf("label name %q contains unescaped new-line", p.currentToken.String()))
-				return
-			case '\\':
-				escaped = true
-			default:
 				p.currentToken.WriteByte(p.currentByte)
 			case 'n':
 				p.currentToken.WriteByte('\n')
