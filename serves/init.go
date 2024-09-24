@@ -6,58 +6,18 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"io"
-	"io/fs"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/goji/httpauth"
 	"github.com/gorilla/mux"
-	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/extemplate"
-	"github.com/orange-cloudfoundry/statusetat/markdown"
-	"github.com/orange-cloudfoundry/statusetat/models"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/orange-cloudfoundry/statusetat/storages"
 )
-
-var registeredFuncs = template.FuncMap{
-	"iconState":             iconState,
-	"colorState":            colorState,
-	"colorIncidentState":    colorIncidentState,
-	"textIncidentState":     models.TextIncidentState,
-	"textScheduledState":    models.TextScheduledState,
-	"textState":             models.TextState,
-	"timeFormat":            timeFormat,
-	"timeStdFormat":         timeStdFormat,
-	"title":                 common.Title,
-	"markdown":              markdown.ConvertSafeTemplate,
-	"stateFromIncidents":    stateFromIncidents,
-	"safeHTML":              safeHTML,
-	"humanTime":             humanTime,
-	"jsonify":               jsonify,
-	"listMap":               listMap,
-	"humanDuration":         common.HumanDuration,
-	"isAfterNow":            isAfterNow,
-	"markdownNoParaph":      markdownNoParaph,
-	"tagify":                tagify,
-	"ref":                   ref,
-	"timeFmtCustom":         timeFmtCustom,
-	"colorHexState":         colorHexState,
-	"colorHexIncidentState": colorHexIncidentState,
-	"join":                  strings.Join,
-	"netUrl":                netUrl,
-	"timeNow":               timeNow,
-	"dict":                  dict,
-	"metadataValue":         metadataValue,
-	"timeAddDay":            timeAddDay,
-	"stringReplace":         stringReplace,
-	"sanitizeUrl":           sanitizeUrl,
-}
 
 type HtmlTemplater interface {
 	ExecuteTemplate(wr io.Writer, name string, data interface{}) error
@@ -72,22 +32,6 @@ type Serve struct {
 
 //go:embed website/templates/*
 var templateContent embed.FS
-
-func getAllFilenames(efs embed.FS, pathFiles string) ([]string, error) {
-	files, err := fs.ReadDir(efs, pathFiles)
-	if err != nil {
-		return nil, err
-	}
-
-	// only file name
-	// 1131 0001-01-01 00:00:00 foo.gohtml -> foo.gohtml
-	arr := make([]string, 0, len(files))
-	for _, file := range files {
-		arr = append(arr, file.Name())
-	}
-
-	return arr, nil
-}
 
 func Register(
 	store storages.Store,

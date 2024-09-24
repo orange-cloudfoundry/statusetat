@@ -236,6 +236,9 @@ func findTemplateFiles(efs *embed.FS, path string, extensions []string) (map[str
 				return err
 			}
 			relativename, err := filepath.Rel(path, templatepath)
+			if err != nil {
+				return err
+			}
 			files[relativename] = tf
 			return nil
 		}
