@@ -2,6 +2,7 @@ package serves
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"sort"
 	"time"
@@ -164,6 +165,7 @@ func (a *Serve) Index(w http.ResponseWriter, req *http.Request) {
 		Theme:               *a.config.Theme,
 	})
 	if err != nil {
+		log.Println(err)
 		HTMLError(w, err, http.StatusInternalServerError)
 		return
 	}
@@ -193,6 +195,7 @@ func (a *Serve) ShowIncident(w http.ResponseWriter, req *http.Request) {
 		Theme:    *a.config.Theme,
 	})
 	if err != nil {
+		log.Println(err)
 		HTMLError(w, err, http.StatusInternalServerError)
 		return
 	}

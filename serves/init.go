@@ -3,19 +3,19 @@ package serves
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . HtmlTemplater
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
-	"github.com/orange-cloudfoundry/statusetat/config"
 	"io"
 	"net/http"
 	"net/url"
 
-	"github.com/gobuffalo/packr/v2"
 	"github.com/goji/httpauth"
 	"github.com/gorilla/mux"
+	"github.com/orange-cloudfoundry/statusetat/config"
+	"github.com/orange-cloudfoundry/statusetat/extemplate"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/orange-cloudfoundry/statusetat/extemplate"
 	"github.com/orange-cloudfoundry/statusetat/storages"
 )
 
@@ -30,6 +30,9 @@ type Serve struct {
 	adminMenuItems []menuItem
 }
 
+//go:embed website/templates/*
+var templateContent embed.FS
+
 func Register(
 	store storages.Store,
 	router *mux.Router,
@@ -37,8 +40,7 @@ func Register(
 	config config.Config,
 ) error {
 	xt := extemplate.New()
-	box := packr.New("templates", "../website/templates")
-	err := xt.ParseDir(box, []string{".gohtml"})
+	err := xt.ParseDir(&templateContent, "website/templates", []string{".gohtml"})
 	if err != nil {
 		return err
 	}
