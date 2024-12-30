@@ -24,8 +24,8 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/nicklaw5/go-respond v1.6.0
 	github.com/olebedev/emitter v0.0.0-20230411050614-349169dec2ba
-	github.com/onsi/ginkgo/v2 v2.22.0
-	github.com/onsi/gomega v1.36.1
+	github.com/onsi/ginkgo/v2 v2.22.1
+	github.com/onsi/gomega v1.36.2
 	github.com/prometheus/client_golang v1.20.5
 	github.com/prometheus/common v0.61.0
 	github.com/rs/cors v1.11.1
@@ -71,7 +71,7 @@ require (
 	github.com/tdewolff/parse/v2 v2.7.19 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.32.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
