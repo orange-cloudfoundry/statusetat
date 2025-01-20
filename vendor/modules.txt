@@ -310,7 +310,7 @@ github.com/rs/cors/internal
 # github.com/sirupsen/logrus v1.9.3
 ## explicit; go 1.13
 github.com/sirupsen/logrus
-# github.com/tdewolff/minify/v2 v2.21.2
+# github.com/tdewolff/minify/v2 v2.21.3
 ## explicit; go 1.18
 github.com/tdewolff/minify/v2
 github.com/tdewolff/minify/v2/css
