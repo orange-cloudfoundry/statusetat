@@ -1,6 +1,7 @@
 package serves
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,6 +24,126 @@ type IndexData struct {
 	BaseInfo            config.BaseInfo
 	Timezone            string
 	Theme               config.Theme
+}
+
+func (i *IndexData) ToJsonData() interface{} {
+	type JsonIncident struct {
+		GUID           string    `json:"guid"`
+		CreatedAt      time.Time `json:"created_at"`
+		UpdatedAt      time.Time `json:"updated_at"`
+		State          string    `json:"state"`
+		ComponentState string    `json:"component_state"`
+		Components     []string  `json:"components"`
+		Messages       []struct {
+			GUID         string    `json:"guid"`
+			IncidentGUID string    `json:"incident_guid"`
+			CreatedAt    time.Time `json:"created_at"`
+			Title        string    `json:"title"`
+			Content      string    `json:"content"`
+		} `json:"messages"`
+		Metadata    interface{} `json:"metadata"`
+		IsScheduled bool        `json:"is_scheduled"`
+		Persistent  bool        `json:"persistent"`
+	}
+
+	type JsonComponent struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		State       string `json:"state"`
+	}
+
+	type JsonGroup struct {
+		Name       string          `json:"name"`
+		Components []JsonComponent `json:"components"`
+		State      string          `json:"state"`
+	}
+
+	res := struct {
+		Groups              []JsonGroup    `json:"groups"`
+		PersistentIncidents []JsonIncident `json:"persistent_incidents"`
+		Incidents           []JsonIncident `json:"incidents"`
+		ScheduledIncidents  []JsonIncident `json:"scheduled"`
+		TimeZone            string         `json:"timezone"`
+	}{
+		Groups:              []JsonGroup{},
+		PersistentIncidents: []JsonIncident{},
+		Incidents:           []JsonIncident{},
+		ScheduledIncidents:  []JsonIncident{},
+		TimeZone:            i.Timezone,
+	}
+
+	// Groups
+	for group, state := range i.GroupComponentState {
+		jsonGroup := JsonGroup{
+			Name:       group,
+			State:      models.TextState(state),
+			Components: []JsonComponent{},
+		}
+		for _, component := range i.ComponentStatesData[group] {
+			jsonGroup.Components = append(jsonGroup.Components, JsonComponent{
+				Name:        component.Name,
+				Description: component.Description,
+				State:       models.TextState(component.State),
+			})
+		}
+
+		incidentToJsonIncident := func(incident models.Incident) JsonIncident {
+			jsonIncident := JsonIncident{
+				GUID:           incident.GUID,
+				CreatedAt:      incident.CreatedAt,
+				UpdatedAt:      incident.UpdatedAt,
+				State:          models.TextIncidentState(incident.State),
+				ComponentState: models.TextState(incident.ComponentState),
+				Components:     []string{},
+				Messages: []struct {
+					GUID         string    `json:"guid"`
+					IncidentGUID string    `json:"incident_guid"`
+					CreatedAt    time.Time `json:"created_at"`
+					Title        string    `json:"title"`
+					Content      string    `json:"content"`
+				}{},
+				Metadata:    incident.Metadata,
+				IsScheduled: incident.IsScheduled,
+				Persistent:  incident.Persistent,
+			}
+			for _, component := range *incident.Components {
+				jsonIncident.Components = append(jsonIncident.Components, component.String())
+			}
+			for _, message := range incident.Messages {
+				jsonIncident.Messages = append(jsonIncident.Messages, struct {
+					GUID         string    `json:"guid"`
+					IncidentGUID string    `json:"incident_guid"`
+					CreatedAt    time.Time `json:"created_at"`
+					Title        string    `json:"title"`
+					Content      string    `json:"content"`
+				}{
+					GUID:         message.GUID,
+					IncidentGUID: message.IncidentGUID,
+					CreatedAt:    message.CreatedAt,
+					Title:        message.Title,
+					Content:      message.Content,
+				})
+			}
+			return jsonIncident
+		}
+
+		for _, incident := range i.PersistentIncidents {
+			res.PersistentIncidents = append(res.PersistentIncidents, incidentToJsonIncident(incident))
+		}
+		for _, incident := range i.Scheduled {
+			res.ScheduledIncidents = append(res.ScheduledIncidents, incidentToJsonIncident(incident))
+		}
+
+		for _, incidents := range i.Timeline {
+			for _, incident := range incidents {
+				res.Incidents = append(res.Incidents, incidentToJsonIncident(incident))
+			}
+		}
+
+		res.Groups = append(res.Groups, jsonGroup)
+	}
+
+	return res
 }
 
 type timeSlice []string
@@ -54,18 +175,15 @@ type ComponentStateData struct {
 	State       models.ComponentState
 }
 
-func (a *Serve) Index(w http.ResponseWriter, req *http.Request) {
-
+func (a *Serve) getIndexData(w http.ResponseWriter, req *http.Request) (IndexData, error) {
 	from, to, err := a.periodFromReq(req, -6, 0)
 	if err != nil {
-		HTMLError(w, err, http.StatusInternalServerError)
-		return
+		return IndexData{}, err
 	}
 
 	incidents, err := a.incidentsByParamsDate(from, to, false)
 	if err != nil {
-		HTMLError(w, err, http.StatusInternalServerError)
-		return
+		return IndexData{}, err
 	}
 
 	componentStatesByGroup := make(map[string][]*ComponentStateData)
@@ -131,14 +249,12 @@ func (a *Serve) Index(w http.ResponseWriter, req *http.Request) {
 
 	fromScheduled, toScheduled, err := a.periodFromReq(req, 0, 26)
 	if err != nil {
-		HTMLError(w, err, http.StatusInternalServerError)
-		return
+		return IndexData{}, err
 	}
 
 	scheduled, err := a.scheduled(fromScheduled, toScheduled)
 	if err != nil {
-		HTMLError(w, err, http.StatusInternalServerError)
-		return
+		return IndexData{}, err
 	}
 
 	timezone := ""
@@ -148,12 +264,11 @@ func (a *Serve) Index(w http.ResponseWriter, req *http.Request) {
 
 	persistents, err := a.store.Persistents()
 	if err != nil {
-		HTMLError(w, err, http.StatusInternalServerError)
-		return
+		return IndexData{}, err
 	}
 
 	sort.Sort(sort.Reverse(timelineDates))
-	err = a.xt.ExecuteTemplate(w, "incidents.gohtml", IndexData{
+	return IndexData{
 		BaseInfo:            a.BaseInfo(),
 		GroupComponentState: compStateGroup,
 		ComponentStatesData: componentStatesByGroup,
@@ -163,7 +278,28 @@ func (a *Serve) Index(w http.ResponseWriter, req *http.Request) {
 		PersistentIncidents: persistents,
 		Timezone:            timezone,
 		Theme:               *a.config.Theme,
-	})
+	}, nil
+}
+
+func (a *Serve) Statuses(w http.ResponseWriter, req *http.Request) {
+	data, err := a.getIndexData(w, req)
+	if err != nil {
+		JSONError(w, err, http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(data.ToJsonData()); err != nil {
+		LogError(err, 500)
+	}
+}
+
+func (a *Serve) Index(w http.ResponseWriter, req *http.Request) {
+	data, err := a.getIndexData(w, req)
+	if err != nil {
+		HTMLError(w, err, http.StatusInternalServerError)
+	}
+	err = a.xt.ExecuteTemplate(w, "incidents.gohtml", data)
 	if err != nil {
 		log.Println(err)
 		HTMLError(w, err, http.StatusInternalServerError)
