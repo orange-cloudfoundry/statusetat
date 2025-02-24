@@ -228,6 +228,10 @@ Send incidents and scheduled tasks to subscribers via subscribe api and/or email
 host: <string>
 # Email server port
 [ port: <int> | default = 25 ]
+# TLS min version to use
+[ tls_min_version: <string> ]
+# TLS max version to use
+[ tls_max_version: <string> ]
 # Username to use when connect to email server
 [ username: <string> ]
 # Password to use when connect to email server
