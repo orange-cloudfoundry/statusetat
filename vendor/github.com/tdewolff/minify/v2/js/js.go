@@ -862,13 +862,13 @@ func (m *jsMinifier) minifyExpr(i js.IExpr, prec js.OpPrec) {
 			expr = expr.Link
 		}
 		data := expr.Data
-		if bytes.Equal(data, undefinedBytes) { // TODO: only if not defined
-			if js.OpUnary < prec {
-				m.write(groupedVoidZeroBytes)
+		if expr.Decl == js.NoDecl && bytes.Equal(data, undefinedBytes) {
+			if js.OpMember < prec {
+				m.write(groupedZeroIndexBytes)
 			} else {
-				m.write(voidZeroBytes)
+				m.write(zeroIndexBytes)
 			}
-		} else if bytes.Equal(data, infinityBytes) { // TODO: only if not defined
+		} else if expr.Decl == js.NoDecl && bytes.Equal(data, infinityBytes) {
 			if js.OpMul < prec {
 				m.write(groupedOneDivZeroBytes)
 			} else {
@@ -997,6 +997,8 @@ func (m *jsMinifier) minifyExpr(i js.IExpr, prec js.OpPrec) {
 		if expr.Op == js.PostIncrToken || expr.Op == js.PostDecrToken {
 			m.minifyExpr(expr.X, unaryPrecMap[expr.Op])
 			m.write(expr.Op.Bytes())
+		} else if expr.Op == js.VoidToken && !hasSideEffects(expr.X) {
+			m.write(zeroIndexBytes)
 		} else {
 			isLtNot := expr.Op == js.NotToken && 0 < len(m.prev) && m.prev[len(m.prev)-1] == '<'
 			m.write(expr.Op.Bytes())
@@ -1198,6 +1200,96 @@ func (m *jsMinifier) minifyExpr(i js.IExpr, prec js.OpPrec) {
 			}
 		}
 	case *js.CallExpr:
+		if v, ok := expr.X.(*js.Var); ok && v.Decl == js.NoDecl {
+			if bytes.Equal(v.Data, isNaNBytes) {
+				// isNaN(x) => x!=x
+				if len(expr.Args.List) == 1 {
+					groupLen := 0
+					if js.OpEquals < prec {
+						groupLen = 2
+					}
+					if arg, ok := expr.Args.List[0].Value.(*js.Var); ok && len(arg.Data)+groupLen < 7 {
+						if js.OpEquals < prec {
+							m.write(openParenBytes)
+						}
+						m.write(arg.Data)
+						m.write(notEqualBytes)
+						m.write(arg.Data)
+						if js.OpEquals < prec {
+							m.write(closeParenBytes)
+						}
+						break
+					}
+				}
+			} else if bytes.Equal(v.Data, NumberBytes) {
+				// Number(x) => +x
+				if len(expr.Args.List) == 1 {
+					if js.OpUnary < prec {
+						m.write(openParenBytes)
+					}
+					m.write(plusBytes)
+					m.minifyExpr(&js.GroupExpr{expr.Args.List[0].Value}, js.OpUnary)
+					if js.OpUnary < prec {
+						m.write(closeParenBytes)
+					}
+					break
+				}
+			}
+		} else if dot, ok := expr.X.(*js.DotExpr); ok {
+			if v, ok := dot.X.(*js.Var); ok && v.Decl == js.NoDecl && bytes.Equal(v.Data, MathBytes) {
+				if bytes.Equal(dot.Y.Data, []byte("pow")) {
+					// Math.pow(a,b) => a**b
+					if len(expr.Args.List) == 2 {
+						if js.OpExp < prec {
+							m.write(openParenBytes)
+						}
+						m.minifyExpr(&js.GroupExpr{expr.Args.List[0].Value}, js.OpUpdate)
+						m.write(expBytes)
+						m.minifyExpr(&js.GroupExpr{expr.Args.List[1].Value}, js.OpExp)
+						if js.OpExp < prec {
+							m.write(closeParenBytes)
+						}
+						break
+					}
+				} else if bytes.Equal(dot.Y.Data, []byte("trunc")) {
+					// Math.trunc(x) => x|0
+					if len(expr.Args.List) == 1 {
+						if js.OpBitOr < prec {
+							m.write(openParenBytes)
+						}
+						m.minifyExpr(&js.GroupExpr{expr.Args.List[0].Value}, js.OpBitOr)
+						m.write(bitOrBytes)
+						m.write(zeroBytes)
+						if js.OpBitOr < prec {
+							m.write(closeParenBytes)
+						}
+						break
+					}
+				} else if bytes.Equal(dot.Y.Data, []byte("abs")) {
+					// Math.abs(x) => x<0?-x:x
+					if len(expr.Args.List) == 1 {
+						groupLen := 0
+						if js.OpAssign < prec {
+							groupLen = 2
+						}
+						if v, ok := expr.Args.List[0].Value.(*js.Var); ok && len(v.Data)*2+groupLen+5 < 10 {
+							if js.OpAssign < prec {
+								m.write(openParenBytes)
+							}
+							m.write(v.Data)
+							m.write([]byte("<0?-"))
+							m.write(v.Data)
+							m.write(colonBytes)
+							m.write(v.Data)
+							if js.OpAssign < prec {
+								m.write(closeParenBytes)
+							}
+							break
+						}
+					}
+				}
+			}
+		}
 		m.minifyExpr(expr.X, js.OpCall)
 		parentInFor := m.inFor
 		m.inFor = false
