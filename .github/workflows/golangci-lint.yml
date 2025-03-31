@@ -23,7 +23,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: 2.0
+          version: v2.0
           args: > 
             --max-same-issues 0 --timeout=5m
             --enable govet
