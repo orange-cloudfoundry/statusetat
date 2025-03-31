@@ -1,6 +1,7 @@
 module github.com/orange-cloudfoundry/statusetat
 
 go 1.23.4
+toolchain go1.24.1
 
 require (
 	github.com/alecthomas/chroma v0.10.0
@@ -30,7 +31,7 @@ require (
 	github.com/prometheus/common v0.63.0
 	github.com/rs/cors v1.11.1
 	github.com/sirupsen/logrus v1.9.3
-	github.com/tdewolff/minify/v2 v2.22.3
+	github.com/tdewolff/minify/v2 v2.22.4
 	github.com/yuin/goldmark v1.7.8
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
 	google.golang.org/grpc v1.71.0
