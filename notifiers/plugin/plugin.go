@@ -126,6 +126,6 @@ func (n *Plugin) MetadataFields() []models.MetadataField {
 	return fields
 }
 
-func (n *Plugin) PreCheck(incident models.Incident) error {
+func (n *Plugin) PreCheck(incident *models.Incident) error {
 	return n.notifier.PreCheck(incident)
 }

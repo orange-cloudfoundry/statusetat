@@ -116,7 +116,8 @@ func (s *GRPCServer) MetadataFields(ctx context.Context, request *emptypb.Empty)
 }
 
 func (s *GRPCServer) PreCheck(ctx context.Context, request *proto.NotifyRequest) (*proto.ErrorResponse, error) {
-	err := s.Impl.PreCheck(ProtoToIncident(request.Incident))
+	protoToIncident := ProtoToIncident(request.Incident)
+	err := s.Impl.PreCheck(&protoToIncident)
 	if err != nil {
 		return &proto.ErrorResponse{
 			Error: &proto.Error{

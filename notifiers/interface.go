@@ -20,7 +20,7 @@ type NotifierMetadataField interface {
 }
 
 type NotifierPreCheck interface {
-	PreCheck(incident models.Incident) error
+	PreCheck(incident *models.Incident) error
 }
 
 // special interface for creating a moke
