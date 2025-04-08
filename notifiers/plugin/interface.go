@@ -31,7 +31,7 @@ type Notifier interface {
 	Id() (string, error)
 	MetadataFields() ([]models.MetadataField, error)
 	Notify(notifyReq *models.NotifyRequest) error
-	PreCheck(incident models.Incident) error
+	PreCheck(incident *models.Incident) error
 }
 
 type NotifierGRPCPlugin struct {
