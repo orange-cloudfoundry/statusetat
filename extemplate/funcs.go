@@ -196,7 +196,7 @@ func dict(values ...interface{}) (map[string]interface{}, error) {
 }
 
 func stringReplace(s, old, new string) string {
-	return strings.Replace(s, old, new, -1)
+	return strings.ReplaceAll(s, old, new)
 }
 
 func sanitizeUrl(u *url.URL) *url.URL {

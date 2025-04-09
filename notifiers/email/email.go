@@ -109,7 +109,7 @@ func (n *Email) Creator(params map[string]interface{}, baseInfo config.BaseInfo)
 
 	tplSubjIncident, err := template.New("subjectIncident").Funcs(extemplate.Funcs()).Parse(opts.SubjectIncident)
 	if err != nil {
-		return nil, fmt.Errorf("Error when parsing template subject incident: %s", err.Error())
+		return nil, fmt.Errorf("error when parsing template subject incident: %s", err.Error())
 	}
 
 	if opts.SubjectScheduled == "" {
@@ -117,7 +117,7 @@ func (n *Email) Creator(params map[string]interface{}, baseInfo config.BaseInfo)
 	}
 	tplSubjScheduled, err := template.New("subjectScheduled").Funcs(extemplate.Funcs()).Parse(opts.SubjectScheduled)
 	if err != nil {
-		return nil, fmt.Errorf("Error when parsing template subject scheduled: %s", err.Error())
+		return nil, fmt.Errorf("error when parsing template subject scheduled: %s", err.Error())
 	}
 
 	if opts.TxtIncident == "" {
@@ -125,18 +125,18 @@ func (n *Email) Creator(params map[string]interface{}, baseInfo config.BaseInfo)
 	}
 	tplTxtIncident, err := template.New("TxtIncident").Funcs(extemplate.Funcs()).Parse(opts.TxtIncident)
 	if err != nil {
-		return nil, fmt.Errorf("Error when parsing template text incident: %s", err.Error())
+		return nil, fmt.Errorf("error when parsing template text incident: %s", err.Error())
 	}
 	if opts.TxtScheduled == "" {
 		opts.TxtScheduled = DefaultTxtScheduled
 	}
 	tplTxtScheduled, err := template.New("TxtScheduled").Funcs(extemplate.Funcs()).Parse(opts.TxtScheduled)
 	if err != nil {
-		return nil, fmt.Errorf("Error when parsing template text scheduled: %s", err.Error())
+		return nil, fmt.Errorf("error when parsing template text scheduled: %s", err.Error())
 	}
 
 	if opts.Host == "" {
-		return nil, fmt.Errorf("Host for email is mandatory")
+		return nil, fmt.Errorf("host for email is mandatory")
 	}
 
 	if opts.From == "" {

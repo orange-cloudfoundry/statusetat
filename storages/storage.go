@@ -36,7 +36,7 @@ var initStores = []Store{
 
 func Factory(urls []*url.URL) (Store, error) {
 	if len(urls) == 0 {
-		return nil, fmt.Errorf("Url store must be set")
+		return nil, fmt.Errorf("url store must be set")
 	}
 	if len(urls) == 1 {
 		u := urls[0]
@@ -46,7 +46,7 @@ func Factory(urls []*url.URL) (Store, error) {
 			}
 			return store.Creator()(u)
 		}
-		return nil, fmt.Errorf("No valid store can be found")
+		return nil, fmt.Errorf("no valid store can be found")
 	}
 
 	repl := NewReplicate(initStores)

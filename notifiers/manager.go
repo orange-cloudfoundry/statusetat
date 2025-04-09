@@ -50,7 +50,7 @@ func AddNotifier(name string, params map[string]interface{}, forComp config.ForC
 			return nil
 		}
 	}
-	return fmt.Errorf("Could not find notifier with name '%s' .", name)
+	return fmt.Errorf("could not find notifier with name '%s'", name)
 }
 
 func MetadataFields() models.MetadataFields {
@@ -101,7 +101,7 @@ func Notify(store storages.Store) {
 			entry := log.WithField("notifier", n.Name()).WithField("id", n.Id())
 			err := n.Notify(notifyReq)
 			if err != nil {
-				entry.Errorf("Could not send notify: %s", err.Error())
+				entry.Errorf("could not send notify: %s", err.Error())
 			}
 		}
 	}

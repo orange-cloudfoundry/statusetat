@@ -12,6 +12,7 @@ import (
 
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/storages"
+	"github.com/orange-cloudfoundry/statusetat/utils"
 )
 
 var _ = Describe("Local", func() {
@@ -28,12 +29,12 @@ var _ = Describe("Local", func() {
 		}
 	})
 	AfterEach(func() {
-		os.RemoveAll(tmpDirLocal)
+		utils.RemoveDir(tmpDirLocal)
 	})
 	Context("Creator", func() {
 		It("should create a new instance of local storage ", func() {
 			u, _ := url.Parse(fmt.Sprintf("file://%s/my/path", tmpDirLocal))
-			defer os.RemoveAll(fmt.Sprintf("file://%s/my/path", tmpDirLocal))
+			defer utils.RemoveDir(fmt.Sprintf("file://%s/my/path", tmpDirLocal))
 
 			newLocal, err := localStorage.Creator()(u)
 			Expect(err).To(BeNil())
@@ -44,7 +45,7 @@ var _ = Describe("Local", func() {
 	Context("Detect", func() {
 		It("should only detect scheme file://", func() {
 			u, _ := url.Parse(fmt.Sprintf("file://%s/my/path", tmpDirLocal))
-			defer os.RemoveAll(fmt.Sprintf("file://%s/my/path", tmpDirLocal))
+			defer utils.RemoveDir(fmt.Sprintf("file://%s/my/path", tmpDirLocal))
 			Expect(localStorage.Detect(u)).To(BeTrue())
 
 			u, _ = url.Parse(fmt.Sprintf("notfile://%s/my/path", tmpDirLocal))
