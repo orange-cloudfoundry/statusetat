@@ -80,7 +80,7 @@ func (a *Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
 	incident.GUID = guid
 	incident.Messages = a.messagesGuid(guid, incident.Messages, loc)
 
-	err = a.runPreCheck(incident)
+	err = a.runPreCheck(&incident)
 	if err != nil {
 		JSONError(w, err, http.StatusPreconditionFailed)
 		return
@@ -260,7 +260,7 @@ func (a *Serve) Update(w http.ResponseWriter, req *http.Request) {
 
 	incident.UpdatedAt = time.Now()
 
-	err = a.runPreCheck(incident)
+	err = a.runPreCheck(&incident)
 	if err != nil {
 		JSONError(w, err, http.StatusPreconditionFailed)
 		return
@@ -282,7 +282,7 @@ func (a *Serve) Update(w http.ResponseWriter, req *http.Request) {
 	respond.NewResponse(w).Ok(incident)
 }
 
-func (a *Serve) runPreCheck(incident models.Incident) error {
+func (a *Serve) runPreCheck(incident *models.Incident) error {
 	var result error
 	for _, preChecker := range notifiers.PreCheckers(*incident.Components) {
 		err := preChecker.PreCheck(incident)
