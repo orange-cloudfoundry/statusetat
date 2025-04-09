@@ -84,12 +84,12 @@ func (c *Config) Validate() error {
 
 	if c.Username == "" {
 		c.Username = uuid.NewString()
-		log.Infof("generated username (set username in config): %s", c.Username)
+		log.Infof("generated username (set username in config)")
 	}
 
 	if c.Password == "" {
 		c.Password = uuid.NewString()
-		log.Infof("generated password (set password in config): %s", c.Password)
+		log.Infof("generated password (set password in config)")
 	}
 
 	host := "0.0.0.0"
