@@ -16,6 +16,7 @@ import (
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
+	"github.com/orange-cloudfoundry/statusetat/utils"
 )
 
 func init() {
@@ -115,13 +116,13 @@ func (n *GrafanaAnnotation) deleteNotify(incident models.Incident) error {
 	if err != nil {
 		return err
 	}
-	defer respFind.Body.Close()
+	defer utils.CloseAndLogError(respFind.Body)
 	b, err := io.ReadAll(respFind.Body)
 	if err != nil {
-		return fmt.Errorf("Get error code %d", respFind.StatusCode)
+		return fmt.Errorf("get error code %d", respFind.StatusCode)
 	}
 	if respFind.StatusCode > 399 {
-		return fmt.Errorf("Get error code %d: %s", respFind.StatusCode, string(b))
+		return fmt.Errorf("get error code %d: %s", respFind.StatusCode, string(b))
 	}
 
 	type notify struct {
@@ -146,7 +147,7 @@ func (n *GrafanaAnnotation) deleteNotify(incident models.Incident) error {
 	if err != nil {
 		return err
 	}
-	defer respDelete.Body.Close()
+	defer utils.CloseAndLogError(respDelete.Body)
 	err = common.ExtractHttpError(respDelete)
 	if err != nil {
 		return err
@@ -197,7 +198,7 @@ func (n *GrafanaAnnotation) Notify(notifyReq *models.NotifyRequest) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer utils.CloseAndLogError(resp.Body)
 	err = common.ExtractHttpError(resp)
 	if err != nil {
 		return err

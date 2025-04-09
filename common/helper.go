@@ -38,9 +38,9 @@ func ExtractHttpError(resp *http.Response) error {
 	if resp.StatusCode > 399 {
 		b, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return fmt.Errorf("Get error code %d", resp.StatusCode)
+			return fmt.Errorf("get error code %d", resp.StatusCode)
 		}
-		return fmt.Errorf("Get error code %d: %s", resp.StatusCode, string(b))
+		return fmt.Errorf("get error code %d: %s", resp.StatusCode, string(b))
 	}
 	return nil
 }

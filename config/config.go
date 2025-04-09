@@ -79,17 +79,17 @@ func (c *Config) Merge(other Config) {
 
 func (c *Config) Validate() error {
 	if len(c.Components) == 0 {
-		return fmt.Errorf("At least one component must be define")
+		return fmt.Errorf("at least one component must be define")
 	}
 
 	if c.Username == "" {
 		c.Username = uuid.NewString()
-		log.Infof("Generated username (set username in config): %s", c.Username)
+		log.Infof("generated username (set username in config)")
 	}
 
 	if c.Password == "" {
 		c.Password = uuid.NewString()
-		log.Infof("Generated password (set password in config): %s", c.Password)
+		log.Infof("generated password (set password in config)")
 	}
 
 	host := "0.0.0.0"
@@ -133,7 +133,7 @@ func (c *Config) Validate() error {
 	}
 
 	if len(c.Targets) == 0 {
-		return fmt.Errorf("At least one target must be define")
+		return fmt.Errorf("at least one target must be define")
 	}
 	if err := c.Targets.Validate(); err != nil {
 		return err
@@ -304,7 +304,7 @@ func LoadConfigFromFile(filename string) (Config, error) {
 		return Config{}, err
 	}
 	if err := config.Validate(); err != nil {
-		return Config{}, fmt.Errorf("Invalid config in file %s: %s", filename, err)
+		return Config{}, fmt.Errorf("invalid config in file %s: %s", filename, err)
 	}
 
 	return config, nil

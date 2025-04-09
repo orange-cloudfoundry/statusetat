@@ -33,34 +33,34 @@ type MetadataField struct {
 
 func (m MetadataField) Validate() error {
 	if m.Name == "" {
-		return fmt.Errorf("Name must be defined")
+		return fmt.Errorf("name must be defined")
 	}
 	if m.Id == "" {
-		return fmt.Errorf("Id must be defined")
+		return fmt.Errorf("id must be defined")
 	}
 	switch m.InputType {
 	case Radio:
 		valOf := reflect.ValueOf(m.Opts)
 		if valOf.IsNil() {
-			return fmt.Errorf("Opts must be set for a radio as a slice")
+			return fmt.Errorf("opts must be set for a radio as a slice")
 		}
 		if valOf.Kind() != reflect.Slice && valOf.Kind() != reflect.Array {
-			return fmt.Errorf("Opts must be set for a radio as a slice, type %s given", valOf.Type())
+			return fmt.Errorf("opts must be set for a radio as a slice, type %s given", valOf.Type())
 		}
 		if valOf.Len() == 0 {
-			return fmt.Errorf("Opts must be set for a radio as a slice, empty one given")
+			return fmt.Errorf("opts must be set for a radio as a slice, empty one given")
 		}
 
 	case Select:
 		valOf := reflect.ValueOf(m.Opts)
 		if valOf.IsNil() {
-			return fmt.Errorf("Opts must be set for a select as a map")
+			return fmt.Errorf("opts must be set for a select as a map")
 		}
 		if valOf.Kind() != reflect.Map {
-			return fmt.Errorf("Opts must be set for a select as a map, type %s given", valOf.Type())
+			return fmt.Errorf("opts must be set for a select as a map, type %s given", valOf.Type())
 		}
 		if valOf.Len() == 0 {
-			return fmt.Errorf("Opts must be be set for a select as a map, empty one given")
+			return fmt.Errorf("opts must be be set for a select as a map, empty one given")
 		}
 	}
 	return nil

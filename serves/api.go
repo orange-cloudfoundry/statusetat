@@ -35,27 +35,27 @@ func (a *Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if incident.Components == nil || len(*incident.Components) == 0 {
-		JSONError(w, fmt.Errorf("Components must be set"), http.StatusPreconditionFailed)
+		JSONError(w, fmt.Errorf("components must be set"), http.StatusPreconditionFailed)
 		return
 	}
 
 	if incident.ComponentState < 0 {
-		JSONError(w, fmt.Errorf("Component state must be set"), http.StatusPreconditionFailed)
+		JSONError(w, fmt.Errorf("component state must be set"), http.StatusPreconditionFailed)
 		return
 	}
 
 	if incident.State < 0 {
-		JSONError(w, fmt.Errorf("Incident state must be set"), http.StatusPreconditionFailed)
+		JSONError(w, fmt.Errorf("incident state must be set"), http.StatusPreconditionFailed)
 		return
 	}
 
 	if len(incident.Messages) <= 0 {
-		JSONError(w, fmt.Errorf("At least one message must be set"), http.StatusPreconditionFailed)
+		JSONError(w, fmt.Errorf("at least one message must be set"), http.StatusPreconditionFailed)
 		return
 	}
 
 	if incident.IsScheduled && incident.ScheduledEnd.IsZero() {
-		JSONError(w, fmt.Errorf("If is scheduled, it must have a scheduled end"), http.StatusPreconditionFailed)
+		JSONError(w, fmt.Errorf("if is scheduled, it must have a scheduled end"), http.StatusPreconditionFailed)
 		return
 	}
 
@@ -73,7 +73,7 @@ func (a *Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {
 	incident.UpdatedAt = incident.CreatedAt
 
 	if incident.IsScheduled && incident.CreatedAt.After(incident.ScheduledEnd) {
-		JSONError(w, fmt.Errorf("Start date of scheduled maintenance can't be before end date"), http.StatusPreconditionFailed)
+		JSONError(w, fmt.Errorf("start date of scheduled maintenance can't be before end date"), http.StatusPreconditionFailed)
 		return
 	}
 
@@ -252,7 +252,7 @@ func (a *Serve) Update(w http.ResponseWriter, req *http.Request) {
 		incident.Metadata = *incidentUpdate.Metadata
 	}
 	if incident.IsScheduled && incident.CreatedAt.After(incident.ScheduledEnd) {
-		JSONError(w, fmt.Errorf("Start date of scheduled maintenance must be before end date"), http.StatusPreconditionFailed)
+		JSONError(w, fmt.Errorf("start date of scheduled maintenance must be before end date"), http.StatusPreconditionFailed)
 		return
 	}
 

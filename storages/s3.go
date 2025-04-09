@@ -17,6 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/orange-cloudfoundry/statusetat/common"
 	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/utils"
 )
 
 type s3Session struct {
@@ -57,7 +58,7 @@ func (s *S3) retrieveSubscribers() ([]string, error) {
 		}
 		return []string{}, err
 	}
-	defer obj.Body.Close()
+	defer utils.CloseAndLogError(obj.Body)
 	subs := make([]string, 0)
 	err = json.NewDecoder(obj.Body).Decode(&subs)
 	if err != nil {
@@ -180,7 +181,7 @@ func (s *S3) Read(guid string) (models.Incident, error) {
 		}
 		return models.Incident{}, err
 	}
-	defer obj.Body.Close()
+	defer utils.CloseAndLogError(obj.Body)
 	err = json.NewDecoder(obj.Body).Decode(&incident)
 	if err != nil {
 		return models.Incident{}, err
@@ -299,7 +300,7 @@ func (s *S3) Persistents() ([]models.Incident, error) {
 		}
 		return []models.Incident{}, err
 	}
-	defer obj.Body.Close()
+	defer utils.CloseAndLogError(obj.Body)
 	subs := make([]models.Incident, 0)
 	err = json.NewDecoder(obj.Body).Decode(&subs)
 	if err != nil {

@@ -161,5 +161,5 @@ func HTMLError(w http.ResponseWriter, err error, code int) {
 	w.WriteHeader(code)
 	LogError(err, code)
 	//nolint:errcheck
-	w.Write([]byte(fmt.Sprintf("%d %s: %s", code, http.StatusText(code), err.Error())))
+	w.Write(fmt.Appendf(nil, "%d %s: %s", code, http.StatusText(code), err.Error()))
 }

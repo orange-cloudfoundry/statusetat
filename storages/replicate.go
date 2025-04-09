@@ -71,7 +71,7 @@ func (m *Replicate) Creator() func(u *url.URL) (Store, error) {
 			m.stores[u.String()] = store
 			return m, nil
 		}
-		return nil, fmt.Errorf("No valid store can be found")
+		return nil, fmt.Errorf("no valid store can be found")
 	}
 }
 

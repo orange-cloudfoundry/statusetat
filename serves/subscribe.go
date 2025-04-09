@@ -9,7 +9,7 @@ import (
 func (a *Serve) SubscribeEmail(w http.ResponseWriter, req *http.Request) {
 	email := req.URL.Query().Get("email")
 	if email == "" {
-		JSONError(w, fmt.Errorf("You must set an email"), http.StatusPreconditionRequired)
+		JSONError(w, fmt.Errorf("you must set an email"), http.StatusPreconditionRequired)
 		return
 	}
 	_, err := mail.ParseAddress(email)
@@ -28,7 +28,7 @@ func (a *Serve) SubscribeEmail(w http.ResponseWriter, req *http.Request) {
 func (a *Serve) UnsubscribeEmail(w http.ResponseWriter, req *http.Request) {
 	email := req.URL.Query().Get("email")
 	if email == "" {
-		HTMLError(w, fmt.Errorf("You must set an email"), http.StatusPreconditionRequired)
+		HTMLError(w, fmt.Errorf("you must set an email"), http.StatusPreconditionRequired)
 		return
 	}
 	err := a.store.Unsubscribe(email)

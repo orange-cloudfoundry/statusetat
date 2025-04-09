@@ -15,6 +15,7 @@ import (
 	"github.com/orange-cloudfoundry/statusetat/config"
 	"github.com/orange-cloudfoundry/statusetat/models"
 	"github.com/orange-cloudfoundry/statusetat/notifiers"
+	"github.com/orange-cloudfoundry/statusetat/utils"
 )
 
 func init() {
@@ -229,13 +230,13 @@ func (n *Slack) notifyScheduled(incident models.Incident) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer utils.CloseAndLogError(resp.Body)
 	if resp.StatusCode > 399 {
 		b, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return fmt.Errorf("Get error code %d", resp.StatusCode)
+			return fmt.Errorf("get error code %d", resp.StatusCode)
 		}
-		return fmt.Errorf("Get error code %d: %s", resp.StatusCode, string(b))
+		return fmt.Errorf("get error code %d: %s", resp.StatusCode, string(b))
 	}
 	return nil
 }
@@ -319,7 +320,7 @@ func (n *Slack) notifyIncident(incident models.Incident, triggered bool) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer utils.CloseAndLogError(resp.Body)
 	err = common.ExtractHttpError(resp)
 	if err != nil {
 		return err
