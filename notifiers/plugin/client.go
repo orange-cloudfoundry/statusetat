@@ -7,10 +7,10 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	"github.com/orange-cloudfoundry/statusetat/common"
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/orange-cloudfoundry/statusetat/notifiers/plugin/proto"
+	"github.com/orange-cloudfoundry/statusetat/v2/common"
+	"github.com/orange-cloudfoundry/statusetat/v2/config"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers/plugin/proto"
 )
 
 type GRPCClient struct {
@@ -99,9 +99,9 @@ func (m *GRPCClient) MetadataFields() ([]models.MetadataField, error) {
 
 }
 
-func (m *GRPCClient) PreCheck(incident models.Incident) error {
+func (m *GRPCClient) PreCheck(incident *models.Incident) error {
 	resp, err := m.client.PreCheck(context.Background(), &proto.NotifyRequest{
-		Incident: IncidentToProto(incident),
+		Incident: IncidentToProto(*incident),
 	})
 	if err != nil {
 		return err

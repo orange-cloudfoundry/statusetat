@@ -12,10 +12,10 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"gopkg.in/gomail.v2"
 
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/extemplate"
-	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/orange-cloudfoundry/statusetat/notifiers"
+	"github.com/orange-cloudfoundry/statusetat/v2/config"
+	"github.com/orange-cloudfoundry/statusetat/v2/extemplate"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers"
 )
 
 func init() {

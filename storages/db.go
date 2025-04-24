@@ -12,7 +12,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
 )
 
 func init() {

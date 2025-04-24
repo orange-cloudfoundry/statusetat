@@ -6,7 +6,7 @@ import (
 
 	ics "github.com/arran4/golang-ical"
 
-	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
 )
 
 func (a *Serve) Ical(w http.ResponseWriter, req *http.Request) {

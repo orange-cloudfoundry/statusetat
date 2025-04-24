@@ -3,8 +3,8 @@ package notifiers
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . NotifierAllInOne
 
 import (
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/config"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
 )
 
 type Notifier interface {

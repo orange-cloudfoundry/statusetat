@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/orange-cloudfoundry/statusetat/storages"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/storages"
 )
 
 type FakeStore struct {

@@ -10,11 +10,11 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
 
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/orange-cloudfoundry/statusetat/notifiers"
+	"github.com/orange-cloudfoundry/statusetat/v2/config"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers"
 
-	"github.com/orange-cloudfoundry/statusetat/notifiers/slack"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers/slack"
 )
 
 var _ = Describe("Slack", func() {

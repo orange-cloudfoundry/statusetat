@@ -4,9 +4,9 @@ package notifiersfakes
 import (
 	"sync"
 
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/orange-cloudfoundry/statusetat/notifiers"
+	"github.com/orange-cloudfoundry/statusetat/v2/config"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers"
 )
 
 type FakeNotifierAllInOne struct {
@@ -422,16 +422,16 @@ func (fake *FakeNotifierAllInOne) NotifyReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeNotifierAllInOne) PreCheck(arg1 models.Incident) error {
+func (fake *FakeNotifierAllInOne) PreCheck(arg1 *models.Incident) error {
 	fake.preCheckMutex.Lock()
 	ret, specificReturn := fake.preCheckReturnsOnCall[len(fake.preCheckArgsForCall)]
 	fake.preCheckArgsForCall = append(fake.preCheckArgsForCall, struct {
 		arg1 models.Incident
-	}{arg1})
+	}{*arg1})
 	fake.recordInvocation("PreCheck", []interface{}{arg1})
 	fake.preCheckMutex.Unlock()
 	if fake.PreCheckStub != nil {
-		return fake.PreCheckStub(arg1)
+		return fake.PreCheckStub(*arg1)
 	}
 	if specificReturn {
 		return ret.result1

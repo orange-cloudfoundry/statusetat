@@ -7,9 +7,9 @@ import (
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/orange-cloudfoundry/statusetat/common"
-	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/orange-cloudfoundry/statusetat/notifiers/plugin/proto"
+	"github.com/orange-cloudfoundry/statusetat/v2/common"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers/plugin/proto"
 )
 
 func IncidentToProto(incident models.Incident) *proto.Incident {

@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
 )
 
 type HeaderTransport struct {

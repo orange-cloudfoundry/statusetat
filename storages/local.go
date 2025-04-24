@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/common"
-	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/common"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
 )
 
 type Local struct {

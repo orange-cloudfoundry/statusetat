@@ -1,4 +1,4 @@
-module github.com/orange-cloudfoundry/statusetat
+module github.com/orange-cloudfoundry/statusetat/v2
 
 go 1.24.1
 

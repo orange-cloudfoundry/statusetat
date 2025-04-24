@@ -13,10 +13,10 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/nicklaw5/go-respond"
 
-	"github.com/orange-cloudfoundry/statusetat/common"
-	"github.com/orange-cloudfoundry/statusetat/emitter"
-	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/orange-cloudfoundry/statusetat/notifiers"
+	"github.com/orange-cloudfoundry/statusetat/v2/common"
+	"github.com/orange-cloudfoundry/statusetat/v2/emitter"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers"
 )
 
 func (a *Serve) CreateIncident(w http.ResponseWriter, req *http.Request) {

@@ -6,9 +6,9 @@ import (
 	pluginhc "github.com/hashicorp/go-plugin"
 	"google.golang.org/grpc"
 
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/orange-cloudfoundry/statusetat/notifiers/plugin/proto"
+	"github.com/orange-cloudfoundry/statusetat/v2/config"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers/plugin/proto"
 )
 
 // Handshake is a common handshake that is shared by plugin and host.

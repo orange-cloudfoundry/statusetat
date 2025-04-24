@@ -5,7 +5,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/orange-cloudfoundry/statusetat/serves"
+	"github.com/orange-cloudfoundry/statusetat/v2/serves"
 )
 
 type FakeHtmlTemplater struct {
