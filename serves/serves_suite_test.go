@@ -16,14 +16,14 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/emitter"
-	"github.com/orange-cloudfoundry/statusetat/emitter/emitterfakes"
-	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/orange-cloudfoundry/statusetat/serves"
-	"github.com/orange-cloudfoundry/statusetat/serves/servesfakes"
-	"github.com/orange-cloudfoundry/statusetat/storages"
-	"github.com/orange-cloudfoundry/statusetat/storages/storagesfakes"
+	"github.com/orange-cloudfoundry/statusetat/v2/config"
+	"github.com/orange-cloudfoundry/statusetat/v2/emitter"
+	"github.com/orange-cloudfoundry/statusetat/v2/emitter/emitterfakes"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/serves"
+	"github.com/orange-cloudfoundry/statusetat/v2/serves/servesfakes"
+	"github.com/orange-cloudfoundry/statusetat/v2/storages"
+	"github.com/orange-cloudfoundry/statusetat/v2/storages/storagesfakes"
 )
 
 var router *mux.Router

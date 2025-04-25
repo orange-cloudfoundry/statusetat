@@ -4,8 +4,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/orange-cloudfoundry/statusetat/markdown"
-	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/markdown"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
 )
 
 func (a *Serve) convertMessageToHtml(messages []models.Message) []models.Message {

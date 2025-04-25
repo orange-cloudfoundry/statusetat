@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
 )
 
 type Store interface {

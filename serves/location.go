@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/sessions"
-	"github.com/orange-cloudfoundry/statusetat/locations"
+	"github.com/orange-cloudfoundry/statusetat/v2/locations"
 )
 
 const (

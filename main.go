@@ -17,16 +17,16 @@ import (
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/locations"
-	"github.com/orange-cloudfoundry/statusetat/notifiers"
-	_ "github.com/orange-cloudfoundry/statusetat/notifiers/email"
-	_ "github.com/orange-cloudfoundry/statusetat/notifiers/grafana"
-	_ "github.com/orange-cloudfoundry/statusetat/notifiers/log"
-	_ "github.com/orange-cloudfoundry/statusetat/notifiers/plugin"
-	_ "github.com/orange-cloudfoundry/statusetat/notifiers/slack"
-	"github.com/orange-cloudfoundry/statusetat/serves"
-	"github.com/orange-cloudfoundry/statusetat/storages"
+	"github.com/orange-cloudfoundry/statusetat/v2/config"
+	"github.com/orange-cloudfoundry/statusetat/v2/locations"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers"
+	_ "github.com/orange-cloudfoundry/statusetat/v2/notifiers/email"
+	_ "github.com/orange-cloudfoundry/statusetat/v2/notifiers/grafana"
+	_ "github.com/orange-cloudfoundry/statusetat/v2/notifiers/log"
+	_ "github.com/orange-cloudfoundry/statusetat/v2/notifiers/plugin"
+	_ "github.com/orange-cloudfoundry/statusetat/v2/notifiers/slack"
+	"github.com/orange-cloudfoundry/statusetat/v2/serves"
+	"github.com/orange-cloudfoundry/statusetat/v2/storages"
 )
 
 var (

@@ -12,11 +12,11 @@ import (
 
 	"github.com/goji/httpauth"
 	"github.com/gorilla/mux"
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/extemplate"
+	"github.com/orange-cloudfoundry/statusetat/v2/config"
+	"github.com/orange-cloudfoundry/statusetat/v2/extemplate"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/orange-cloudfoundry/statusetat/storages"
+	"github.com/orange-cloudfoundry/statusetat/v2/storages"
 )
 
 type HtmlTemplater interface {

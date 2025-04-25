@@ -11,9 +11,9 @@ import (
 
 	"github.com/dustin/go-humanize"
 
-	"github.com/orange-cloudfoundry/statusetat/locations"
-	"github.com/orange-cloudfoundry/statusetat/markdown"
-	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/locations"
+	"github.com/orange-cloudfoundry/statusetat/v2/markdown"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
 )
 
 func iconState(state models.ComponentState) string {

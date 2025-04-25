@@ -8,11 +8,11 @@ import (
 	. "github.com/onsi/gomega"
 	"gopkg.in/gomail.v2"
 
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/orange-cloudfoundry/statusetat/notifiers"
-	"github.com/orange-cloudfoundry/statusetat/notifiers/email"
-	"github.com/orange-cloudfoundry/statusetat/notifiers/email/emailfakes"
+	"github.com/orange-cloudfoundry/statusetat/v2/config"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers/email"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers/email/emailfakes"
 )
 
 var _ = Describe("Email", func() {

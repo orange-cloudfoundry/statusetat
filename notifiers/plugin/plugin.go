@@ -7,10 +7,10 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 
-	"github.com/orange-cloudfoundry/statusetat/common"
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/models"
-	"github.com/orange-cloudfoundry/statusetat/notifiers"
+	"github.com/orange-cloudfoundry/statusetat/v2/common"
+	"github.com/orange-cloudfoundry/statusetat/v2/config"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers"
 )
 
 func init() {
@@ -126,6 +126,6 @@ func (n *Plugin) MetadataFields() []models.MetadataField {
 	return fields
 }
 
-func (n *Plugin) PreCheck(incident models.Incident) error {
+func (n *Plugin) PreCheck(incident *models.Incident) error {
 	return n.notifier.PreCheck(incident)
 }

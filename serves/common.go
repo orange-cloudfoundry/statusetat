@@ -5,8 +5,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/orange-cloudfoundry/statusetat/config"
-	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/config"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
 )
 
 func (a *Serve) scheduled(from, to time.Time) ([]models.Incident, error) {

@@ -279,7 +279,7 @@ import (
 type LogNotifier struct {
 }
 
-func (n LogNotifier) PreCheck(incident models.Incident) error {
+func (n LogNotifier) PreCheck(incident *models.Incident) error {
 	return nil
 }
 

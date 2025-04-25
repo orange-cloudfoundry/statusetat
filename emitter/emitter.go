@@ -5,7 +5,7 @@ package emitter
 import (
 	"github.com/olebedev/emitter"
 
-	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
 )
 
 type emitterInterface interface {

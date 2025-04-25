@@ -4,7 +4,7 @@ package emailfakes
 import (
 	"sync"
 
-	"github.com/orange-cloudfoundry/statusetat/notifiers/email"
+	"github.com/orange-cloudfoundry/statusetat/v2/notifiers/email"
 	gomail "gopkg.in/gomail.v2"
 )
 

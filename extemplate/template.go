@@ -16,9 +16,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/orange-cloudfoundry/statusetat/common"
-	"github.com/orange-cloudfoundry/statusetat/markdown"
-	"github.com/orange-cloudfoundry/statusetat/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/common"
+	"github.com/orange-cloudfoundry/statusetat/v2/markdown"
+	"github.com/orange-cloudfoundry/statusetat/v2/models"
 )
 
 var extendsRegex *regexp.Regexp
