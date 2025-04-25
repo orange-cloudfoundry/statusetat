@@ -12,7 +12,7 @@ import (
 
 	"github.com/orange-cloudfoundry/statusetat/v2/models"
 	"github.com/orange-cloudfoundry/statusetat/v2/storages"
-	"github.com/orange-cloudfoundry/statusetat/utils"
+	"github.com/orange-cloudfoundry/statusetat/v2/utils"
 )
 
 var _ = Describe("Local", func() {

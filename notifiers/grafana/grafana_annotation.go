@@ -16,7 +16,7 @@ import (
 	"github.com/orange-cloudfoundry/statusetat/v2/config"
 	"github.com/orange-cloudfoundry/statusetat/v2/models"
 	"github.com/orange-cloudfoundry/statusetat/v2/notifiers"
-	"github.com/orange-cloudfoundry/statusetat/utils"
+	"github.com/orange-cloudfoundry/statusetat/v2/utils"
 )
 
 func init() {

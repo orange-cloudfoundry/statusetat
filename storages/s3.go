@@ -15,9 +15,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/orange-cloudfoundry/statusetat/utils"
 	"github.com/orange-cloudfoundry/statusetat/v2/common"
 	"github.com/orange-cloudfoundry/statusetat/v2/models"
+	"github.com/orange-cloudfoundry/statusetat/v2/utils"
 )
 
 type s3Session struct {
