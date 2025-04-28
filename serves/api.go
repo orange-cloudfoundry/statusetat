@@ -343,6 +343,9 @@ func (a *Serve) Delete(w http.ResponseWriter, req *http.Request) {
 		JSONError(w, err, http.StatusPreconditionFailed)
 		return
 	}
+
+	emitter.Emit(models.NewNotifyRequest(incident, true))
+
 	w.WriteHeader(200)
 }
 
