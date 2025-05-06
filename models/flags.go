@@ -17,6 +17,7 @@ const (
 	Resolved
 	Monitoring
 	Idle
+	Cancelled
 )
 
 var AllIncidentState = []IncidentState{Unresolved, Monitoring, Resolved}

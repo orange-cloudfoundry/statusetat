@@ -315,8 +315,17 @@ func (a *Serve) Notify(w http.ResponseWriter, req *http.Request) {
 func (a *Serve) Delete(w http.ResponseWriter, req *http.Request) {
 	v := mux.Vars(req)
 	guid := v["guid"]
+	incident, err := a.store.Read(guid)
+	if err != nil {
+		if os.IsNotExist(err) {
+			JSONError(w, err, http.StatusNotFound)
+			return
+		}
+		JSONError(w, err, http.StatusPreconditionRequired)
+		return
+	}
 
-	err := a.store.Delete(guid)
+	err = a.store.Delete(guid)
 	if err != nil {
 		if os.IsNotExist(err) {
 			JSONError(w, err, http.StatusNotFound)
@@ -325,6 +334,18 @@ func (a *Serve) Delete(w http.ResponseWriter, req *http.Request) {
 		JSONError(w, err, http.StatusInternalServerError)
 		return
 	}
+
+	// Using a "cancelled" state
+	incident.State = models.Cancelled
+
+	err = a.runPreCheck(&incident)
+	if err != nil {
+		JSONError(w, err, http.StatusPreconditionFailed)
+		return
+	}
+
+	emitter.Emit(models.NewNotifyRequest(incident, true))
+
 	w.WriteHeader(200)
 }
 

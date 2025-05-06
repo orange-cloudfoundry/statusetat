@@ -282,6 +282,7 @@ var _ = Describe("Api", func() {
 
 			rr := CallRequest(NewRequestIntAdmin(http.MethodDelete, "/v1/incidents/1", nil))
 			Expect(rr.CheckError()).ToNot(HaveOccurred())
+			Expect(fakeEmitter.EmitCallCount()).To(Equal(1))
 
 			_, err = fakeStoreMem.Read("1")
 			Expect(err).To(HaveOccurred())
