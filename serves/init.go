@@ -81,6 +81,7 @@ func RegisterWithHtmlTemplater(
 
 	router.HandleFunc("/", api.Index)
 	router.HandleFunc("/index", api.Index)
+	router.HandleFunc("/statuses", api.Statuses)
 	router.HandleFunc("/history", api.History)
 	router.HandleFunc("/incidents/{guid}", api.ShowIncident)
 	router.HandleFunc("/rss.xml", api.Rss)
