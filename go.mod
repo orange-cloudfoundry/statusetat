@@ -27,7 +27,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
 	github.com/prometheus/client_golang v1.22.0
-	github.com/prometheus/common v0.63.0
+	github.com/prometheus/common v0.64.0
 	github.com/rs/cors v1.11.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/tdewolff/minify/v2 v2.23.5
@@ -71,10 +71,10 @@ require (
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
-	golang.org/x/net v0.39.0 // indirect
-	golang.org/x/sync v0.13.0 // indirect
+	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/sync v0.14.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.24.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
 	golang.org/x/tools v0.32.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250428153025-10db94c68c34 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
