@@ -291,6 +291,8 @@ func (a *Serve) Statuses(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(data.ToJsonData()); err != nil {
 		LogError(err, 500)
+		HTMLError(w, err, http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -298,6 +300,7 @@ func (a *Serve) Index(w http.ResponseWriter, req *http.Request) {
 	data, err := a.getIndexData(w, req)
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)
+		return
 	}
 	err = a.xt.ExecuteTemplate(w, "incidents.gohtml", data)
 	if err != nil {
