@@ -27,123 +27,129 @@ type IndexData struct {
 }
 
 func (i *IndexData) ToJsonData() interface{} {
-	type JsonIncident struct {
-		GUID           string    `json:"guid"`
-		CreatedAt      time.Time `json:"created_at"`
-		UpdatedAt      time.Time `json:"updated_at"`
-		State          string    `json:"state"`
-		ComponentState string    `json:"component_state"`
-		Components     []string  `json:"components"`
-		Messages       []struct {
-			GUID         string    `json:"guid"`
-			IncidentGUID string    `json:"incident_guid"`
-			CreatedAt    time.Time `json:"created_at"`
-			Title        string    `json:"title"`
-			Content      string    `json:"content"`
-		} `json:"messages"`
-		Metadata    interface{} `json:"metadata"`
-		IsScheduled bool        `json:"is_scheduled"`
-		Persistent  bool        `json:"persistent"`
-	}
-
-	type JsonComponent struct {
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		State       string `json:"state"`
-	}
-
-	type JsonGroup struct {
-		Name       string          `json:"name"`
-		Components []JsonComponent `json:"components"`
-		State      string          `json:"state"`
-	}
-
-	res := struct {
-		Groups              []JsonGroup    `json:"groups"`
-		PersistentIncidents []JsonIncident `json:"persistent_incidents"`
-		Incidents           []JsonIncident `json:"incidents"`
-		ScheduledIncidents  []JsonIncident `json:"scheduled"`
-		TimeZone            string         `json:"timezone"`
-	}{
-		Groups:              []JsonGroup{},
-		PersistentIncidents: []JsonIncident{},
-		Incidents:           []JsonIncident{},
-		ScheduledIncidents:  []JsonIncident{},
+	jsonData := JsonResponse{
 		TimeZone:            i.Timezone,
+		Groups:              make([]JsonGroup, 0, len(i.GroupComponentState)),
+		PersistentIncidents: make([]JsonIncident, 0, len(i.PersistentIncidents)),
+		ScheduledIncidents:  make([]JsonIncident, 0, len(i.Scheduled)),
+		Incidents:           make([]JsonIncident, 0),
 	}
 
-	// Groups
-	for group, state := range i.GroupComponentState {
-		jsonGroup := JsonGroup{
-			Name:       group,
+	jsonData.processGroups(i)
+	jsonData.processIncidents(i)
+
+	return jsonData
+}
+
+type JsonResponse struct {
+	Groups              []JsonGroup    `json:"groups"`
+	PersistentIncidents []JsonIncident `json:"persistent_incidents"`
+	Incidents           []JsonIncident `json:"incidents"`
+	ScheduledIncidents  []JsonIncident `json:"scheduled"`
+	TimeZone            string         `json:"timezone"`
+}
+
+type JsonIncident struct {
+	GUID           string        `json:"guid"`
+	CreatedAt      time.Time     `json:"created_at"`
+	UpdatedAt      time.Time     `json:"updated_at"`
+	State          string        `json:"state"`
+	ComponentState string        `json:"component_state"`
+	Components     []string      `json:"components"`
+	Messages       []JsonMessage `json:"messages"`
+	Metadata       interface{}   `json:"metadata"`
+	IsScheduled    bool          `json:"is_scheduled"`
+	Persistent     bool          `json:"persistent"`
+}
+
+type JsonMessage struct {
+	GUID         string    `json:"guid"`
+	IncidentGUID string    `json:"incident_guid"`
+	CreatedAt    time.Time `json:"created_at"`
+	Title        string    `json:"title"`
+	Content      string    `json:"content"`
+}
+
+type JsonComponent struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	State       string `json:"state"`
+}
+
+type JsonGroup struct {
+	Name       string          `json:"name"`
+	Components []JsonComponent `json:"components"`
+	State      string          `json:"state"`
+}
+
+func (jr *JsonResponse) processGroups(indexData *IndexData) {
+	for groupName, state := range indexData.GroupComponentState {
+		group := JsonGroup{
+			Name:       groupName,
 			State:      models.TextState(state),
-			Components: []JsonComponent{},
+			Components: make([]JsonComponent, 0, len(indexData.ComponentStatesData[groupName])),
 		}
-		for _, component := range i.ComponentStatesData[group] {
-			jsonGroup.Components = append(jsonGroup.Components, JsonComponent{
+
+		for _, component := range indexData.ComponentStatesData[groupName] {
+			group.Components = append(group.Components, JsonComponent{
 				Name:        component.Name,
 				Description: component.Description,
 				State:       models.TextState(component.State),
 			})
 		}
 
-		incidentToJsonIncident := func(incident models.Incident) JsonIncident {
-			jsonIncident := JsonIncident{
-				GUID:           incident.GUID,
-				CreatedAt:      incident.CreatedAt,
-				UpdatedAt:      incident.UpdatedAt,
-				State:          models.TextIncidentState(incident.State),
-				ComponentState: models.TextState(incident.ComponentState),
-				Components:     []string{},
-				Messages: []struct {
-					GUID         string    `json:"guid"`
-					IncidentGUID string    `json:"incident_guid"`
-					CreatedAt    time.Time `json:"created_at"`
-					Title        string    `json:"title"`
-					Content      string    `json:"content"`
-				}{},
-				Metadata:    incident.Metadata,
-				IsScheduled: incident.IsScheduled,
-				Persistent:  incident.Persistent,
-			}
-			for _, component := range *incident.Components {
-				jsonIncident.Components = append(jsonIncident.Components, component.String())
-			}
-			for _, message := range incident.Messages {
-				jsonIncident.Messages = append(jsonIncident.Messages, struct {
-					GUID         string    `json:"guid"`
-					IncidentGUID string    `json:"incident_guid"`
-					CreatedAt    time.Time `json:"created_at"`
-					Title        string    `json:"title"`
-					Content      string    `json:"content"`
-				}{
-					GUID:         message.GUID,
-					IncidentGUID: message.IncidentGUID,
-					CreatedAt:    message.CreatedAt,
-					Title:        message.Title,
-					Content:      message.Content,
-				})
-			}
-			return jsonIncident
+		jr.Groups = append(jr.Groups, group)
+	}
+}
+
+func (jr *JsonResponse) processIncidents(indexData *IndexData) {
+	convertIncident := func(incident models.Incident) JsonIncident {
+		jsonIncident := JsonIncident{
+			GUID:           incident.GUID,
+			CreatedAt:      incident.CreatedAt,
+			UpdatedAt:      incident.UpdatedAt,
+			State:          models.TextIncidentState(incident.State),
+			ComponentState: models.TextState(incident.ComponentState),
+			Components:     make([]string, 0, len(*incident.Components)),
+			Messages:       make([]JsonMessage, 0, len(incident.Messages)),
+			Metadata:       incident.Metadata,
+			IsScheduled:    incident.IsScheduled,
+			Persistent:     incident.Persistent,
 		}
 
-		for _, incident := range i.PersistentIncidents {
-			res.PersistentIncidents = append(res.PersistentIncidents, incidentToJsonIncident(incident))
-		}
-		for _, incident := range i.Scheduled {
-			res.ScheduledIncidents = append(res.ScheduledIncidents, incidentToJsonIncident(incident))
+		for _, component := range *incident.Components {
+			jsonIncident.Components = append(jsonIncident.Components, component.String())
 		}
 
-		for _, incidents := range i.Timeline {
-			for _, incident := range incidents {
-				res.Incidents = append(res.Incidents, incidentToJsonIncident(incident))
-			}
+		for _, message := range incident.Messages {
+			jsonIncident.Messages = append(jsonIncident.Messages, JsonMessage{
+				GUID:         message.GUID,
+				IncidentGUID: message.IncidentGUID,
+				CreatedAt:    message.CreatedAt,
+				Title:        message.Title,
+				Content:      message.Content,
+			})
 		}
 
-		res.Groups = append(res.Groups, jsonGroup)
+		return jsonIncident
 	}
 
-	return res
+	// Process persistent incidents
+	for _, incident := range indexData.PersistentIncidents {
+		jr.PersistentIncidents = append(jr.PersistentIncidents, convertIncident(incident))
+	}
+
+	// Process scheduled incidents
+	for _, incident := range indexData.Scheduled {
+		jr.ScheduledIncidents = append(jr.ScheduledIncidents, convertIncident(incident))
+	}
+
+	// Process timeline incidents
+	for _, incidents := range indexData.Timeline {
+		for _, incident := range incidents {
+			jr.Incidents = append(jr.Incidents, convertIncident(incident))
+		}
+	}
 }
 
 type timeSlice []string
