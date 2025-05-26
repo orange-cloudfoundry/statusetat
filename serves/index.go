@@ -1,6 +1,7 @@
 package serves
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,6 +24,132 @@ type IndexData struct {
 	BaseInfo            config.BaseInfo
 	Timezone            string
 	Theme               config.Theme
+}
+
+func (i *IndexData) ToJsonData() interface{} {
+	jsonData := JsonResponse{
+		TimeZone:            i.Timezone,
+		Groups:              make([]JsonGroup, 0, len(i.GroupComponentState)),
+		PersistentIncidents: make([]JsonIncident, 0, len(i.PersistentIncidents)),
+		ScheduledIncidents:  make([]JsonIncident, 0, len(i.Scheduled)),
+		Incidents:           make([]JsonIncident, 0),
+	}
+
+	jsonData.processGroups(i)
+	jsonData.processIncidents(i)
+
+	return jsonData
+}
+
+type JsonResponse struct {
+	Groups              []JsonGroup    `json:"groups"`
+	PersistentIncidents []JsonIncident `json:"persistent_incidents"`
+	Incidents           []JsonIncident `json:"incidents"`
+	ScheduledIncidents  []JsonIncident `json:"scheduled"`
+	TimeZone            string         `json:"timezone"`
+}
+
+type JsonIncident struct {
+	GUID           string        `json:"guid"`
+	CreatedAt      time.Time     `json:"created_at"`
+	UpdatedAt      time.Time     `json:"updated_at"`
+	State          string        `json:"state"`
+	ComponentState string        `json:"component_state"`
+	Components     []string      `json:"components"`
+	Messages       []JsonMessage `json:"messages"`
+	Metadata       interface{}   `json:"metadata"`
+	IsScheduled    bool          `json:"is_scheduled"`
+	Persistent     bool          `json:"persistent"`
+}
+
+type JsonMessage struct {
+	GUID         string    `json:"guid"`
+	IncidentGUID string    `json:"incident_guid"`
+	CreatedAt    time.Time `json:"created_at"`
+	Title        string    `json:"title"`
+	Content      string    `json:"content"`
+}
+
+type JsonComponent struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	State       string `json:"state"`
+}
+
+type JsonGroup struct {
+	Name       string          `json:"name"`
+	Components []JsonComponent `json:"components"`
+	State      string          `json:"state"`
+}
+
+func (jr *JsonResponse) processGroups(indexData *IndexData) {
+	for groupName, state := range indexData.GroupComponentState {
+		group := JsonGroup{
+			Name:       groupName,
+			State:      models.TextState(state),
+			Components: make([]JsonComponent, 0, len(indexData.ComponentStatesData[groupName])),
+		}
+
+		for _, component := range indexData.ComponentStatesData[groupName] {
+			group.Components = append(group.Components, JsonComponent{
+				Name:        component.Name,
+				Description: component.Description,
+				State:       models.TextState(component.State),
+			})
+		}
+
+		jr.Groups = append(jr.Groups, group)
+	}
+}
+
+func (jr *JsonResponse) processIncidents(indexData *IndexData) {
+	convertIncident := func(incident models.Incident) JsonIncident {
+		jsonIncident := JsonIncident{
+			GUID:           incident.GUID,
+			CreatedAt:      incident.CreatedAt,
+			UpdatedAt:      incident.UpdatedAt,
+			State:          models.TextIncidentState(incident.State),
+			ComponentState: models.TextState(incident.ComponentState),
+			Components:     make([]string, 0, len(*incident.Components)),
+			Messages:       make([]JsonMessage, 0, len(incident.Messages)),
+			Metadata:       incident.Metadata,
+			IsScheduled:    incident.IsScheduled,
+			Persistent:     incident.Persistent,
+		}
+
+		for _, component := range *incident.Components {
+			jsonIncident.Components = append(jsonIncident.Components, component.String())
+		}
+
+		for _, message := range incident.Messages {
+			jsonIncident.Messages = append(jsonIncident.Messages, JsonMessage{
+				GUID:         message.GUID,
+				IncidentGUID: message.IncidentGUID,
+				CreatedAt:    message.CreatedAt,
+				Title:        message.Title,
+				Content:      message.Content,
+			})
+		}
+
+		return jsonIncident
+	}
+
+	// Process persistent incidents
+	for _, incident := range indexData.PersistentIncidents {
+		jr.PersistentIncidents = append(jr.PersistentIncidents, convertIncident(incident))
+	}
+
+	// Process scheduled incidents
+	for _, incident := range indexData.Scheduled {
+		jr.ScheduledIncidents = append(jr.ScheduledIncidents, convertIncident(incident))
+	}
+
+	// Process timeline incidents
+	for _, incidents := range indexData.Timeline {
+		for _, incident := range incidents {
+			jr.Incidents = append(jr.Incidents, convertIncident(incident))
+		}
+	}
 }
 
 type timeSlice []string
@@ -54,18 +181,15 @@ type ComponentStateData struct {
 	State       models.ComponentState
 }
 
-func (a *Serve) Index(w http.ResponseWriter, req *http.Request) {
-
+func (a *Serve) getIndexData(w http.ResponseWriter, req *http.Request) (IndexData, error) {
 	from, to, err := a.periodFromReq(req, -6, 0)
 	if err != nil {
-		HTMLError(w, err, http.StatusInternalServerError)
-		return
+		return IndexData{}, err
 	}
 
 	incidents, err := a.incidentsByParamsDate(from, to, false)
 	if err != nil {
-		HTMLError(w, err, http.StatusInternalServerError)
-		return
+		return IndexData{}, err
 	}
 
 	componentStatesByGroup := make(map[string][]*ComponentStateData)
@@ -131,14 +255,12 @@ func (a *Serve) Index(w http.ResponseWriter, req *http.Request) {
 
 	fromScheduled, toScheduled, err := a.periodFromReq(req, 0, 26)
 	if err != nil {
-		HTMLError(w, err, http.StatusInternalServerError)
-		return
+		return IndexData{}, err
 	}
 
 	scheduled, err := a.scheduled(fromScheduled, toScheduled)
 	if err != nil {
-		HTMLError(w, err, http.StatusInternalServerError)
-		return
+		return IndexData{}, err
 	}
 
 	timezone := ""
@@ -148,12 +270,11 @@ func (a *Serve) Index(w http.ResponseWriter, req *http.Request) {
 
 	persistents, err := a.store.Persistents()
 	if err != nil {
-		HTMLError(w, err, http.StatusInternalServerError)
-		return
+		return IndexData{}, err
 	}
 
 	sort.Sort(sort.Reverse(timelineDates))
-	err = a.xt.ExecuteTemplate(w, "incidents.gohtml", IndexData{
+	return IndexData{
 		BaseInfo:            a.BaseInfo(),
 		GroupComponentState: compStateGroup,
 		ComponentStatesData: componentStatesByGroup,
@@ -163,7 +284,31 @@ func (a *Serve) Index(w http.ResponseWriter, req *http.Request) {
 		PersistentIncidents: persistents,
 		Timezone:            timezone,
 		Theme:               *a.config.Theme,
-	})
+	}, nil
+}
+
+func (a *Serve) Statuses(w http.ResponseWriter, req *http.Request) {
+	data, err := a.getIndexData(w, req)
+	if err != nil {
+		JSONError(w, err, http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(data.ToJsonData()); err != nil {
+		LogError(err, 500)
+		HTMLError(w, err, http.StatusInternalServerError)
+		return
+	}
+}
+
+func (a *Serve) Index(w http.ResponseWriter, req *http.Request) {
+	data, err := a.getIndexData(w, req)
+	if err != nil {
+		HTMLError(w, err, http.StatusInternalServerError)
+		return
+	}
+	err = a.xt.ExecuteTemplate(w, "incidents.gohtml", data)
 	if err != nil {
 		log.Println(err)
 		HTMLError(w, err, http.StatusInternalServerError)
