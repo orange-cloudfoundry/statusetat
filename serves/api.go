@@ -325,6 +325,15 @@ func (a *Serve) Delete(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// Using a "cancelled" state
+	incident.State = models.Cancelled
+
+	err = a.runPreCheck(&incident)
+	if err != nil {
+		JSONError(w, err, http.StatusPreconditionFailed)
+		return
+	}
+
 	err = a.store.Delete(guid)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -332,15 +341,6 @@ func (a *Serve) Delete(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		JSONError(w, err, http.StatusInternalServerError)
-		return
-	}
-
-	// Using a "cancelled" state
-	incident.State = models.Cancelled
-
-	err = a.runPreCheck(&incident)
-	if err != nil {
-		JSONError(w, err, http.StatusPreconditionFailed)
 		return
 	}
 
