@@ -6,7 +6,7 @@ require (
 	github.com/alecthomas/chroma v0.10.0
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/arran4/golang-ical v0.3.2
-	github.com/aws/aws-sdk-go v1.55.7
+	github.com/aws/aws-sdk-go v1.55.8
 	github.com/dustin/go-humanize v1.0.1
 	github.com/goji/httpauth v0.0.0-20160601135302-2da839ab0f4d
 	github.com/google/uuid v1.6.0
