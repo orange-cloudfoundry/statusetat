@@ -305,7 +305,7 @@ github.com/rs/cors/internal
 # github.com/sirupsen/logrus v1.9.3
 ## explicit; go 1.13
 github.com/sirupsen/logrus
-# github.com/tdewolff/minify/v2 v2.23.11
+# github.com/tdewolff/minify/v2 v2.24.0
 ## explicit; go 1.17
 github.com/tdewolff/minify/v2
 github.com/tdewolff/minify/v2/css
@@ -314,7 +314,7 @@ github.com/tdewolff/minify/v2/js
 github.com/tdewolff/minify/v2/json
 github.com/tdewolff/minify/v2/svg
 github.com/tdewolff/minify/v2/xml
-# github.com/tdewolff/parse/v2 v2.8.2-0.20250806174018-50048bb39781
+# github.com/tdewolff/parse/v2 v2.8.3
 ## explicit; go 1.11
 github.com/tdewolff/parse/v2
 github.com/tdewolff/parse/v2/buffer
