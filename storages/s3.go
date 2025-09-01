@@ -242,7 +242,7 @@ func (s *S3) Detect(u *url.URL) bool {
 
 func (s *S3) urlToSession(u *url.URL) (*s3Session, error) {
 	bucket, path := s.extractBucketPath(u)
-	
+
 	// Use default config if connecting to standard AWS S3
 	if strings.HasSuffix(u.Host, "s3.amazonaws.com") && (u.User == nil || u.User.Username() == "") {
 		cfg, err := config.LoadDefaultConfig(context.TODO())
@@ -299,9 +299,7 @@ func (s *S3) urlToSession(u *url.URL) (*s3Session, error) {
 
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
 		o.UsePathStyle = pathStyle
-		if host != u.Host {
-			o.BaseEndpoint = aws.String("https://" + host)
-		}
+		o.BaseEndpoint = aws.String("https://" + host)
 	})
 
 	return &s3Session{
