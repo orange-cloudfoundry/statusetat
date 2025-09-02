@@ -312,7 +312,7 @@ github.com/oklog/run
 # github.com/olebedev/emitter v0.0.0-20230411050614-349169dec2ba
 ## explicit
 github.com/olebedev/emitter
-# github.com/onsi/ginkgo/v2 v2.25.1
+# github.com/onsi/ginkgo/v2 v2.25.2
 ## explicit; go 1.23.0
 github.com/onsi/ginkgo/v2
 github.com/onsi/ginkgo/v2/config
@@ -334,8 +334,8 @@ github.com/onsi/ginkgo/v2/internal/parallel_support
 github.com/onsi/ginkgo/v2/internal/testingtproxy
 github.com/onsi/ginkgo/v2/reporters
 github.com/onsi/ginkgo/v2/types
-# github.com/onsi/gomega v1.38.1
-## explicit; go 1.24.0
+# github.com/onsi/gomega v1.38.2
+## explicit; go 1.23.0
 github.com/onsi/gomega
 github.com/onsi/gomega/format
 github.com/onsi/gomega/ghttp
