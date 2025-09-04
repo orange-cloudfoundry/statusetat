@@ -37,7 +37,9 @@ func (s *S3) Create(incident models.Incident) (models.Incident, error) {
 		return incident, err
 	}
 	b, _ := json.Marshal(incident)
-	uploader := manager.NewUploader(s.sess.client)
+	uploader := manager.NewUploader(s.sess.client, func(u *manager.Uploader) {
+		u.RequestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
+	})
 	_, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(s.sess.bucket),
 		Key:    aws.String(incident.GUID),
@@ -69,7 +71,9 @@ func (s *S3) retrieveSubscribers() ([]string, error) {
 
 func (s *S3) storeSubscribers(subscribers []string) error {
 	b, _ := json.Marshal(subscribers)
-	uploader := manager.NewUploader(s.sess.client)
+	uploader := manager.NewUploader(s.sess.client, func(u *manager.Uploader) {
+		u.RequestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
+	})
 	_, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(s.sess.bucket),
 		Key:    aws.String(subscriberFilename),
@@ -126,7 +130,9 @@ func (s *S3) Unsubscribe(email string) error {
 func (s *S3) storePersistents(incidents []models.Incident) error {
 	sort.Sort(models.Incidents(incidents))
 	b, _ := json.Marshal(incidents)
-	uploader := manager.NewUploader(s.sess.client)
+	uploader := manager.NewUploader(s.sess.client, func(u *manager.Uploader) {
+		u.RequestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
+	})
 	_, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(s.sess.bucket),
 		Key:    aws.String(persistentFilename),
@@ -300,6 +306,8 @@ func (s *S3) urlToSession(u *url.URL) (*s3Session, error) {
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
 		o.UsePathStyle = pathStyle
 		o.BaseEndpoint = aws.String("https://" + host)
+		o.RequestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
+		o.ResponseChecksumValidation = aws.ResponseChecksumValidationWhenRequired
 	})
 
 	return &s3Session{
