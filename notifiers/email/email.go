@@ -54,6 +54,22 @@ const (
 	DefaultFrom             = "no-reply@local"
 )
 
+var (
+	tlsVersions = map[string]uint16{
+		"TLS10": tls.VersionTLS10,
+		"TLS11": tls.VersionTLS11,
+		"TLS12": tls.VersionTLS12,
+		"TLS13": tls.VersionTLS13,
+	}
+)
+
+func getTLSVersion(version string, defaultVersion uint16) uint16 {
+	if v, ok := tlsVersions[version]; ok {
+		return v
+	}
+	return defaultVersion
+}
+
 type EmailDialer interface {
 	DialAndSend(m ...*gomail.Message) error
 }
@@ -61,6 +77,8 @@ type EmailDialer interface {
 type OptsEmail struct {
 	Host             string   `mapstructure:"host"`
 	Port             int      `mapstructure:"port"`
+	TLSMinVersion    string   `mapstructure:"tls_min_version"`
+	TLSMaxVersion    string   `mapstructure:"tls_max_version"`
 	Username         string   `mapstructure:"username"`
 	Password         string   `mapstructure:"password"`
 	UseSSl           bool     `mapstructure:"use_ssl"`
@@ -170,9 +188,15 @@ func loadDialer(opts OptsEmail) *gomail.Dialer {
 		Password: opts.Password,
 		SSL:      opts.UseSSl,
 	}
-	if opts.SkipInsecure {
-		dialer.TLSConfig = &tls.Config{InsecureSkipVerify: opts.SkipInsecure}
+
+	tlsConfig := &tls.Config{
+		MinVersion: getTLSVersion(opts.TLSMinVersion, tls.VersionTLS10),
+		MaxVersion: getTLSVersion(opts.TLSMaxVersion, tls.VersionTLS13),
 	}
+	if opts.SkipInsecure {
+		tlsConfig.InsecureSkipVerify = opts.SkipInsecure
+	}
+	dialer.TLSConfig = tlsConfig
 	return dialer
 }
 
