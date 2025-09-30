@@ -2,6 +2,7 @@ package notifiers
 
 import (
 	"fmt"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 
@@ -93,16 +94,24 @@ func Notify(store storages.Store) {
 		}
 		notifyReq := emitter.ToNotifyRequest(event)
 		notifyReq.Subscribers = subscribers
+
+		// Use a wait group to make notify calls concurrently and wait for all to complete
+		var wg sync.WaitGroup
 		for _, toNotif := range toNotifies {
 			n := toNotif.Notifier
 			if !toNotif.For.MatchComponents(*notifyReq.Incident.Components) {
 				continue
 			}
-			entry := log.WithField("notifier", n.Name()).WithField("id", n.Id())
-			err := n.Notify(notifyReq)
-			if err != nil {
-				entry.Errorf("could not send notify: %s", err.Error())
-			}
+			wg.Add(1)
+			go func(n Notifier, notifyReq *models.NotifyRequest) {
+				defer wg.Done()
+				entry := log.WithField("notifier", n.Name()).WithField("id", n.Id())
+				err := n.Notify(notifyReq)
+				if err != nil {
+					entry.Errorf("could not send notify: %s", err.Error())
+				}
+			}(n, notifyReq)
 		}
+		wg.Wait()
 	}
 }
