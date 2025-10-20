@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 )
 
 const PageSize = 4096
@@ -45,17 +46,15 @@ func (r *binaryReaderFile) Len() int64 {
 }
 
 func (r *binaryReaderFile) Bytes(b []byte, n, off int64) ([]byte, error) {
-	if _, err := r.f.Seek(off, 0); err != nil {
-		return nil, err
-	} else if b == nil {
+	if b == nil {
 		b = make([]byte, n)
 	}
-
-	m, err := r.f.Read(b)
-	if err != nil {
-		return nil, err
+	if m, err := r.f.ReadAt(b, off); err != nil {
+		return b[:m], err
+	} else if off+int64(m) == r.size {
+		return b[:m], io.EOF
 	} else if int64(m) != n {
-		return nil, errors.New("file: could not read all bytes")
+		return b[:m], errors.New("file: could not read all bytes")
 	}
 	return b, nil
 }
@@ -79,16 +78,22 @@ func (r *binaryReaderBytes) Len() int64 {
 }
 
 func (r *binaryReaderBytes) Bytes(b []byte, n, off int64) ([]byte, error) {
-	if off < 0 || n < 0 || int64(len(r.data)) < off || int64(len(r.data))-off < n {
+	var err error
+	if off < 0 || n < 0 {
 		return nil, fmt.Errorf("bytes: invalid range %d--%d", off, off+n)
+	} else if int64(len(r.data)) <= off {
+		return nil, io.EOF
+	} else if int64(len(r.data))-off <= n {
+		n = int64(len(r.data)) - off
+		err = io.EOF
 	}
 
 	data := r.data[off : off+n : off+n]
 	if b == nil {
-		return data, nil
+		return data, err
 	}
 	copy(b, data)
-	return b, nil
+	return b[:len(data)], err
 }
 
 type binaryReaderReader struct {
@@ -96,12 +101,13 @@ type binaryReaderReader struct {
 	size     int64
 	readerAt bool
 	seeker   bool
+	mu       sync.Mutex
 }
 
 func newBinaryReaderReader(r io.Reader, n int64) *binaryReaderReader {
 	_, readerAt := r.(io.ReaderAt)
 	_, seeker := r.(io.Seeker)
-	return &binaryReaderReader{r, n, readerAt, seeker}
+	return &binaryReaderReader{r, n, readerAt, seeker, sync.Mutex{}}
 }
 
 // Close closes the reader.
@@ -124,23 +130,30 @@ func (r *binaryReaderReader) Bytes(b []byte, n, off int64) ([]byte, error) {
 
 	// seeker seems faster than readerAt by 10%
 	if r.seeker {
+		r.mu.Lock()
 		if _, err := r.r.(io.Seeker).Seek(off, 0); err != nil {
+			r.mu.Unlock()
 			return nil, err
 		}
 
 		m, err := r.r.Read(b)
+		r.mu.Unlock()
 		if err != nil {
-			return nil, err
+			return b[:m], err
+		} else if off+int64(m) == r.size {
+			return b[:m], io.EOF
 		} else if int64(m) != n {
-			return nil, errors.New("file: could not read all bytes")
+			return b[:m], errors.New("reader: could not read all bytes")
 		}
 		return b, nil
 	} else if r.readerAt {
 		m, err := r.r.(io.ReaderAt).ReadAt(b, off)
 		if err != nil {
-			return nil, err
+			return b[:m], err
+		} else if off+int64(m) == r.size {
+			return b[:m], io.EOF
 		} else if int64(m) != n {
-			return nil, errors.New("file: could not read all bytes")
+			return b[:m], errors.New("reader: could not read all bytes")
 		}
 		return b, nil
 	}
@@ -197,12 +210,8 @@ func (r *BinaryReader) IBinaryReader() IBinaryReader {
 }
 
 func (r *BinaryReader) Clone() *BinaryReader {
-	f := r.f
-	if cloner, ok := f.(interface{ Clone() IBinaryReader }); ok {
-		f = cloner.Clone()
-	}
 	return &BinaryReader{
-		f:         f,
+		f:         r.f,
 		pos:       r.pos,
 		err:       r.err,
 		ByteOrder: r.ByteOrder,
@@ -262,9 +271,6 @@ func (r *BinaryReader) Seek(off int64, whence int) (int64, error) {
 // Read complies with io.Reader.
 func (r *BinaryReader) Read(b []byte) (int, error) {
 	data, err := r.f.Bytes(b, int64(len(b)), r.pos)
-	if err != nil && err != io.EOF {
-		return 0, err
-	}
 	r.pos += int64(len(data))
 	return len(data), err
 }
@@ -272,20 +278,14 @@ func (r *BinaryReader) Read(b []byte) (int, error) {
 // ReadAt complies with io.ReaderAt.
 func (r *BinaryReader) ReadAt(b []byte, off int64) (int, error) {
 	data, err := r.f.Bytes(b, int64(len(b)), off)
-	if err != nil && err != io.EOF {
-		return 0, err
-	}
 	return len(data), err
 }
 
 // ReadBytes reads n bytes.
 func (r *BinaryReader) ReadBytes(n int64) []byte {
 	data, err := r.f.Bytes(nil, n, r.pos)
-	if err != nil {
-		r.err = err
-		return nil
-	}
-	r.pos += n
+	r.pos += int64(len(data))
+	r.err = err
 	return data
 }
 
