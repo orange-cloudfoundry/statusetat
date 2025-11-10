@@ -64,6 +64,20 @@ func (r *renamer) renameScope(scope js.Scope) {
 	}
 }
 
+// rename all private elements in a class
+func (r *renamer) renameClassScope(scope js.Scope) {
+	if !r.rename {
+		return
+	}
+
+	i := 0
+	sort.Sort(js.VarsByUses(scope.Declared))
+	for _, v := range scope.Declared {
+		v.Data = append(v.Data[:1], r.getName(v.Data[1:], i)...) // keep #
+		i++
+	}
+}
+
 func (r *renamer) isReserved(name []byte, undeclared js.VarArray) bool {
 	if 1 < len(name) { // there are no keywords or known globals that are one character long
 		if _, ok := r.reserved[string(name)]; ok {
@@ -155,6 +169,34 @@ func (r *renamer) getName(name []byte, index int) []byte {
 func hasDefines(v *js.VarDecl) bool {
 	for _, item := range v.List {
 		if item.Default != nil {
+			return true
+		}
+	}
+	return false
+}
+
+func bindingUsed(ibinding js.IBinding) bool {
+	switch binding := ibinding.(type) {
+	case *js.Var:
+		if 1 < binding.Uses {
+			return true
+		}
+	case *js.BindingArray:
+		for _, item := range binding.List {
+			if item.Binding != nil && bindingUsed(item.Binding) {
+				return true
+			}
+		}
+		if binding.Rest != nil && bindingUsed(binding.Rest) {
+			return true
+		}
+	case *js.BindingObject:
+		for _, item := range binding.List {
+			if item.Value.Binding != nil && bindingUsed(item.Value.Binding) {
+				return true
+			}
+		}
+		if binding.Rest != nil && bindingUsed(binding.Rest) {
 			return true
 		}
 	}
