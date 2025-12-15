@@ -17,8 +17,7 @@ func (a *Serve) scheduled(from, to time.Time) ([]models.Incident, error) {
 		return scheduled, err
 	}
 	for _, incident := range incidents {
-		if (incident.IsScheduled && incident.ScheduledEnd.After(time.Now())) ||
-			(incident.IsScheduled && (incident.State == models.Resolved || incident.State == models.Idle)) {
+		if !incident.ShouldBeIncident(a.config.DisableMaintenanceToIncident) {
 			scheduled = append(scheduled, incident)
 		}
 	}
@@ -59,8 +58,7 @@ func (a *Serve) incidentsByParamsDate(from, to time.Time, allType bool) ([]model
 			finalIncidents = append(finalIncidents, incident)
 			continue
 		}
-		if (incident.IsScheduled && incident.ScheduledEnd.After(time.Now())) ||
-			(incident.IsScheduled && (incident.State == models.Resolved || incident.State == models.Idle)) {
+		if !incident.ShouldBeIncident(a.config.DisableMaintenanceToIncident) {
 			continue
 		}
 		finalIncidents = append(finalIncidents, incident)
