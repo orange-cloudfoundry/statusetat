@@ -76,6 +76,9 @@ func (c *Config) Merge(other Config) {
 	if c.Log == nil {
 		c.Log = other.Log
 	}
+	if c.DisableMaintenanceToIncident == false {
+		c.DisableMaintenanceToIncident = other.DisableMaintenanceToIncident
+	}
 }
 
 func (c *Config) Validate() error {
