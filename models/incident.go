@@ -138,3 +138,18 @@ func TextScheduledState(state IncidentState) string {
 	}
 	return "started"
 }
+
+func (i *Incident) HasRealScheduledEndDate() bool {
+	return !i.ScheduledEnd.IsZero() && i.ScheduledEnd.After(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
+}
+
+func (i *Incident) ShouldBeIncident(disableMaintenanceToIncident bool) bool {
+	if !disableMaintenanceToIncident {
+		if (i.IsScheduled && i.ScheduledEnd.After(time.Now())) ||
+			(i.IsScheduled && (i.State == Resolved || i.State == Idle)) {
+			return false
+		}
+		return true
+	}
+	return !i.HasRealScheduledEndDate()
+}
