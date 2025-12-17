@@ -1,4 +1,5 @@
 project_name: statusetat
+version: 2
 
 builds:
   - id: binary
@@ -21,15 +22,15 @@ builds:
 
 archives:
   - id: archives
-    builds:
+    ids:
       - binary
-    format: "tar.gz"
+    formats: ["tar.gz"]
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
     wrap_in_directory: true
   - id: archives-zip
-    builds:
+    ids:
       - binary
-    format: "zip"
+    formats: ["zip"]
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
     wrap_in_directory: true
 
