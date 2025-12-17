@@ -18,16 +18,16 @@ const (
 )
 
 type Config struct {
-	Targets                       Targets    `yaml:"targets"`
-	Listen                        string     `yaml:"listen"`
-	Log                           *Log       `yaml:"log"`
-	Components                    Components `yaml:"components"`
-	BaseInfo                      *BaseInfo  `yaml:"base_info"`
-	Username                      string     `yaml:"username"`
-	Password                      string     `yaml:"password"`
-	TlsConfig                     *TlsConfig `yaml:"tls"`
-	CookieKey                     string     `yaml:"cookie_key"`
-	Notifiers                     []Notifier `yaml:"notifiers"`
+	Targets                      Targets    `yaml:"targets"`
+	Listen                       string     `yaml:"listen"`
+	Log                          *Log       `yaml:"log"`
+	Components                   Components `yaml:"components"`
+	BaseInfo                     *BaseInfo  `yaml:"base_info"`
+	Username                     string     `yaml:"username"`
+	Password                     string     `yaml:"password"`
+	TlsConfig                    *TlsConfig `yaml:"tls"`
+	CookieKey                    string     `yaml:"cookie_key"`
+	Notifiers                    []Notifier `yaml:"notifiers"`
 	DisableMaintenanceToIncident bool       `yaml:"disable_maintenance_to_incident"`
 
 	Theme *Theme `yaml:"theme"`
@@ -76,7 +76,7 @@ func (c *Config) Merge(other Config) {
 	if c.Log == nil {
 		c.Log = other.Log
 	}
-	if c.DisableMaintenanceToIncident == false {
+	if !c.DisableMaintenanceToIncident {
 		c.DisableMaintenanceToIncident = other.DisableMaintenanceToIncident
 	}
 }
