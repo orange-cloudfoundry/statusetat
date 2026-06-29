@@ -13,7 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/orange-cloudfoundry/statusetat/v2/common"
 	"github.com/orange-cloudfoundry/statusetat/v2/models"
@@ -37,10 +36,7 @@ func (s *S3) Create(incident models.Incident) (models.Incident, error) {
 		return incident, err
 	}
 	b, _ := json.Marshal(incident)
-	uploader := manager.NewUploader(s.sess.client, func(u *manager.Uploader) {
-		u.RequestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
-	})
-	_, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+	_, err := s.sess.client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(s.sess.bucket),
 		Key:    aws.String(incident.GUID),
 		Body:   bytes.NewBuffer(b),
@@ -71,10 +67,7 @@ func (s *S3) retrieveSubscribers() ([]string, error) {
 
 func (s *S3) storeSubscribers(subscribers []string) error {
 	b, _ := json.Marshal(subscribers)
-	uploader := manager.NewUploader(s.sess.client, func(u *manager.Uploader) {
-		u.RequestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
-	})
-	_, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+	_, err := s.sess.client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(s.sess.bucket),
 		Key:    aws.String(subscriberFilename),
 		Body:   bytes.NewBuffer(b),
@@ -130,10 +123,7 @@ func (s *S3) Unsubscribe(email string) error {
 func (s *S3) storePersistents(incidents []models.Incident) error {
 	sort.Sort(models.Incidents(incidents))
 	b, _ := json.Marshal(incidents)
-	uploader := manager.NewUploader(s.sess.client, func(u *manager.Uploader) {
-		u.RequestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
-	})
-	_, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+	_, err := s.sess.client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(s.sess.bucket),
 		Key:    aws.String(persistentFilename),
 		Body:   bytes.NewBuffer(b),
