@@ -128,7 +128,7 @@ func listMap(strs []string) template.JS {
 }
 
 func ref(d interface{}) interface{} {
-	if reflect.TypeOf(d).Kind() != reflect.Ptr {
+	if reflect.TypeOf(d).Kind() != reflect.Ptr { //nolint:govet
 		return d
 	}
 	value := reflect.ValueOf(d)

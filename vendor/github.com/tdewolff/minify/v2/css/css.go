@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -174,6 +175,7 @@ func (c *cssMinifier) minifyGrammar() {
 	semicolonQueued := false
 	for {
 		gt, _, data := c.p.Next()
+	Next:
 		switch gt {
 		case css.ErrorGrammar:
 			if c.p.HasParseError() {
@@ -236,14 +238,29 @@ func (c *cssMinifier) minifyGrammar() {
 			}
 			semicolonQueued = true
 		case css.BeginAtRuleGrammar:
-			c.w.Write(data)
-			for _, val := range c.p.Values() {
-				c.w.Write(val.Data)
+			rule := slices.Clone(data)
+			values := slices.Clone(c.p.Values())
+			gt, _, data = c.p.Next()
+			if gt == css.EndAtRuleGrammar {
+				gt, _, data = c.p.Next()
+			} else {
+				c.w.Write(rule)
+				for _, val := range values {
+					c.w.Write(val.Data)
+				}
+				c.w.Write(leftBracketBytes)
 			}
-			c.w.Write(leftBracketBytes)
+			goto Next
 		case css.BeginRulesetGrammar:
-			c.minifySelectors(c.p.Values())
-			c.w.Write(leftBracketBytes)
+			selectors := slices.Clone(c.p.Values())
+			gt, _, data = c.p.Next()
+			if gt == css.EndRulesetGrammar {
+				gt, _, data = c.p.Next()
+			} else {
+				c.minifySelectors(selectors)
+				c.w.Write(leftBracketBytes)
+			}
+			goto Next
 		case css.DeclarationGrammar:
 			c.minifyDeclaration(data, c.p.Values())
 			semicolonQueued = true
@@ -272,7 +289,7 @@ func (c *cssMinifier) minifyGrammar() {
 func (c *cssMinifier) minifySelectors(values []css.Token) {
 	inAttr := false
 	isClass := false
-	for _, val := range c.p.Values() {
+	for _, val := range values {
 		if !inAttr {
 			if val.TokenType == css.IdentToken {
 				if !isClass {
@@ -1552,7 +1569,7 @@ func (c *cssMinifier) minifyDimension(value Token) (Token, []byte) {
 	//		}
 	//		for i := range dimensions {
 	//			if dimensions[i] != h { //&& (d < 1.0) == (multipliers[i] > 1.0) {
-	//				b, _ := strconvParse.AppendFloat([]byte{}, d*multipliers[i], -1)
+	//				b := strconvParse.AppendFloat([]byte{}, d*multipliers[i], -1)
 	//				if c.o.Version<=2 {
 	//					b = minify.Decimal(b, c.o.newPrecision) // don't use exponents
 	//				} else {
