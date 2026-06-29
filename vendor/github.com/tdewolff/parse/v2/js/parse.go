@@ -221,6 +221,9 @@ func (p *Parser) parseModule() (module BlockStmt) {
 				expr := p.parseExpressionSuffix(left, OpExpr, OpMember)
 				p.exprLevel--
 				module.List = append(module.List, &ExprStmt{expr})
+				if !p.prevLT && p.tt == SemicolonToken {
+					p.next()
+				}
 			} else {
 				importStmt := p.parseImportStmt()
 				module.List = append(module.List, &importStmt)
@@ -1422,6 +1425,7 @@ func (p *Parser) parseObjectLiteral() (object ObjectExpr) {
 				parent := p.enterScope(&method.Body.Scope, true)
 				prevAwait, prevYield, prevRetrn := p.await, p.yield, p.retrn
 				p.await, p.yield, p.retrn = method.Async, method.Generator, true
+				p.assumeArrowFunc = false
 
 				method.Params = p.parseFuncParams("method definition")
 				method.Body.List = p.parseStmtList("method definition")
@@ -1429,7 +1433,6 @@ func (p *Parser) parseObjectLiteral() (object ObjectExpr) {
 				p.await, p.yield, p.retrn = prevAwait, prevYield, prevRetrn
 				p.exitScope(parent)
 				property.Value = &method
-				p.assumeArrowFunc = false
 			} else if p.tt == ColonToken {
 				// PropertyName : AssignmentExpression
 				p.next()
@@ -1875,6 +1878,7 @@ func (p *Parser) parseExpression(prec OpPrec) IExpr {
 	return suffix
 }
 
+// parseExpressionSuffix parses an expression recursively by their suffixes. prec is the precedence level (or higher) that is allowed (we may return earlier when an operator has a lower precedence), while precLeft is the precedence level of the preceding (left side) of the expression at this point (may be an error if it is lower than allowed). For example: when we encounter || we parse LogicalOR: LogicalOR || LogicalAND, if prec is higher than LogicalOR we return the expression and parse || and the rest higher up, if precLeft is lower than LogicalOR (the part before ||), this is invalid syntax.
 func (p *Parser) parseExpressionSuffix(left IExpr, prec, precLeft OpPrec) IExpr {
 	for i := 0; ; i++ {
 		if 1000 < p.exprLevel+i {
@@ -1947,115 +1951,99 @@ func (p *Parser) parseExpressionSuffix(left IExpr, prec, precLeft OpPrec) IExpr 
 			precLeft = OpCoalesce
 		case DotToken:
 			// OpMember < prec does never happen
-			if precLeft < OpCall {
+			if precLeft < OpLHS {
 				p.fail("expression")
 				return nil
+			} else if OpMember < precLeft {
+				precLeft = OpMember
 			}
 			p.next()
 			if !IsIdentifierName(p.tt) && p.tt != PrivateIdentifierToken {
 				p.fail("dot expression", IdentifierToken)
 				return nil
 			}
-			exprPrec := OpMember
-			if precLeft < OpMember {
-				exprPrec = OpCall
-			}
 			if p.tt == PrivateIdentifierToken {
-				left = &DotExpr{left, p.scope.Use(p.data), exprPrec, false}
+				left = &DotExpr{left, p.scope.Use(p.data), precLeft, false}
 			} else {
-				left = &DotExpr{left, LiteralExpr{IdentifierToken, p.data}, exprPrec, false}
+				left = &DotExpr{left, LiteralExpr{IdentifierToken, p.data}, precLeft, false}
 			}
 			p.next()
-			if precLeft < OpMember {
-				precLeft = OpCall
-			} else {
-				precLeft = OpMember
-			}
 		case OpenBracketToken:
 			// OpMember < prec does never happen
-			if precLeft < OpCall {
+			if precLeft < OpLHS {
 				p.fail("expression")
 				return nil
+			} else if OpMember < precLeft {
+				precLeft = OpMember
 			}
 			p.next()
-			exprPrec := OpMember
-			if precLeft < OpMember {
-				exprPrec = OpCall
-			}
 			prevIn := p.in
 			p.in = true
-			left = &IndexExpr{left, p.parseExpression(OpExpr), exprPrec, false}
+			left = &IndexExpr{left, p.parseExpression(OpExpr), precLeft, false}
 			p.in = prevIn
 			if !p.consume("index expression", CloseBracketToken) {
 				return nil
 			}
-			if precLeft < OpMember {
-				precLeft = OpCall
-			} else {
-				precLeft = OpMember
-			}
 		case OpenParenToken:
 			if OpCall < prec {
 				return left
-			} else if precLeft < OpCall {
+			} else if precLeft < OpLHS {
 				p.fail("expression")
 				return nil
+			} else if OpCall < precLeft {
+				precLeft = OpCall
 			}
 			prevIn := p.in
 			p.in = true
-			left = &CallExpr{left, p.parseArguments(), false}
-			precLeft = OpCall
+			left = &CallExpr{left, p.parseArguments(), precLeft, false}
 			p.in = prevIn
 		case TemplateToken, TemplateStartToken:
 			// OpMember < prec does never happen
-			if precLeft < OpCall {
+			if precLeft < OpLHS {
 				p.fail("expression")
 				return nil
+			} else if OpMember < precLeft {
+				precLeft = OpMember
 			}
 			prevIn := p.in
 			p.in = true
 			template := p.parseTemplateLiteral(precLeft)
 			template.Tag = left
 			left = &template
-			if precLeft < OpMember {
-				precLeft = OpCall
-			} else {
-				precLeft = OpMember
-			}
 			p.in = prevIn
 		case OptChainToken:
-			if OpCall < prec {
+			if OpOpt < prec {
 				return left
-			} else if precLeft < OpCall {
+			} else if precLeft < OpLHS {
 				p.fail("expression")
 				return nil
 			}
 			p.next()
 			if p.tt == OpenParenToken {
-				left = &CallExpr{left, p.parseArguments(), true}
+				left = &CallExpr{left, p.parseArguments(), OpOpt, true}
 			} else if p.tt == OpenBracketToken {
 				p.next()
-				left = &IndexExpr{left, p.parseExpression(OpExpr), OpCall, true}
+				left = &IndexExpr{left, p.parseExpression(OpExpr), OpOpt, true}
 				if !p.consume("optional chaining expression", CloseBracketToken) {
 					return nil
 				}
 			} else if p.tt == TemplateToken || p.tt == TemplateStartToken {
 				template := p.parseTemplateLiteral(precLeft)
-				template.Prec = OpCall
+				template.Prec = OpOpt
 				template.Tag = left
 				template.Optional = true
 				left = &template
 			} else if IsIdentifierName(p.tt) {
-				left = &DotExpr{left, LiteralExpr{IdentifierToken, p.data}, OpCall, true}
+				left = &DotExpr{left, LiteralExpr{IdentifierToken, p.data}, OpOpt, true}
 				p.next()
 			} else if p.tt == PrivateIdentifierToken {
-				left = &DotExpr{left, LiteralExpr{p.tt, p.data}, OpCall, true}
+				left = &DotExpr{left, LiteralExpr{p.tt, p.data}, OpOpt, true}
 				p.next()
 			} else {
 				p.fail("optional chaining expression", IdentifierToken, OpenParenToken, OpenBracketToken, TemplateToken)
 				return nil
 			}
-			precLeft = OpCall
+			precLeft = OpOpt
 		case IncrToken:
 			if p.prevLT || OpUpdate < prec {
 				return left
@@ -2311,7 +2299,7 @@ func (p *Parser) parseParenthesizedExpression(prec OpPrec, async []byte) IExpr {
 		if isAsync {
 			// call expression
 			left = p.scope.Use(async)
-			left = &CallExpr{left, args, false}
+			left = &CallExpr{left, args, OpCall, false}
 			precLeft = OpCall
 		} else {
 			// parenthesized expression
