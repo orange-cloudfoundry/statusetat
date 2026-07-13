@@ -34,7 +34,7 @@ require (
 	github.com/rs/cors v1.11.1
 	github.com/sirupsen/logrus v1.9.4
 	github.com/tdewolff/minify/v2 v2.24.13
-	github.com/yuin/goldmark v1.8.2
+	github.com/yuin/goldmark v1.8.4
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
 	google.golang.org/grpc v1.82.0
 	google.golang.org/protobuf v1.36.11
