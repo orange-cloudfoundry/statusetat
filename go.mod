@@ -32,7 +32,7 @@ require (
 	github.com/prometheus/client_golang v1.24.1
 	github.com/prometheus/common v0.70.1
 	github.com/rs/cors v1.11.1
-	github.com/sirupsen/logrus v1.9.4
+	github.com/sirupsen/logrus v1.10.0
 	github.com/tdewolff/minify/v2 v2.24.16
 	github.com/yuin/goldmark v1.8.5
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
