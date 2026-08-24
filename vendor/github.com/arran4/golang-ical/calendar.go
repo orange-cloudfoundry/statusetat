@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"reflect"
 	"strings"
 	"time"
 )
@@ -232,6 +231,7 @@ const (
 	PropertySequence        Property = "SEQUENCE"
 	PropertyXWRCalID        Property = "X-WR-RELCALID"
 	PropertyTimezoneId      Property = "TIMEZONE-ID"
+	PropertySource          Property = "SOURCE"
 )
 
 type Parameter string
@@ -380,6 +380,21 @@ const (
 	ClassificationConfidential Classification = "CONFIDENTIAL"
 )
 
+// Method represents the iCalendar METHOD property.
+//
+// These should be used with caution when creating simple iCal (.ics) files.
+// The iCalendar specification is defined in RFC 5545. It refers to RFC 5546,
+// which defines the ADD method as allowing the Organizer to add one or more
+// new instances to an existing VEVENT, VTODO, or VJOURNAL using a single iTIP message. The UID
+// must be that of the existing event/task/journal.
+//
+// If you include METHOD: ADD in your .ics file (or use SetMethod(MethodAdd)),
+// it is required to refer to existing calendar components. If you are simply
+// writing .ics files to import into calendaring tools, it is not likely that
+// you will want to use this option. Notably, the Apple Calendar program will
+// reject events in .ics files that have this set if they do not refer to
+// existing calendar events; some other calendars (like Microsoft Outlook)
+// have a more permissive import process and will accept them.
 type Method string
 
 const (
@@ -401,22 +416,37 @@ type Calendar struct {
 	Components                     []Component
 	CalendarProperties             []CalendarProperty
 	unknownCalendarPropertyHandler func(cal *Calendar, state string, cl *BaseProperty) error
+	propertyParser                 PropertyParser
+	timezoneMapper                 TimezoneMapper
 }
 
 func NewCalendar() *Calendar {
-	return NewCalendarFor("arran4")
-}
-
-func NewCalendarFor(service string) *Calendar {
-	c := &Calendar{
-		Components:         []Component{},
-		CalendarProperties: []CalendarProperty{},
-	}
-	c.SetVersion("2.0")
-	c.SetProductId("-//" + service + "//Golang ICS Library")
+	c, _ := NewCalendarWithOptions(
+		WithVersion("2.0"),
+		WithProductId("-//arran4//Golang ICS Library"),
+	)
 	return c
 }
 
+func NewCalendarFor(service string) *Calendar {
+	c, _ := NewCalendarWithOptions(
+		WithVersion("2.0"),
+		WithProductId("-//"+service+"//Golang ICS Library"),
+	)
+	return c
+}
+
+// Serialize converts the Calendar and all its nested components (such as events,
+// timezones, and alarms) into a single, fully formatted iCalendar string.
+//
+// It accepts optional configuration arguments (ops) to customize the output layout,
+// such as setting custom line folding lengths or overriding line endings.
+//
+// Note on Line Endings: By default, uses Unix-style line endings (LF). To strictly comply with the iCalendar
+// specification (RFC 5545), which requires Windows-style line endings (CRLF) for broad
+// compatibility with clients like Outlook and Apple Calendar, pass the explicit formatting option:
+//
+//	cal.Serialize(ics.WithNewLineWindows)
 func (cal *Calendar) Serialize(ops ...any) string {
 	b := &strings.Builder{}
 	// We are intentionally ignoring the return value. _ used to communicate this to lint.
@@ -453,7 +483,11 @@ type SerializationConfiguration struct {
 	MaxLength         int
 	NewLine           string
 	PropertyMaxLength int
+	timezoneMapper    TimezoneSerializationMapper
 }
+
+// SerializationOption provides functional options for Serialize and SerializeTo.
+type SerializationOption func(*SerializationConfiguration) error
 
 func parseSerializeOps(ops []any) (*SerializationConfiguration, error) {
 	serializeConfig := defaultSerializationOptions()
@@ -463,12 +497,22 @@ func parseSerializeOps(ops []any) (*SerializationConfiguration, error) {
 			serializeConfig.MaxLength = int(op)
 		case WithNewLine:
 			serializeConfig.NewLine = string(op)
+		case SerializationOption:
+			if op != nil {
+				if err := op(serializeConfig); err != nil {
+					return nil, err
+				}
+			}
 		case *SerializationConfiguration:
 			return op, nil
+		case TimezoneSerializationMapper:
+			serializeConfig.timezoneMapper = op
+		case func(*time.Location) (string, bool):
+			serializeConfig.timezoneMapper = TimezoneSerializationMapper(op)
 		case error:
 			return nil, op
 		default:
-			return nil, fmt.Errorf("unknown op %d of type %s", opi, reflect.TypeOf(op))
+			return nil, fmt.Errorf("%w %d: %T", ErrInvalidOpArg, opi, op)
 		}
 	}
 	return serializeConfig, nil
@@ -483,6 +527,49 @@ func defaultSerializationOptions() *SerializationConfiguration {
 	return serializeConfig
 }
 
+// WithTimezoneMapper configures how Windows timezone identifiers are mapped during parsing.
+func WithTimezoneMapper(mapper TimezoneMapper) ParseOption {
+	return func(c *Calendar) error {
+		c.timezoneMapper = mapper
+		return nil
+	}
+}
+
+// WithWindowsTimezoneMapping enables mapping of Windows timezone names to
+// IANA equivalents during calendar parsing.
+func WithWindowsTimezoneMapping() ParseOption {
+	return WithTimezoneMapper(WindowsTimezoneToIANA)
+}
+
+// WithSerializationTimezoneMapper configures how timezone identifiers are mapped during serialization.
+func WithSerializationTimezoneMapper(mapper TimezoneSerializationMapper) SerializationOption {
+	return func(c *SerializationConfiguration) error {
+		c.timezoneMapper = mapper
+		return nil
+	}
+}
+
+// WithWindowsTimezoneMappingForSerialization enables mapping of IANA timezone names
+// to Windows equivalents during serialization.
+func WithWindowsTimezoneMappingForSerialization() SerializationOption {
+	return WithSerializationTimezoneMapper(IANAToWindowsTimezone)
+}
+
+// SetMethod sets the METHOD property for the calendar.
+//
+// These should be used with caution when creating simple iCal (.ics) files.
+// The iCalendar specification is defined in RFC 5545. It refers to RFC 5546,
+// which defines the ADD method as allowing the Organizer to add one or more
+// new instances to an existing VEVENT, VTODO, or VJOURNAL using a single iTIP message. The UID
+// must be that of the existing event/task/journal.
+//
+// If you include METHOD: ADD in your .ics file (or use SetMethod(MethodAdd)),
+// it is required to refer to existing calendar components. If you are simply
+// writing .ics files to import into calendaring tools, it is not likely that
+// you will want to use this option. Notably, the Apple Calendar program will
+// reject events in .ics files that have this set if they do not refer to
+// existing calendar events; some other calendars (like Microsoft Outlook)
+// have a more permissive import process and will accept them.
 func (cal *Calendar) SetMethod(method Method, params ...PropertyParameter) {
 	cal.setProperty(PropertyMethod, string(method), params...)
 }
@@ -552,6 +639,31 @@ func (cal *Calendar) SetTimezoneId(s string, params ...PropertyParameter) {
 	cal.setProperty(PropertyTimezoneId, s, params...)
 }
 
+func (cal *Calendar) componentParseOptions() []any {
+	opts := make([]any, 0, 2)
+	if cal.propertyParser != nil {
+		opts = append(opts, cal.propertyParser)
+	}
+	if cal.timezoneMapper != nil {
+		opts = append(opts, cal.timezoneMapper)
+	}
+	return opts
+}
+
+func (cal *Calendar) addComponent(c Component) {
+	if c == nil {
+		return
+	}
+	if cal.timezoneMapper != nil {
+		if setter, ok := c.(timezoneMapperSetter); ok {
+			if getter, ok := c.(timezoneMapperGetter); !ok || getter.getTimezoneMapper() == nil {
+				setter.setTimezoneMapper(cal.timezoneMapper)
+			}
+		}
+	}
+	cal.Components = append(cal.Components, c)
+}
+
 func (cal *Calendar) setProperty(property Property, value string, params ...PropertyParameter) {
 	for i := range cal.CalendarProperties {
 		if cal.CalendarProperties[i].IANAToken == string(property) {
@@ -580,12 +692,12 @@ func (cal *Calendar) setProperty(property Property, value string, params ...Prop
 
 func (calendar *Calendar) AddEvent(id string) *VEvent {
 	e := NewEvent(id)
-	calendar.Components = append(calendar.Components, e)
+	calendar.addComponent(e)
 	return e
 }
 
 func (calendar *Calendar) AddVEvent(e *VEvent) {
-	calendar.Components = append(calendar.Components, e)
+	calendar.addComponent(e)
 }
 
 func (calendar *Calendar) Events() (r []*VEvent) {
@@ -627,7 +739,8 @@ func ParseCalendarFromUrl(url string, opts ...any) (*Calendar, error) {
 	var ctx context.Context
 	var req *http.Request
 	var client HttpClientLike = http.DefaultClient
-	for opti, opt := range opts {
+	parseOpts := make([]any, 0, len(opts))
+	for i, opt := range opts {
 		switch opt := opt.(type) {
 		case *http.Client:
 			client = opt
@@ -643,8 +756,20 @@ func ParseCalendarFromUrl(url string, opts ...any) (*Calendar, error) {
 			ctx = opt
 		case func() context.Context:
 			ctx = opt()
+		case ParseOption:
+			parseOpts = append(parseOpts, opt)
+		case CalendarOption:
+			parseOpts = append(parseOpts, opt)
+		case PropertyParser:
+			parseOpts = append(parseOpts, opt)
+		case func(ContentLine) (*BaseProperty, error):
+			parseOpts = append(parseOpts, opt)
+		case TimezoneMapper:
+			parseOpts = append(parseOpts, opt)
+		case func(string) *time.Location:
+			parseOpts = append(parseOpts, opt)
 		default:
-			return nil, fmt.Errorf("unknown optional argument %d on ParseCalendarFromUrl: %s", opti, reflect.TypeOf(opt))
+			return nil, fmt.Errorf("%w %d: %T", ErrInvalidOpArg, i, opt)
 		}
 	}
 	if ctx == nil {
@@ -657,14 +782,14 @@ func ParseCalendarFromUrl(url string, opts ...any) (*Calendar, error) {
 			return nil, fmt.Errorf("creating http request: %w", err)
 		}
 	}
-	return parseCalendarFromHttpRequest(client, req)
+	return parseCalendarFromHttpRequest(client, req, parseOpts...)
 }
 
 type HttpClientLike interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-func parseCalendarFromHttpRequest(client HttpClientLike, request *http.Request) (*Calendar, error) {
+func parseCalendarFromHttpRequest(client HttpClientLike, request *http.Request, opts ...any) (*Calendar, error) {
 	resp, err := client.Do(request)
 	if err != nil {
 		return nil, fmt.Errorf("http request: %w", err)
@@ -675,13 +800,32 @@ func parseCalendarFromHttpRequest(client HttpClientLike, request *http.Request) 
 		}
 	}(resp.Body)
 	var cal *Calendar
-	cal, err = ParseCalendar(resp.Body)
+	cal, err = ParseCalendarWithOptions(resp.Body, opts...)
 	// This allows the defer func to change the error
 	return cal, err
 }
 
 // ParseOption provides functional options for ParseCalendar
 type ParseOption func(*Calendar) error
+
+// CalendarOption provides functional options for Calendar construction.
+type CalendarOption func(*Calendar) error
+
+// WithVersion sets the calendar version.
+func WithVersion(version string, params ...PropertyParameter) CalendarOption {
+	return func(c *Calendar) error {
+		c.SetVersion(version, params...)
+		return nil
+	}
+}
+
+// WithProductId sets the calendar product identifier.
+func WithProductId(productID string, params ...PropertyParameter) CalendarOption {
+	return func(c *Calendar) error {
+		c.SetProductId(productID, params...)
+		return nil
+	}
+}
 
 // WithUnknownPropertyHandler allows custom handling of unknown properties
 func WithUnknownPropertyHandler(f func(*Calendar, string, *BaseProperty) error) ParseOption {
@@ -691,6 +835,69 @@ func WithUnknownPropertyHandler(f func(*Calendar, string, *BaseProperty) error) 
 	}
 }
 
+// WithPropertyParser allows custom handling of property parse errors.
+// It is a convenience wrapper; ParseCalendarWithOptions also accepts PropertyParser directly.
+// When a content line fails to parse (e.g. due to malformed parameter names),
+// the parser is called with the raw content line.
+//
+// The parser can:
+//   - Return (*BaseProperty, nil) to use a recovered/replacement property
+//   - Return (nil, nil) to skip the property silently
+//   - Return (nil, err) to abort parsing with the error
+//
+// Without this option, any property parse error aborts the entire calendar parse.
+// This is useful for real-world ICS feeds that contain non-RFC-compliant properties
+// (e.g. parameter names with underscores).
+func WithPropertyParser(f PropertyParser) ParseOption {
+	return func(c *Calendar) error {
+		if f != nil {
+			c.propertyParser = f
+		}
+		return nil
+	}
+}
+
+// NewCalendarWithOptions constructs a calendar with sane parser defaults and optional overrides.
+func NewCalendarWithOptions(options ...any) (*Calendar, error) {
+	c := &Calendar{
+		Components:                     []Component{},
+		CalendarProperties:             []CalendarProperty{},
+		unknownCalendarPropertyHandler: DefaultUnknownCalendarPropertyHandler,
+		propertyParser:                 parseProperty,
+	}
+	for i, opt := range options {
+		switch opt := opt.(type) {
+		case CalendarOption:
+			if opt != nil {
+				if err := opt(c); err != nil {
+					return nil, err
+				}
+			}
+		case ParseOption:
+			if opt != nil {
+				if err := opt(c); err != nil {
+					return nil, err
+				}
+			}
+		case TimezoneMapper:
+			c.timezoneMapper = opt
+		case func(string) *time.Location:
+			c.timezoneMapper = TimezoneMapper(opt)
+		case PropertyParser:
+			if opt != nil {
+				c.propertyParser = opt
+			}
+		case func(ContentLine) (*BaseProperty, error):
+			if opt != nil {
+				c.propertyParser = PropertyParser(opt)
+			}
+		default:
+			return nil, fmt.Errorf("%w %d: %T", ErrInvalidOpArg, i, opt)
+		}
+	}
+	return c, nil
+}
+
 func ParseCalendar(r io.Reader) (*Calendar, error) {
 	// Default behavior maintains backward compatibility (strict mode)
 	return ParseCalendarWithOptions(r)
@@ -698,26 +905,17 @@ func ParseCalendar(r io.Reader) (*Calendar, error) {
 
 func ParseCalendarWithOptions(r io.Reader, options ...any) (*Calendar, error) {
 	state := "begin"
-	c := &Calendar{
-		unknownCalendarPropertyHandler: DefaultUnknownCalendarPropertyHandler,
-	}
-	for _, opt := range options {
-		switch opt := opt.(type) {
-		case ParseOption:
-			if err := opt(c); err != nil {
-				return nil, fmt.Errorf("invalid parse option: %w", err)
-			}
-		default:
-			return nil, fmt.Errorf("invalid parse option type: %T", opt)
-		}
+	c, err := NewCalendarWithOptions(options...)
+	if err != nil {
+		return nil, err
 	}
 	cs := NewCalendarStream(r)
 	cont := true
-	for ln := 0; cont; ln++ {
-		l, err := cs.ReadLine()
+	for cont {
+		l, lineNo, err := cs.ReadLine()
 		if err != nil {
-			switch err {
-			case io.EOF:
+			switch {
+			case errors.Is(err, io.EOF):
 				cont = false
 			default:
 				return c, err
@@ -726,12 +924,15 @@ func ParseCalendarWithOptions(r io.Reader, options ...any) (*Calendar, error) {
 		if l == nil || len(*l) == 0 {
 			continue
 		}
-		line, err := ParseProperty(*l)
+		line, err := c.propertyParser(*l)
 		if err != nil {
-			return nil, fmt.Errorf("parsing line %d: %w", ln, err)
+			if errors.Is(err, ErrPropertySkipped) {
+				continue
+			}
+			return nil, NewMalformedError(lineNo, -1, err)
 		}
 		if line == nil {
-			return nil, fmt.Errorf("parsing calendar line %d", ln)
+			continue
 		}
 		switch state {
 		case "begin":
@@ -741,10 +942,10 @@ func ParseCalendarWithOptions(r io.Reader, options ...any) (*Calendar, error) {
 				case "VCALENDAR":
 					state = "properties"
 				default:
-					return nil, errors.New("malformed calendar; expected a vcalendar")
+					return nil, NewMalformedError(lineNo, -1, ErrExpectedVCalendar)
 				}
 			default:
-				return nil, errors.New("malformed calendar; expected begin")
+				return nil, NewMalformedError(lineNo, -1, ErrExpectedBegin)
 			}
 		case "properties":
 			switch line.IANAToken {
@@ -753,11 +954,13 @@ func ParseCalendarWithOptions(r io.Reader, options ...any) (*Calendar, error) {
 				case "VCALENDAR":
 					state = "end"
 				default:
-					return nil, errors.New("malformed calendar; expected end")
+					return nil, NewMalformedError(lineNo, -1, ErrExpectedEnd)
 				}
 			case "BEGIN":
 				state = "components"
-			default: // TODO put in all the supported types for type switching etc.
+			case string(PropertyCalscale), string(PropertyMethod), string(PropertyProductId), string(PropertyVersion), string(PropertyName), string(PropertyXWRCalName), string(PropertyXWRCalDesc), string(PropertyXWRTimezone), string(PropertyXWRCalID), string(PropertyXPublishedTTL), string(PropertyRefreshInterval), string(PropertyColor), string(PropertyDescription), string(PropertyLastModified), string(PropertyUrl), string(PropertyTzid), string(PropertyTimezoneId), string(PropertySource):
+				c.CalendarProperties = append(c.CalendarProperties, CalendarProperty{*line})
+			default:
 				c.CalendarProperties = append(c.CalendarProperties, CalendarProperty{*line})
 			}
 			if state != "components" {
@@ -771,10 +974,10 @@ func ParseCalendarWithOptions(r io.Reader, options ...any) (*Calendar, error) {
 				case "VCALENDAR":
 					state = "end"
 				default:
-					return nil, errors.New("malformed calendar; expected end")
+					return nil, NewMalformedError(lineNo, -1, ErrExpectedEnd)
 				}
 			case "BEGIN":
-				co, err := GeneralParseComponent(cs, line)
+				co, err := generalParseComponentWithHandler(cs, line, c.componentParseOptions()...)
 				if err != nil {
 					return nil, err
 				}
@@ -783,13 +986,13 @@ func ParseCalendarWithOptions(r io.Reader, options ...any) (*Calendar, error) {
 				}
 			default:
 				if err := c.unknownCalendarPropertyHandler(c, state, line); err != nil {
-					return nil, err
+					return nil, NewMalformedError(lineNo, -1, err)
 				}
 			}
 		case "end":
-			return nil, errors.New("malformed calendar; unexpected end")
+			return nil, NewMalformedError(lineNo, -1, ErrUnexpectedCalendarEnd)
 		default:
-			return nil, errors.New("malformed calendar; bad state")
+			return nil, NewMalformedError(lineNo, -1, ErrBadCalendarState)
 		}
 	}
 	return c, nil
@@ -808,12 +1011,14 @@ func AcceptUnknownPropertyHandler(cal *Calendar, state string, cl *BaseProperty)
 }
 
 func DefaultUnknownCalendarPropertyHandler(cal *Calendar, state string, cl *BaseProperty) error {
-	return errors.New("malformed calendar; expected begin or end")
+	return ErrExpectedBeginOrEnd
 }
 
 type CalendarStream struct {
-	r io.Reader
-	b *bufio.Reader
+	r     io.Reader
+	b     *bufio.Reader
+	line  int
+	depth int
 }
 
 func NewCalendarStream(r io.Reader) *CalendarStream {
@@ -823,10 +1028,11 @@ func NewCalendarStream(r io.Reader) *CalendarStream {
 	}
 }
 
-func (cs *CalendarStream) ReadLine() (*ContentLine, error) {
+func (cs *CalendarStream) ReadLine() (*ContentLine, int, error) {
 	r := []byte{}
 	c := true
 	var err error
+	lineNo := cs.line + 1
 	for c {
 		var b []byte
 		b, err = cs.b.ReadBytes('\n')
@@ -844,7 +1050,7 @@ func (cs *CalendarStream) ReadLine() (*ContentLine, error) {
 			}
 			p, err := cs.b.Peek(1)
 			r = append(r, b[:len(b)-o]...)
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				c = false
 			}
 			switch {
@@ -858,20 +1064,28 @@ func (cs *CalendarStream) ReadLine() (*ContentLine, error) {
 		default:
 			r = append(r, b...)
 		}
-		switch err {
-		case nil:
+		switch {
+		case err == nil:
 			if len(r) == 0 {
 				c = true
 			}
-		case io.EOF:
+		case errors.Is(err, io.EOF):
 			c = false
 		default:
-			return nil, err
+			// This must be as a result of boxing?
+			if err != nil {
+				err = fmt.Errorf("readline: %w", err)
+			}
+			return nil, lineNo, err
 		}
 	}
 	if len(r) == 0 && err != nil {
-		return nil, err
+		return nil, lineNo, fmt.Errorf("readline: %w", err)
 	}
 	cl := ContentLine(r)
-	return &cl, err
+	cs.line = lineNo
+	if err != nil {
+		err = fmt.Errorf("readline: %w", err)
+	}
+	return &cl, lineNo, err
 }
