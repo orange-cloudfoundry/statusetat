@@ -30,7 +30,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.32.1
 	github.com/onsi/gomega v1.43.0
 	github.com/prometheus/client_golang v1.24.1
-	github.com/prometheus/common v0.70.1
+	github.com/prometheus/common v0.71.0
 	github.com/rs/cors v1.11.1
 	github.com/sirupsen/logrus v1.10.1
 	github.com/tdewolff/minify/v2 v2.24.17
@@ -86,7 +86,7 @@ require (
 	github.com/prometheus/procfs v0.21.1 // indirect
 	github.com/tdewolff/parse/v2 v2.8.16 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
-	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/mod v0.38.0 // indirect
 	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
