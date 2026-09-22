@@ -110,6 +110,11 @@ message ErrorResponse {
   Error error = 1;
 }
 
+message PreCheckResponse {
+  Error error = 1;
+  Incident incident = 2;
+}
+
 message NameResponse {
   string name = 1;
 }
@@ -129,5 +134,5 @@ service Notifier {
   rpc Id(google.protobuf.Empty) returns (IdResponse);
   rpc Notify(NotifyRequest) returns (ErrorResponse);
   rpc MetadataFields(google.protobuf.Empty) returns (ListMetadataField);
-  rpc PreCheck(NotifyRequest) returns (ErrorResponse);
+  rpc PreCheck(NotifyRequest) returns (PreCheckResponse);
 }
