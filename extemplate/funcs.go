@@ -11,6 +11,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 
+	"github.com/orange-cloudfoundry/statusetat/v2/config"
 	"github.com/orange-cloudfoundry/statusetat/v2/locations"
 	"github.com/orange-cloudfoundry/statusetat/v2/markdown"
 	"github.com/orange-cloudfoundry/statusetat/v2/models"
@@ -178,6 +179,32 @@ func metadataValue(metadata []models.Metadata, key string) string {
 		}
 	}
 	return ""
+}
+
+// visibleMetadatas filters metadata to only those whose key is listed in visible (all are shown when visible is empty)
+func visibleMetadatas(metadata []models.Metadata, visible []config.MetadataPresentation) []models.Metadata {
+	if len(visible) == 0 {
+		return metadata
+	}
+	filtered := make([]models.Metadata, 0, len(metadata))
+	for _, data := range metadata {
+		for _, v := range visible {
+			if v.Key == data.Key {
+				filtered = append(filtered, data)
+				break
+			}
+		}
+	}
+	return filtered
+}
+
+func metadataLabel(visible []config.MetadataPresentation, key string) string {
+	for _, v := range visible {
+		if v.Key == key && v.Label != "" {
+			return v.Label
+		}
+	}
+	return key
 }
 
 func dict(values ...interface{}) (map[string]interface{}, error) {

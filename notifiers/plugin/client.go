@@ -109,5 +109,8 @@ func (m *GRPCClient) PreCheck(incident *models.Incident) error {
 	if resp.GetError() != nil {
 		return fmt.Errorf("%s", resp.GetError().GetDetail())
 	}
+	if resp.GetIncident() != nil {
+		*incident = ProtoToIncident(resp.GetIncident())
+	}
 	return nil
 }
