@@ -115,15 +115,17 @@ func (s *GRPCServer) MetadataFields(ctx context.Context, request *emptypb.Empty)
 	return &proto.ListMetadataField{Fields: protoFields}, nil
 }
 
-func (s *GRPCServer) PreCheck(ctx context.Context, request *proto.NotifyRequest) (*proto.ErrorResponse, error) {
+func (s *GRPCServer) PreCheck(ctx context.Context, request *proto.NotifyRequest) (*proto.PreCheckResponse, error) {
 	protoToIncident := ProtoToIncident(request.Incident)
 	err := s.Impl.PreCheck(&protoToIncident)
 	if err != nil {
-		return &proto.ErrorResponse{
+		return &proto.PreCheckResponse{
 			Error: &proto.Error{
 				Detail: err.Error(),
 			},
 		}, nil
 	}
-	return &proto.ErrorResponse{}, nil
+	return &proto.PreCheckResponse{
+		Incident: IncidentToProto(protoToIncident),
+	}, nil
 }
