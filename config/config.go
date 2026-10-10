@@ -18,19 +18,25 @@ const (
 )
 
 type Config struct {
-	Targets                      Targets    `yaml:"targets"`
-	Listen                       string     `yaml:"listen"`
-	Log                          *Log       `yaml:"log"`
-	Components                   Components `yaml:"components"`
-	BaseInfo                     *BaseInfo  `yaml:"base_info"`
-	Username                     string     `yaml:"username"`
-	Password                     string     `yaml:"password"`
-	TlsConfig                    *TlsConfig `yaml:"tls"`
-	CookieKey                    string     `yaml:"cookie_key"`
-	Notifiers                    []Notifier `yaml:"notifiers"`
-	DisableMaintenanceToIncident bool       `yaml:"disable_maintenance_to_incident"`
+	Targets                      Targets                `yaml:"targets"`
+	Listen                       string                 `yaml:"listen"`
+	Log                          *Log                   `yaml:"log"`
+	Components                   Components             `yaml:"components"`
+	BaseInfo                     *BaseInfo              `yaml:"base_info"`
+	Username                     string                 `yaml:"username"`
+	Password                     string                 `yaml:"password"`
+	TlsConfig                    *TlsConfig             `yaml:"tls"`
+	CookieKey                    string                 `yaml:"cookie_key"`
+	Notifiers                    []Notifier             `yaml:"notifiers"`
+	DisableMaintenanceToIncident bool                   `yaml:"disable_maintenance_to_incident"`
+	VisibleMetadatas             []MetadataPresentation `yaml:"visible_metadatas"`
 
 	Theme *Theme `yaml:"theme"`
+}
+
+type MetadataPresentation struct {
+	Key   string `yaml:"key"`
+	Label string `yaml:"label"`
 }
 
 type TlsConfig struct {
