@@ -52,6 +52,8 @@ var registeredFuncs = template.FuncMap{
 	"timeNow":               timeNow,
 	"dict":                  dict,
 	"metadataValue":         metadataValue,
+	"visibleMetadatas":      visibleMetadatas,
+	"metadataLabel":         metadataLabel,
 	"timeAddDay":            timeAddDay,
 	"stringReplace":         stringReplace,
 	"sanitizeUrl":           sanitizeUrl,

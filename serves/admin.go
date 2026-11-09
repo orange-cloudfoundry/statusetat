@@ -193,13 +193,14 @@ func (a *Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
 
 	err = a.xt.ExecuteTemplate(w, "admin/maintenance.gohtml", struct {
 		adminDefaultData
-		Maintenance    []models.Incident
-		IncidentStates []models.IncidentState
-		MetadataFields models.MetadataFields
-		Before         time.Time
-		After          time.Time
-		From           time.Time
-		To             time.Time
+		Maintenance      []models.Incident
+		IncidentStates   []models.IncidentState
+		MetadataFields   models.MetadataFields
+		VisibleMetadatas []config.MetadataPresentation
+		Before           time.Time
+		After            time.Time
+		From             time.Time
+		To               time.Time
 	}{
 		adminDefaultData: adminDefaultData{
 			BaseInfo:   a.BaseInfo(),
@@ -207,13 +208,14 @@ func (a *Serve) AdminMaintenance(w http.ResponseWriter, req *http.Request) {
 			MenuItems:  a.adminMenuItems,
 			Timezone:   timezone,
 		},
-		Maintenance:    maintenance,
-		IncidentStates: models.AllIncidentState,
-		MetadataFields: notifiers.MetadataFields(),
-		After:          after,
-		Before:         before,
-		From:           from,
-		To:             to,
+		Maintenance:      maintenance,
+		IncidentStates:   models.AllIncidentState,
+		MetadataFields:   notifiers.MetadataFields(),
+		VisibleMetadatas: a.config.VisibleMetadatas,
+		After:            after,
+		Before:           before,
+		From:             from,
+		To:               to,
 	})
 	if err != nil {
 		HTMLError(w, err, http.StatusInternalServerError)

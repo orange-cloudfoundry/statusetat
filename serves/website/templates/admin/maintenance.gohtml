@@ -45,8 +45,13 @@
                         <time class="grey-text human tooltipped" datetime="{{ .CreatedAt | timeStdFormat }}" data-tooltip="{{ .CreatedAt | timeFormat }}">{{ .CreatedAt | humanTime }}</time>
                         - Duration: <time class="grey-text human tooltipped" data-prefix="End at: " data-tooltip="{{ .ScheduledEnd | timeFormat }}" datetime="{{ .ScheduledEnd | timeStdFormat}}">{{ humanDuration .CreatedAt .ScheduledEnd }}</time>
                       </span>
+                      <br/>
+                      <span class="details-metadata">
+                        {{ range visibleMetadatas .Metadata $.VisibleMetadatas }}
+                          <span class="badge blue-grey lighten-4 grey-text text-darken-1"><strong>{{ metadataLabel $.VisibleMetadatas .Key }}:</strong> {{ .Value }}</span>
+                        {{ end }}
+                      </span>
                     </p>
-
                   </li>
               {{end}}
           </ul>
