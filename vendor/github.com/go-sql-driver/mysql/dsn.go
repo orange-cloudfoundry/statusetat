@@ -26,10 +26,10 @@ import (
 )
 
 var (
-	errInvalidDSNUnescaped       = errors.New("invalid DSN: did you forget to escape a param value?")
-	errInvalidDSNAddr            = errors.New("invalid DSN: network address not terminated (missing closing brace)")
-	errInvalidDSNNoSlash         = errors.New("invalid DSN: missing the slash separating the database name")
-	errInvalidDSNUnsafeCollation = errors.New("invalid DSN: interpolateParams can not be used with unsafe collations")
+	errInvalidDSNUnescaped = errors.New("invalid DSN: did you forget to escape a param value?")
+	errInvalidDSNAddr      = errors.New("invalid DSN: network address not terminated (missing closing brace)")
+	errInvalidDSNNoSlash   = errors.New("invalid DSN: missing the slash separating the database name")
+	errUnsafeCharset       = errors.New("interpolateParams cannot be used with unsafe charsets")
 )
 
 // Config is a configuration parsed from a DSN string.
@@ -121,6 +121,9 @@ func TimeTruncate(d time.Duration) Option {
 }
 
 // BeforeConnect sets the function to be invoked before a connection is established.
+// If the function changes [Config.Addr] while [Config.TLS] is non-nil and its
+// InsecureSkipVerify field is false, it must also update ServerName to match
+// the hostname in the new address.
 func BeforeConnect(fn func(context.Context, *Config) error) Option {
 	return func(cfg *Config) error {
 		cfg.beforeConnect = fn
@@ -169,9 +172,28 @@ func (cfg *Config) Clone() *Config {
 	return &cp
 }
 
+// checkUnsafeCharset returns an error if interpolateParams is used with a
+// charset that is unsafe for backslash escaping.
+func (cfg *Config) checkUnsafeCharset() error {
+	if !cfg.InterpolateParams {
+		return nil
+	}
+	if cfg.Collation != "" && isUnsafeCollation(cfg.Collation) {
+		return errUnsafeCharset
+	}
+	// Every charset is checked, not only the first, because the fallbacks
+	// are used when the preceding ones fail.
+	for _, cs := range cfg.charsets {
+		if isUnsafeCharset(cs) {
+			return errUnsafeCharset
+		}
+	}
+	return nil
+}
+
 func (cfg *Config) normalize() error {
-	if cfg.InterpolateParams && cfg.Collation != "" && unsafeCollations[cfg.Collation] {
-		return errInvalidDSNUnsafeCollation
+	if err := cfg.checkUnsafeCharset(); err != nil {
+		return err
 	}
 
 	// Set default network if empty
@@ -264,13 +286,19 @@ func (cfg *Config) FormatDSN() string {
 	}
 
 	// [protocol[(address)]]
-	if len(cfg.Net) > 0 {
-		buf.WriteString(cfg.Net)
-		if len(cfg.Addr) > 0 {
-			buf.WriteByte('(')
-			buf.WriteString(cfg.Addr)
-			buf.WriteByte(')')
+	if len(cfg.Addr) > 0 {
+		net := cfg.Net
+		if net == "" {
+			net = "tcp"
 		}
+		buf.WriteString(net)
+		buf.WriteByte('(')
+		buf.WriteString(cfg.Addr)
+		buf.WriteByte(')')
+	} else if cfg.Net != "" && cfg.Net != "tcp" {
+		// Preserve an explicit non-default protocol when there's no
+		// address, so e.g. Net="unix" still round-trips.
+		buf.WriteString(cfg.Net)
 	}
 
 	// /dbname

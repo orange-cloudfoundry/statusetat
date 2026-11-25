@@ -291,7 +291,18 @@ Default:        false
 
 If `interpolateParams` is true, placeholders (`?`) in calls to `db.Query()` and `db.Exec()` are interpolated into a single query string with given parameters. This reduces the number of roundtrips, since the driver has to prepare a statement, execute it with given parameters and close the statement again with `interpolateParams=false`.
 
-*This can not be used together with the multibyte encodings BIG5, CP932, GB2312, GBK or SJIS. These are rejected as they may [introduce a SQL injection vulnerability](http://stackoverflow.com/a/12118602/3430118)!*
+*This can not be used together with the multibyte encodings BIG5, CP932, GB18030, GBK or SJIS. A `charset` or `collation` using one of these is rejected, as they may [introduce a SQL injection vulnerability](http://stackoverflow.com/a/12118602/3430118)!*
+
+> [!NOTE]
+> `interpolateParams` is designed to safely embed externally supplied parameter values into queries written by the application.
+> It does not fully replicate the MySQL server's parser: its handling of comments, quoting and escaping (e.g. executable comments `/*! ... */` or the `ANSI_QUOTES` SQL mode) may differ from the server's.
+> Queries using `interpolateParams` must not rely on character-set-specific recognition of `--` comments. When the byte immediately following `--` is non-ASCII, the driver's interpretation is not guaranteed to match the server's; use an ASCII space (`-- `) or server-side `Prepare()` instead. The driver recognizes a raw `0xA0` byte as a comment separator for latin1 compatibility. This is not U+00A0 encoded as UTF-8, whose bytes are `0xC2 0xA0`.
+> If you need to run arbitrary SQL with placeholders, use `Prepare()` (e.g. `db.Prepare()` or `conn.PrepareContext()`) so that the placeholders are processed by the server.
+
+> [!WARNING]
+> Unsafe-charset rejection is a fail-safe, not a complete safety mechanism. The driver checks the configured `charset` and `collation` but does not automatically select or enforce a safe effective charset on the server. Applications that enable `interpolateParams` are responsible for ensuring that `character_set_client` remains safe and for following the parser restrictions documented above.
+> Changes made through other paths, such as a `character_set_client=sjis` system variable in the DSN or `SET NAMES sjis` at runtime, are not detected and can make `interpolateParams` unsafe.
+> If the effective charset cannot be guaranteed, disable `interpolateParams` and let the server process the placeholders.
 
 ##### `loc`
 
@@ -314,7 +325,10 @@ Type:           duration
 Default:        0
 ```
 
-[Truncate time values](https://pkg.go.dev/time#Duration.Truncate) to the specified duration. The value must be a decimal number with a unit suffix (*"ms"*, *"s"*, *"m"*, *"h"*), such as *"30s"*, *"0.5m"* or *"1m30s"*.
+[Truncate time values](https://pkg.go.dev/time#Duration.Truncate) in query arguments to the specified duration. The value must be a decimal number with a unit suffix (*"ns"*, *"us"*, *"ms"*, etc...), such as "1us", "1ms", or "10ns".
+
+> [!NOTE]
+> `time.Time` arguments are sent with up to nanosecond precision, so a value from `time.Now()` usually has more fractional-second digits than a `DATETIME(N)` or `TIMESTAMP(N)` column stores. On MariaDB, comparing such a value against an indexed column can prevent an index range scan, turning it into a full index scan. Truncating to the column's precision (`1us` for `DATETIME(6)`) avoids this. Only arguments sent to the server are truncated; values read from the server are not affected.
 
 ##### `maxAllowedPacket`
 ```
